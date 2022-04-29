@@ -1,14 +1,18 @@
 # REQUIREMENTS
 
+Basic schedule funtionality shall be supported, as depicted below:
+
+![Scheduling-components-overview](images/61850-90-7_6.3.2_Schedules_relevant_parts.png)
+
 # Configuration
 
 [C01]: Basic configuration of DER default shall be stored inside a SCL File:
 
-[C01a]: reserve schedule
+[C01-a]: reserve schedule
 
-[C01b]: number of available schedules
+[C01-b]: number of available schedules
 
-[C01c]: number of devices to be controlled (limit to 1 for evaluation?)
+[C01-c]: number of devices to be controlled (limit to 1 for evaluation?)
 
 [C02]: Schedule paramaters are to be stored in a key-value manner (also include in SCL?)
 
@@ -18,9 +22,9 @@
 
 [C05]: A interface to CoMPAS is not required.
 
-[C05a]: A simple interface to notify about changes in SCL file is to be defined.
+[C05-a]: A simple interface to notify about changes in SCL file is to be defined.
 
-[C05b]: A simple interface to notify about changes in key-value
+[C05-b]: A simple interface to notify about changes in key-value
 
 # Logical Nodes
 [LN01]: Map Logical Nodes and Common Data Classes to configuration values, allow reading and writing according to 61850-10
