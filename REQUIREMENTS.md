@@ -31,7 +31,7 @@ Basic schedule funtionality shall be supported, as depicted below:
 
 [LN02]: Add X logical Nodes FSCHxx with subclasses according to 61850-10
 
-[LN03]: Add 1 logical Node FSCC to control output of DER (TODO:are several controllers required for frequency/...? they all control the DER power, so probably no?!)
+[LN03]: Add 1 logical Node FSCC to control output of DER
 
 # Scheduling
 [S01]: A set of 10 schedules per logical device must be supported
