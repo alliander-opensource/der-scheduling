@@ -1,0 +1,5 @@
+- schedule controller: add more details, 
+- maybe add a class diagram if required
+- doublecheck 61850 naming:
+ - SysRes_FSCH010001?
+ - CLS1?
