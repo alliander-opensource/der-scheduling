@@ -44,9 +44,11 @@ Basic schedule funtionality shall be supported, as depicted below:
 
 [S05]: Support of absolute schedules of power setpoints
 
-[S06]: Other schedules, such as voltage (Volt-var curve), phase (Frequency-watt curve), or (more complex) percentage of total power may be supported (see 61850-7, figure 13, page 37)
+[S06]: Support of limiting watt output
 
-[S07]: Validation of Schedules according to 61850-10
+[S07]: Other schedules, such as voltage (Volt-var curve), phase (Frequency-watt curve), or (more complex) percentage of total power may be supported (see 61850-7, figure 13, page 37)
+
+[S08]: Validation of Schedules according to 61850-10
 
 # Schedule execution
 [E01]: Execution of schedules must regard schedule priority according to 61850-10
