@@ -50,6 +50,8 @@ Basic schedule funtionality shall be supported, as depicted below:
 
 [S08]: Validation of Schedules according to 61850-10
 
+[S09]: Schedules for maximum generation values and absolute power values are modeled in the same way (using the same DTO)
+
 # Schedule execution
 [E01]: Execution of schedules must regard schedule priority according to 61850-10
 
