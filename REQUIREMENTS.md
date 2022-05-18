@@ -10,9 +10,9 @@ Basic schedule funtionality shall be supported, as depicted below:
 
 [C01-a]: reserve schedule
 
-[C01-b]: number of available schedules
+[C01-b]: number of available schedules (maximum 10 schedules, less can be configured)
 
-[C01-c]: number of devices to be controlled is limited to 1 for evaluation, extension shall be foreseen
+[C01-c]: number of devices to be controlled (limited to 1 for evaluation, extension shall be foreseen)
 
 [C02]: Parameters of schedules other than the reserve schedule are to be stored in a key-value manner
 
