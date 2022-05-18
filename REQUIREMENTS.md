@@ -12,11 +12,11 @@ Basic schedule funtionality shall be supported, as depicted below:
 
 [C01-b]: number of available schedules
 
-[C01-c]: number of devices to be controlled (TODO: limit to 1 for evaluation?)
+[C01-c]: number of devices to be controlled is limited to 1 for evaluation, extension shall be foreseen
 
-[C02]: Schedule paramaters are to be stored in a key-value manner (TODO: also include in SCL?)
+[C02]: Parameters of schedules other than the reserve schedule are to be stored in a key-value manner
 
-[C03]: Schedule parameters are persisted to a sperate file (e.g. as JSON)
+[C03]: Parameters of schedules other than the reserve schedule are persisted to a sperate file (e.g. as JSON)
 
 [C04]: Changes in schedules are persisted into the file as soon as the schedule is validated
 

@@ -1,5 +1,6 @@
-- schedule controller: add more details, 
-- maybe add a class diagram if required
+- schedule controller: add more details, add links to relevant parts of IEC
+- maybe add a class diagram if required (probably only schedule controller)
 - doublecheck 61850 naming:
- - SysRes_FSCH010001?
- - CLS1?
+  - SysRes_FSCH010001?
+  - CLS1?
+- add connection/disconnection of IEDs from the grid as schedule or function
