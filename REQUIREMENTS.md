@@ -52,6 +52,8 @@ Basic schedule funtionality shall be supported, as depicted below:
 
 [S09]: Schedules for maximum generation values and absolute power values are modeled in the same way (using the same DTO)
 
+[S10]: Each schedule must store a sequence of max. 100 values
+
 # Schedule execution
 [E01]: Execution of schedules must regard schedule priority according to 61850-10
 
