@@ -1,0 +1,1675 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<SCL xmlns="http://www.iec.ch/61850/2003/SCL" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" revision="B" release="4" version="2007" xsi:noNamespaceSchemaLocation="SCL.xsd" xsi:schemaLocation="http://www.iec.ch/61850/2003/SCL SCL.xsd">
+  <Header id="DER_Scheduler_Example" revision="1" version="1">
+    <History>
+      <Hitem version="" revision="" when="2022-06-24T14:44:00Z" who="Michael Zillgith" what="Initial version" />
+    </History>
+  </Header>
+  <Communication>
+    <SubNetwork name="SubNetworkName" type="8-MMS">
+      <ConnectedAP apName="AccessPoint1" iedName="DER_Scheduler_">
+        <Address>
+          <P type="OSI-AP-Title">1,1,9999,1</P>
+          <P type="OSI-AE-Qualifier">12</P>
+          <P type="OSI-PSEL">00000001</P>
+          <P type="OSI-SSEL">0001</P>
+          <P type="OSI-TSEL">0001</P>
+          <P type="IP">0.0.0.0</P>
+          <P type="IP-SUBNET">255.255.255.0</P>
+        </Address>
+      </ConnectedAP>
+    </SubNetwork>
+  </Communication>
+  <IED type="DER_Scheduler" originalSclRevision="B" originalSclVersion="2007" name="DER_Scheduler_">
+    <Services nameLength="64">
+      <ClientServices />
+      <DynAssociation max="5" />
+      <ConfLNs fixLnInst="true" fixPrefix="true" />
+      <ReportSettings rptID="Dyn" optFields="Dyn" trgOps="Dyn" intgPd="Dyn" />
+      <ConfReportControl max="30" />
+      <GetDirectory />
+      <GetDataObjectDefinition />
+      <GetDataSetValue />
+      <DataSetDirectory />
+      <ConfDataSet max="10" />
+      <ReadWrite />
+      <GetCBValues />
+    </Services>
+    <AccessPoint name="AccessPoint1">
+      <Server desc="Server" timeout="30">
+        <Authentication none="true" />
+        <LDevice inst="Control" desc="DER Controller">
+          <LN0 inst="" lnClass="LLN0" lnType="DERScheduler.LLN0">
+            <DOI desc="logical device name plate" name="NamPlt">
+              <DAI name="vendor">
+                <Val>Alliander</Val>
+              </DAI>
+              <DAI name="swRev">
+                <Val>1.0.0</Val>
+              </DAI>
+              <DAI name="configRev">
+                <Val>1</Val>
+              </DAI>
+              <DAI name="d">
+                <Val>DER Scheduler example</Val>
+              </DAI>
+              <DAI name="ldNs">
+                <Val>IEC 61850-7-4:2007B</Val>
+              </DAI>
+            </DOI>
+            <DOI desc="Health" name="Health">
+              <DAI name="stVal">
+                <Val>Ok</Val>
+              </DAI>
+            </DOI>
+          </LN0>
+          <LN inst="1" lnClass="LPHD" lnType="DERScheduler_LPHD" prefix="">
+            <DOI name="PhyNam">
+              <DAI name="vendor">
+                <Val>Alliander</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Proxy">
+              <DAI name="stVal">
+                <Val>false</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN desc="Generic IO (active power)" inst="1" lnClass="GGIO" lnType="DERScheduler_GGIO_ActPow" prefix="ActPow_" />
+          <LN desc="Generic IO (maximum power)" inst="1" lnClass="GGIO" lnType="DERScheduler_GGIO_ActPow" prefix="MaxPow_" />
+          <LN desc="Generic IO (on/off control)" inst="1" lnClass="GGIO" lnType="DERScheduler_GGIO_OnOff" prefix="OnOff_" />
+          <LN inst="1" lnClass="FSCC" lnType="DERScheduler_FSCC_APC" prefix="ActPow_">
+            <DOI desc="controlled entity" name="CtlEnt">
+              <DAI name="setSrcRef">
+                <Val>@Control/ActPow_GGIO1.AnOut1.mxVal.f</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd01">
+              <DAI name="setSrcRef">
+                <Val>@Control/ActPow_NP_FSCH01</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd02">
+              <DAI name="setSrcRef">
+                <Val>@Control/ActPow_NP_FSCH02</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd03">
+              <DAI name="setSrcRef">
+                <Val>@Control/ActPow_NP_FSCH03</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd04">
+              <DAI name="setSrcRef">
+                <Val>@Control/ActPow_NP_FSCH04</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd05">
+              <DAI name="setSrcRef">
+                <Val>@Control/ActPow_P_FSCH01</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd06">
+              <DAI name="setSrcRef">
+                <Val>@Control/ActPow_P_FSCH02</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd07">
+              <DAI name="setSrcRef">
+                <Val>@Control/ActPow_P_FSCH03</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd08">
+              <DAI name="setSrcRef">
+                <Val>@Control/ActPow_P_FSCH04</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd09">
+              <DAI name="setSrcRef">
+                <Val>@Control/ActPow_EV_FSCH01</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd10">
+              <DAI name="setSrcRef">
+                <Val>@Control/ActPow_EV_FSCH02</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN inst="1" lnClass="FSCC" lnType="DERScheduler_FSCC_APC" prefix="MaxPow_">
+            <DOI desc="controlled entity" name="CtlEnt">
+              <DAI name="setSrcRef">
+                <Val>@Control/MaxPow_GGIO1.AnOut1.mxVal.f</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd01">
+              <DAI name="setSrcRef">
+                <Val>@Control/MaxPow_NP_FSCH01</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd02">
+              <DAI name="setSrcRef">
+                <Val>@Control/MaxPow_NP_FSCH02</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd03">
+              <DAI name="setSrcRef">
+                <Val>@Control/MaxPow_NP_FSCH03</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd04">
+              <DAI name="setSrcRef">
+                <Val>@Control/MaxPow_NP_FSCH04</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd05">
+              <DAI name="setSrcRef">
+                <Val>@Control/MaxPow_P_FSCH01</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd06">
+              <DAI name="setSrcRef">
+                <Val>@Control/MaxPow_P_FSCH02</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd07">
+              <DAI name="setSrcRef">
+                <Val>@Control/MaxPow_P_FSCH03</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd08">
+              <DAI name="setSrcRef">
+                <Val>@Control/MaxPow_P_FSCH04</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd09">
+              <DAI name="setSrcRef">
+                <Val>@Control/MaxPow_EV_FSCH01</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd10">
+              <DAI name="setSrcRef">
+                <Val>@Control/MaxPow_EV_FSCH02</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN inst="1" lnClass="FSCC" lnType="DERScheduler_FSCC_SPC" prefix="OnOff_">
+            <DOI desc="controlled entity" name="CtlEnt">
+              <DAI name="setSrcRef">
+                <Val>@Control/OnOff_GGIO1.SPCSO1.stVal</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd01">
+              <DAI name="setSrcRef">
+                <Val>@Control/OnOff_NP_FSCH01</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd02">
+              <DAI name="setSrcRef">
+                <Val>@Control/OnOff_NP_FSCH02</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd03">
+              <DAI name="setSrcRef">
+                <Val>@Control/OnOff_NP_FSCH03</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd04">
+              <DAI name="setSrcRef">
+                <Val>@Control/OnOff_NP_FSCH04</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd05">
+              <DAI name="setSrcRef">
+                <Val>@Control/OnOff_P_FSCH01</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd06">
+              <DAI name="setSrcRef">
+                <Val>@Control/OnOff_P_FSCH02</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd07">
+              <DAI name="setSrcRef">
+                <Val>@Control/OnOff_P_FSCH03</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd08">
+              <DAI name="setSrcRef">
+                <Val>@Control/OnOff_P_FSCH04</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd09">
+              <DAI name="setSrcRef">
+                <Val>@Control/OnOff_EV_FSCH01</Val>
+              </DAI>
+            </DOI>
+            <DOI name="Schd10">
+              <DAI name="setSrcRef">
+                <Val>@Control/OnOff_EV_FSCH02</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="ActPow_NP_" inst="01" lnType="DERScheduler_FSCH_ASG_100_nonperiodic">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="ActPow_NP_" inst="02" lnType="DERScheduler_FSCH_ASG_100_nonperiodic">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="ActPow_NP_" inst="03" lnType="DERScheduler_FSCH_ASG_100_nonperiodic">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="ActPow_NP_" inst="04" lnType="DERScheduler_FSCH_ASG_100_nonperiodic">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="ActPow_P_" inst="01" lnType="DERScheduler_FSCH_ASG_100_periodic">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="ActPow_P_" inst="02" lnType="DERScheduler_FSCH_ASG_100_periodic">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="ActPow_P_" inst="03" lnType="DERScheduler_FSCH_ASG_100_periodic">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="ActPow_P_" inst="04" lnType="DERScheduler_FSCH_ASG_100_periodic">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="ActPow_EV_" inst="01" lnType="DERScheduler_FSCH_ASG_100_event">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+            <DOI name="EvTrg">
+              <DAI name="setVal">
+                <Val>true</Val>
+              </DAI>
+            </DOI>
+            <DOI name="SchdReuse">
+              <DAI name="setVal">
+                <Val>true</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="ActPow_EV_" inst="02" lnType="DERScheduler_FSCH_ASG_100_event">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+            <DOI name="EvTrg">
+              <DAI name="setVal">
+                <Val>true</Val>
+              </DAI>
+            </DOI>
+            <DOI name="SchdReuse">
+              <DAI name="setVal">
+                <Val>true</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="MaxPow_NP_" inst="01" lnType="DERScheduler_FSCH_ASG_100_nonperiodic">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="MaxPow_NP_" inst="02" lnType="DERScheduler_FSCH_ASG_100_nonperiodic">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="MaxPow_NP_" inst="03" lnType="DERScheduler_FSCH_ASG_100_nonperiodic">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="MaxPow_NP_" inst="04" lnType="DERScheduler_FSCH_ASG_100_nonperiodic">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="MaxPow_P_" inst="01" lnType="DERScheduler_FSCH_ASG_100_periodic">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="MaxPow_P_" inst="02" lnType="DERScheduler_FSCH_ASG_100_periodic">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="MaxPow_P_" inst="03" lnType="DERScheduler_FSCH_ASG_100_periodic">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="MaxPow_P_" inst="04" lnType="DERScheduler_FSCH_ASG_100_periodic">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="MaxPow_EV_" inst="01" lnType="DERScheduler_FSCH_ASG_100_event">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+            <DOI name="EvTrg">
+              <DAI name="setVal">
+                <Val>true</Val>
+              </DAI>
+            </DOI>
+            <DOI name="SchdReuse">
+              <DAI name="setVal">
+                <Val>true</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="MaxPow_EV_" inst="02" lnType="DERScheduler_FSCH_ASG_100_event">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+            <DOI name="EvTrg">
+              <DAI name="setVal">
+                <Val>true</Val>
+              </DAI>
+            </DOI>
+            <DOI name="SchdReuse">
+              <DAI name="setVal">
+                <Val>true</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="OnOff_NP_" inst="01" lnType="DERScheduler_FSCH_SPG_100_nonperiodic">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="OnOff_NP_" inst="02" lnType="DERScheduler_FSCH_SPG_100_nonperiodic">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="OnOff_NP_" inst="03" lnType="DERScheduler_FSCH_SPG_100_nonperiodic">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="OnOff_NP_" inst="04" lnType="DERScheduler_FSCH_SPG_100_nonperiodic">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="OnOff_P_" inst="01" lnType="DERScheduler_FSCH_SPG_100_periodic">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="OnOff_P_" inst="02" lnType="DERScheduler_FSCH_SPG_100_periodic">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="OnOff_P_" inst="03" lnType="DERScheduler_FSCH_SPG_100_periodic">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="OnOff_P_" inst="04" lnType="DERScheduler_FSCH_SPG_100_periodic">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="OnOff_EV_" inst="01" lnType="DERScheduler_FSCH_SPG_100_event">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+          <LN lnClass="FSCH" prefix="OnOff_EV_" inst="02" lnType="DERScheduler_FSCH_SPG_100_event">
+            <DOI name="NumEntr">
+              <DAI name="setVal">
+                <Val>100</Val>
+              </DAI>
+            </DOI>
+          </LN>
+        </LDevice>
+      </Server>
+    </AccessPoint>
+  </IED>
+  <DataTypeTemplates>
+    <LNodeType id="DERScheduler_FSCH_SPG_100_periodic" lnClass="FSCH">
+      <DO name="Beh" type="ENS_Beh_On" />
+      <DO name="SchdSt" type="DERScheduler_ENS_SchdSt" />
+      <DO name="SchdEntr" type="DERScheduler_INS" />
+      <DO name="ValSPS" type="DERScheduler_SPS" desc="current schedule value" />
+      <DO name="ActStrTm" type="DERScheduler_TCS" />
+      <DO name="NxtStrTm" type="DERScheduler_TCS" />
+      <DO name="SchdEnaErr" type="DERScheduler_ENS_SchdEnaErr" />
+      <DO name="EnaReq" type="DERScheduler_SPC_direct" />
+      <DO name="DsaReq" type="DERScheduler_SPC_direct" />
+      <DO name="SchdPrio" type="DERScheduler_ING" />
+      <DO name="NumEntr" type="DERScheduler_ING" />
+      <DO name="SchdIntv" type="DERScheduler_ING_s" />
+      <DO name="ValSPG001" type="DERScheduler_SPG" />
+      <DO name="ValSPG002" type="DERScheduler_SPG" />
+      <DO name="ValSPG003" type="DERScheduler_SPG" />
+      <DO name="ValSPG004" type="DERScheduler_SPG" />
+      <DO name="ValSPG005" type="DERScheduler_SPG" />
+      <DO name="ValSPG006" type="DERScheduler_SPG" />
+      <DO name="ValSPG007" type="DERScheduler_SPG" />
+      <DO name="ValSPG008" type="DERScheduler_SPG" />
+      <DO name="ValSPG009" type="DERScheduler_SPG" />
+      <DO name="ValSPG010" type="DERScheduler_SPG" />
+      <DO name="ValSPG011" type="DERScheduler_SPG" />
+      <DO name="ValSPG012" type="DERScheduler_SPG" />
+      <DO name="ValSPG013" type="DERScheduler_SPG" />
+      <DO name="ValSPG014" type="DERScheduler_SPG" />
+      <DO name="ValSPG015" type="DERScheduler_SPG" />
+      <DO name="ValSPG016" type="DERScheduler_SPG" />
+      <DO name="ValSPG017" type="DERScheduler_SPG" />
+      <DO name="ValSPG018" type="DERScheduler_SPG" />
+      <DO name="ValSPG019" type="DERScheduler_SPG" />
+      <DO name="ValSPG020" type="DERScheduler_SPG" />
+      <DO name="ValSPG021" type="DERScheduler_SPG" />
+      <DO name="ValSPG022" type="DERScheduler_SPG" />
+      <DO name="ValSPG023" type="DERScheduler_SPG" />
+      <DO name="ValSPG024" type="DERScheduler_SPG" />
+      <DO name="ValSPG025" type="DERScheduler_SPG" />
+      <DO name="ValSPG026" type="DERScheduler_SPG" />
+      <DO name="ValSPG027" type="DERScheduler_SPG" />
+      <DO name="ValSPG028" type="DERScheduler_SPG" />
+      <DO name="ValSPG029" type="DERScheduler_SPG" />
+      <DO name="ValSPG030" type="DERScheduler_SPG" />
+      <DO name="ValSPG031" type="DERScheduler_SPG" />
+      <DO name="ValSPG032" type="DERScheduler_SPG" />
+      <DO name="ValSPG033" type="DERScheduler_SPG" />
+      <DO name="ValSPG034" type="DERScheduler_SPG" />
+      <DO name="ValSPG035" type="DERScheduler_SPG" />
+      <DO name="ValSPG036" type="DERScheduler_SPG" />
+      <DO name="ValSPG037" type="DERScheduler_SPG" />
+      <DO name="ValSPG038" type="DERScheduler_SPG" />
+      <DO name="ValSPG039" type="DERScheduler_SPG" />
+      <DO name="ValSPG040" type="DERScheduler_SPG" />
+      <DO name="ValSPG041" type="DERScheduler_SPG" />
+      <DO name="ValSPG042" type="DERScheduler_SPG" />
+      <DO name="ValSPG043" type="DERScheduler_SPG" />
+      <DO name="ValSPG044" type="DERScheduler_SPG" />
+      <DO name="ValSPG045" type="DERScheduler_SPG" />
+      <DO name="ValSPG046" type="DERScheduler_SPG" />
+      <DO name="ValSPG047" type="DERScheduler_SPG" />
+      <DO name="ValSPG048" type="DERScheduler_SPG" />
+      <DO name="ValSPG049" type="DERScheduler_SPG" />
+      <DO name="ValSPG050" type="DERScheduler_SPG" />
+      <DO name="ValSPG051" type="DERScheduler_SPG" />
+      <DO name="ValSPG052" type="DERScheduler_SPG" />
+      <DO name="ValSPG053" type="DERScheduler_SPG" />
+      <DO name="ValSPG054" type="DERScheduler_SPG" />
+      <DO name="ValSPG055" type="DERScheduler_SPG" />
+      <DO name="ValSPG056" type="DERScheduler_SPG" />
+      <DO name="ValSPG057" type="DERScheduler_SPG" />
+      <DO name="ValSPG058" type="DERScheduler_SPG" />
+      <DO name="ValSPG059" type="DERScheduler_SPG" />
+      <DO name="ValSPG060" type="DERScheduler_SPG" />
+      <DO name="ValSPG061" type="DERScheduler_SPG" />
+      <DO name="ValSPG062" type="DERScheduler_SPG" />
+      <DO name="ValSPG063" type="DERScheduler_SPG" />
+      <DO name="ValSPG064" type="DERScheduler_SPG" />
+      <DO name="ValSPG065" type="DERScheduler_SPG" />
+      <DO name="ValSPG066" type="DERScheduler_SPG" />
+      <DO name="ValSPG067" type="DERScheduler_SPG" />
+      <DO name="ValSPG068" type="DERScheduler_SPG" />
+      <DO name="ValSPG069" type="DERScheduler_SPG" />
+      <DO name="ValSPG070" type="DERScheduler_SPG" />
+      <DO name="ValSPG071" type="DERScheduler_SPG" />
+      <DO name="ValSPG072" type="DERScheduler_SPG" />
+      <DO name="ValSPG073" type="DERScheduler_SPG" />
+      <DO name="ValSPG074" type="DERScheduler_SPG" />
+      <DO name="ValSPG075" type="DERScheduler_SPG" />
+      <DO name="ValSPG076" type="DERScheduler_SPG" />
+      <DO name="ValSPG077" type="DERScheduler_SPG" />
+      <DO name="ValSPG078" type="DERScheduler_SPG" />
+      <DO name="ValSPG079" type="DERScheduler_SPG" />
+      <DO name="ValSPG080" type="DERScheduler_SPG" />
+      <DO name="ValSPG081" type="DERScheduler_SPG" />
+      <DO name="ValSPG082" type="DERScheduler_SPG" />
+      <DO name="ValSPG083" type="DERScheduler_SPG" />
+      <DO name="ValSPG084" type="DERScheduler_SPG" />
+      <DO name="ValSPG085" type="DERScheduler_SPG" />
+      <DO name="ValSPG086" type="DERScheduler_SPG" />
+      <DO name="ValSPG087" type="DERScheduler_SPG" />
+      <DO name="ValSPG088" type="DERScheduler_SPG" />
+      <DO name="ValSPG089" type="DERScheduler_SPG" />
+      <DO name="ValSPG090" type="DERScheduler_SPG" />
+      <DO name="ValSPG091" type="DERScheduler_SPG" />
+      <DO name="ValSPG092" type="DERScheduler_SPG" />
+      <DO name="ValSPG093" type="DERScheduler_SPG" />
+      <DO name="ValSPG094" type="DERScheduler_SPG" />
+      <DO name="ValSPG095" type="DERScheduler_SPG" />
+      <DO name="ValSPG096" type="DERScheduler_SPG" />
+      <DO name="ValSPG097" type="DERScheduler_SPG" />
+      <DO name="ValSPG098" type="DERScheduler_SPG" />
+      <DO name="ValSPG099" type="DERScheduler_SPG" />
+      <DO name="ValSPG100" type="DERScheduler_SPG" />
+      <DO name="StrTm01" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm02" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm03" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm04" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm05" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm06" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm07" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm08" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm09" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm10" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm11" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm12" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm13" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm14" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm15" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm16" type="DERScheduler_TSG_setCal" />
+      <DO name="SchdReuse" type="DERScheduler_SPG" />
+    </LNodeType>
+    <LNodeType id="DERScheduler_FSCH_SPG_100_nonperiodic" lnClass="FSCH">
+      <DO name="Beh" type="ENS_Beh_On" />
+      <DO name="SchdSt" type="DERScheduler_ENS_SchdSt" />
+      <DO name="SchdEntr" type="DERScheduler_INS" />
+      <DO name="ValSPS" type="DERScheduler_SPS" desc="current schedule value" />
+      <DO name="ActStrTm" type="DERScheduler_TCS" />
+      <DO name="NxtStrTm" type="DERScheduler_TCS" />
+      <DO name="SchdEnaErr" type="DERScheduler_ENS_SchdEnaErr" />
+      <DO name="EnaReq" type="DERScheduler_SPC_direct" />
+      <DO name="DsaReq" type="DERScheduler_SPC_direct" />
+      <DO name="SchdPrio" type="DERScheduler_ING" />
+      <DO name="NumEntr" type="DERScheduler_ING" />
+      <DO name="SchdIntv" type="DERScheduler_ING_s" />
+      <DO name="ValSPG001" type="DERScheduler_SPG" />
+      <DO name="ValSPG002" type="DERScheduler_SPG" />
+      <DO name="ValSPG003" type="DERScheduler_SPG" />
+      <DO name="ValSPG004" type="DERScheduler_SPG" />
+      <DO name="ValSPG005" type="DERScheduler_SPG" />
+      <DO name="ValSPG006" type="DERScheduler_SPG" />
+      <DO name="ValSPG007" type="DERScheduler_SPG" />
+      <DO name="ValSPG008" type="DERScheduler_SPG" />
+      <DO name="ValSPG009" type="DERScheduler_SPG" />
+      <DO name="ValSPG010" type="DERScheduler_SPG" />
+      <DO name="ValSPG011" type="DERScheduler_SPG" />
+      <DO name="ValSPG012" type="DERScheduler_SPG" />
+      <DO name="ValSPG013" type="DERScheduler_SPG" />
+      <DO name="ValSPG014" type="DERScheduler_SPG" />
+      <DO name="ValSPG015" type="DERScheduler_SPG" />
+      <DO name="ValSPG016" type="DERScheduler_SPG" />
+      <DO name="ValSPG017" type="DERScheduler_SPG" />
+      <DO name="ValSPG018" type="DERScheduler_SPG" />
+      <DO name="ValSPG019" type="DERScheduler_SPG" />
+      <DO name="ValSPG020" type="DERScheduler_SPG" />
+      <DO name="ValSPG021" type="DERScheduler_SPG" />
+      <DO name="ValSPG022" type="DERScheduler_SPG" />
+      <DO name="ValSPG023" type="DERScheduler_SPG" />
+      <DO name="ValSPG024" type="DERScheduler_SPG" />
+      <DO name="ValSPG025" type="DERScheduler_SPG" />
+      <DO name="ValSPG026" type="DERScheduler_SPG" />
+      <DO name="ValSPG027" type="DERScheduler_SPG" />
+      <DO name="ValSPG028" type="DERScheduler_SPG" />
+      <DO name="ValSPG029" type="DERScheduler_SPG" />
+      <DO name="ValSPG030" type="DERScheduler_SPG" />
+      <DO name="ValSPG031" type="DERScheduler_SPG" />
+      <DO name="ValSPG032" type="DERScheduler_SPG" />
+      <DO name="ValSPG033" type="DERScheduler_SPG" />
+      <DO name="ValSPG034" type="DERScheduler_SPG" />
+      <DO name="ValSPG035" type="DERScheduler_SPG" />
+      <DO name="ValSPG036" type="DERScheduler_SPG" />
+      <DO name="ValSPG037" type="DERScheduler_SPG" />
+      <DO name="ValSPG038" type="DERScheduler_SPG" />
+      <DO name="ValSPG039" type="DERScheduler_SPG" />
+      <DO name="ValSPG040" type="DERScheduler_SPG" />
+      <DO name="ValSPG041" type="DERScheduler_SPG" />
+      <DO name="ValSPG042" type="DERScheduler_SPG" />
+      <DO name="ValSPG043" type="DERScheduler_SPG" />
+      <DO name="ValSPG044" type="DERScheduler_SPG" />
+      <DO name="ValSPG045" type="DERScheduler_SPG" />
+      <DO name="ValSPG046" type="DERScheduler_SPG" />
+      <DO name="ValSPG047" type="DERScheduler_SPG" />
+      <DO name="ValSPG048" type="DERScheduler_SPG" />
+      <DO name="ValSPG049" type="DERScheduler_SPG" />
+      <DO name="ValSPG050" type="DERScheduler_SPG" />
+      <DO name="ValSPG051" type="DERScheduler_SPG" />
+      <DO name="ValSPG052" type="DERScheduler_SPG" />
+      <DO name="ValSPG053" type="DERScheduler_SPG" />
+      <DO name="ValSPG054" type="DERScheduler_SPG" />
+      <DO name="ValSPG055" type="DERScheduler_SPG" />
+      <DO name="ValSPG056" type="DERScheduler_SPG" />
+      <DO name="ValSPG057" type="DERScheduler_SPG" />
+      <DO name="ValSPG058" type="DERScheduler_SPG" />
+      <DO name="ValSPG059" type="DERScheduler_SPG" />
+      <DO name="ValSPG060" type="DERScheduler_SPG" />
+      <DO name="ValSPG061" type="DERScheduler_SPG" />
+      <DO name="ValSPG062" type="DERScheduler_SPG" />
+      <DO name="ValSPG063" type="DERScheduler_SPG" />
+      <DO name="ValSPG064" type="DERScheduler_SPG" />
+      <DO name="ValSPG065" type="DERScheduler_SPG" />
+      <DO name="ValSPG066" type="DERScheduler_SPG" />
+      <DO name="ValSPG067" type="DERScheduler_SPG" />
+      <DO name="ValSPG068" type="DERScheduler_SPG" />
+      <DO name="ValSPG069" type="DERScheduler_SPG" />
+      <DO name="ValSPG070" type="DERScheduler_SPG" />
+      <DO name="ValSPG071" type="DERScheduler_SPG" />
+      <DO name="ValSPG072" type="DERScheduler_SPG" />
+      <DO name="ValSPG073" type="DERScheduler_SPG" />
+      <DO name="ValSPG074" type="DERScheduler_SPG" />
+      <DO name="ValSPG075" type="DERScheduler_SPG" />
+      <DO name="ValSPG076" type="DERScheduler_SPG" />
+      <DO name="ValSPG077" type="DERScheduler_SPG" />
+      <DO name="ValSPG078" type="DERScheduler_SPG" />
+      <DO name="ValSPG079" type="DERScheduler_SPG" />
+      <DO name="ValSPG080" type="DERScheduler_SPG" />
+      <DO name="ValSPG081" type="DERScheduler_SPG" />
+      <DO name="ValSPG082" type="DERScheduler_SPG" />
+      <DO name="ValSPG083" type="DERScheduler_SPG" />
+      <DO name="ValSPG084" type="DERScheduler_SPG" />
+      <DO name="ValSPG085" type="DERScheduler_SPG" />
+      <DO name="ValSPG086" type="DERScheduler_SPG" />
+      <DO name="ValSPG087" type="DERScheduler_SPG" />
+      <DO name="ValSPG088" type="DERScheduler_SPG" />
+      <DO name="ValSPG089" type="DERScheduler_SPG" />
+      <DO name="ValSPG090" type="DERScheduler_SPG" />
+      <DO name="ValSPG091" type="DERScheduler_SPG" />
+      <DO name="ValSPG092" type="DERScheduler_SPG" />
+      <DO name="ValSPG093" type="DERScheduler_SPG" />
+      <DO name="ValSPG094" type="DERScheduler_SPG" />
+      <DO name="ValSPG095" type="DERScheduler_SPG" />
+      <DO name="ValSPG096" type="DERScheduler_SPG" />
+      <DO name="ValSPG097" type="DERScheduler_SPG" />
+      <DO name="ValSPG098" type="DERScheduler_SPG" />
+      <DO name="ValSPG099" type="DERScheduler_SPG" />
+      <DO name="ValSPG100" type="DERScheduler_SPG" />
+      <DO name="StrTm01" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm02" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm03" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm04" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm05" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm06" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm07" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm08" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm09" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm10" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm11" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm12" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm13" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm14" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm15" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm16" type="DERScheduler_TSG_setTm" />
+      <DO name="SchdReuse" type="DERScheduler_SPG" />
+    </LNodeType>
+    <LNodeType id="DERScheduler_FSCH_SPG_100_event" lnClass="FSCH">
+      <DO name="Beh" type="ENS_Beh_On" />
+      <DO name="SchdSt" type="DERScheduler_ENS_SchdSt" />
+      <DO name="SchdEntr" type="DERScheduler_INS" />
+      <DO name="ValSPS" type="DERScheduler_SPS" desc="current schedule value" />
+      <DO name="ActStrTm" type="DERScheduler_TCS" />
+      <DO name="NxtStrTm" type="DERScheduler_TCS" />
+      <DO name="SchdEnaErr" type="DERScheduler_ENS_SchdEnaErr" />
+      <DO name="EnaReq" type="DERScheduler_SPC_direct" />
+      <DO name="DsaReq" type="DERScheduler_SPC_direct" />
+      <DO name="SchdPrio" type="DERScheduler_ING" />
+      <DO name="NumEntr" type="DERScheduler_ING" />
+      <DO name="SchdIntv" type="DERScheduler_ING_s" />
+      <DO name="ValSPG001" type="DERScheduler_SPG" />
+      <DO name="ValSPG002" type="DERScheduler_SPG" />
+      <DO name="ValSPG003" type="DERScheduler_SPG" />
+      <DO name="ValSPG004" type="DERScheduler_SPG" />
+      <DO name="ValSPG005" type="DERScheduler_SPG" />
+      <DO name="ValSPG006" type="DERScheduler_SPG" />
+      <DO name="ValSPG007" type="DERScheduler_SPG" />
+      <DO name="ValSPG008" type="DERScheduler_SPG" />
+      <DO name="ValSPG009" type="DERScheduler_SPG" />
+      <DO name="ValSPG010" type="DERScheduler_SPG" />
+      <DO name="ValSPG011" type="DERScheduler_SPG" />
+      <DO name="ValSPG012" type="DERScheduler_SPG" />
+      <DO name="ValSPG013" type="DERScheduler_SPG" />
+      <DO name="ValSPG014" type="DERScheduler_SPG" />
+      <DO name="ValSPG015" type="DERScheduler_SPG" />
+      <DO name="ValSPG016" type="DERScheduler_SPG" />
+      <DO name="ValSPG017" type="DERScheduler_SPG" />
+      <DO name="ValSPG018" type="DERScheduler_SPG" />
+      <DO name="ValSPG019" type="DERScheduler_SPG" />
+      <DO name="ValSPG020" type="DERScheduler_SPG" />
+      <DO name="ValSPG021" type="DERScheduler_SPG" />
+      <DO name="ValSPG022" type="DERScheduler_SPG" />
+      <DO name="ValSPG023" type="DERScheduler_SPG" />
+      <DO name="ValSPG024" type="DERScheduler_SPG" />
+      <DO name="ValSPG025" type="DERScheduler_SPG" />
+      <DO name="ValSPG026" type="DERScheduler_SPG" />
+      <DO name="ValSPG027" type="DERScheduler_SPG" />
+      <DO name="ValSPG028" type="DERScheduler_SPG" />
+      <DO name="ValSPG029" type="DERScheduler_SPG" />
+      <DO name="ValSPG030" type="DERScheduler_SPG" />
+      <DO name="ValSPG031" type="DERScheduler_SPG" />
+      <DO name="ValSPG032" type="DERScheduler_SPG" />
+      <DO name="ValSPG033" type="DERScheduler_SPG" />
+      <DO name="ValSPG034" type="DERScheduler_SPG" />
+      <DO name="ValSPG035" type="DERScheduler_SPG" />
+      <DO name="ValSPG036" type="DERScheduler_SPG" />
+      <DO name="ValSPG037" type="DERScheduler_SPG" />
+      <DO name="ValSPG038" type="DERScheduler_SPG" />
+      <DO name="ValSPG039" type="DERScheduler_SPG" />
+      <DO name="ValSPG040" type="DERScheduler_SPG" />
+      <DO name="ValSPG041" type="DERScheduler_SPG" />
+      <DO name="ValSPG042" type="DERScheduler_SPG" />
+      <DO name="ValSPG043" type="DERScheduler_SPG" />
+      <DO name="ValSPG044" type="DERScheduler_SPG" />
+      <DO name="ValSPG045" type="DERScheduler_SPG" />
+      <DO name="ValSPG046" type="DERScheduler_SPG" />
+      <DO name="ValSPG047" type="DERScheduler_SPG" />
+      <DO name="ValSPG048" type="DERScheduler_SPG" />
+      <DO name="ValSPG049" type="DERScheduler_SPG" />
+      <DO name="ValSPG050" type="DERScheduler_SPG" />
+      <DO name="ValSPG051" type="DERScheduler_SPG" />
+      <DO name="ValSPG052" type="DERScheduler_SPG" />
+      <DO name="ValSPG053" type="DERScheduler_SPG" />
+      <DO name="ValSPG054" type="DERScheduler_SPG" />
+      <DO name="ValSPG055" type="DERScheduler_SPG" />
+      <DO name="ValSPG056" type="DERScheduler_SPG" />
+      <DO name="ValSPG057" type="DERScheduler_SPG" />
+      <DO name="ValSPG058" type="DERScheduler_SPG" />
+      <DO name="ValSPG059" type="DERScheduler_SPG" />
+      <DO name="ValSPG060" type="DERScheduler_SPG" />
+      <DO name="ValSPG061" type="DERScheduler_SPG" />
+      <DO name="ValSPG062" type="DERScheduler_SPG" />
+      <DO name="ValSPG063" type="DERScheduler_SPG" />
+      <DO name="ValSPG064" type="DERScheduler_SPG" />
+      <DO name="ValSPG065" type="DERScheduler_SPG" />
+      <DO name="ValSPG066" type="DERScheduler_SPG" />
+      <DO name="ValSPG067" type="DERScheduler_SPG" />
+      <DO name="ValSPG068" type="DERScheduler_SPG" />
+      <DO name="ValSPG069" type="DERScheduler_SPG" />
+      <DO name="ValSPG070" type="DERScheduler_SPG" />
+      <DO name="ValSPG071" type="DERScheduler_SPG" />
+      <DO name="ValSPG072" type="DERScheduler_SPG" />
+      <DO name="ValSPG073" type="DERScheduler_SPG" />
+      <DO name="ValSPG074" type="DERScheduler_SPG" />
+      <DO name="ValSPG075" type="DERScheduler_SPG" />
+      <DO name="ValSPG076" type="DERScheduler_SPG" />
+      <DO name="ValSPG077" type="DERScheduler_SPG" />
+      <DO name="ValSPG078" type="DERScheduler_SPG" />
+      <DO name="ValSPG079" type="DERScheduler_SPG" />
+      <DO name="ValSPG080" type="DERScheduler_SPG" />
+      <DO name="ValSPG081" type="DERScheduler_SPG" />
+      <DO name="ValSPG082" type="DERScheduler_SPG" />
+      <DO name="ValSPG083" type="DERScheduler_SPG" />
+      <DO name="ValSPG084" type="DERScheduler_SPG" />
+      <DO name="ValSPG085" type="DERScheduler_SPG" />
+      <DO name="ValSPG086" type="DERScheduler_SPG" />
+      <DO name="ValSPG087" type="DERScheduler_SPG" />
+      <DO name="ValSPG088" type="DERScheduler_SPG" />
+      <DO name="ValSPG089" type="DERScheduler_SPG" />
+      <DO name="ValSPG090" type="DERScheduler_SPG" />
+      <DO name="ValSPG091" type="DERScheduler_SPG" />
+      <DO name="ValSPG092" type="DERScheduler_SPG" />
+      <DO name="ValSPG093" type="DERScheduler_SPG" />
+      <DO name="ValSPG094" type="DERScheduler_SPG" />
+      <DO name="ValSPG095" type="DERScheduler_SPG" />
+      <DO name="ValSPG096" type="DERScheduler_SPG" />
+      <DO name="ValSPG097" type="DERScheduler_SPG" />
+      <DO name="ValSPG098" type="DERScheduler_SPG" />
+      <DO name="ValSPG099" type="DERScheduler_SPG" />
+      <DO name="ValSPG100" type="DERScheduler_SPG" />
+      <DO name="SchdReuse" type="DERScheduler_SPG" />
+      <DO name="EvTrg" type="DERScheduler_SPG" />
+      <DO name="InSyn" type="DERScheduler_ORG" />
+    </LNodeType>
+    <LNodeType id="DERScheduler_FSCH_ASG_100_periodic" lnClass="FSCH">
+      <DO name="Beh" type="ENS_Beh_On" />
+      <DO name="SchdSt" type="DERScheduler_ENS_SchdSt" />
+      <DO name="SchdEntr" type="DERScheduler_INS" />
+      <DO name="ValMV" type="DERScheduler_MV_ValMV" />
+      <DO name="ActStrTm" type="DERScheduler_TCS" />
+      <DO name="NxtStrTm" type="DERScheduler_TCS" />
+      <DO name="SchdEnaErr" type="DERScheduler_ENS_SchdEnaErr" />
+      <DO name="EnaReq" type="DERScheduler_SPC_direct" />
+      <DO name="DsaReq" type="DERScheduler_SPC_direct" />
+      <DO name="SchdPrio" type="DERScheduler_ING" />
+      <DO name="NumEntr" type="DERScheduler_ING" />
+      <DO name="SchdIntv" type="DERScheduler_ING_s" />
+      <DO name="ValASG001" type="DERScheduler_ASG" />
+      <DO name="ValASG002" type="DERScheduler_ASG" />
+      <DO name="ValASG003" type="DERScheduler_ASG" />
+      <DO name="ValASG004" type="DERScheduler_ASG" />
+      <DO name="ValASG005" type="DERScheduler_ASG" />
+      <DO name="ValASG006" type="DERScheduler_ASG" />
+      <DO name="ValASG007" type="DERScheduler_ASG" />
+      <DO name="ValASG008" type="DERScheduler_ASG" />
+      <DO name="ValASG009" type="DERScheduler_ASG" />
+      <DO name="ValASG010" type="DERScheduler_ASG" />
+      <DO name="ValASG011" type="DERScheduler_ASG" />
+      <DO name="ValASG012" type="DERScheduler_ASG" />
+      <DO name="ValASG013" type="DERScheduler_ASG" />
+      <DO name="ValASG014" type="DERScheduler_ASG" />
+      <DO name="ValASG015" type="DERScheduler_ASG" />
+      <DO name="ValASG016" type="DERScheduler_ASG" />
+      <DO name="ValASG017" type="DERScheduler_ASG" />
+      <DO name="ValASG018" type="DERScheduler_ASG" />
+      <DO name="ValASG019" type="DERScheduler_ASG" />
+      <DO name="ValASG020" type="DERScheduler_ASG" />
+      <DO name="ValASG021" type="DERScheduler_ASG" />
+      <DO name="ValASG022" type="DERScheduler_ASG" />
+      <DO name="ValASG023" type="DERScheduler_ASG" />
+      <DO name="ValASG024" type="DERScheduler_ASG" />
+      <DO name="ValASG025" type="DERScheduler_ASG" />
+      <DO name="ValASG026" type="DERScheduler_ASG" />
+      <DO name="ValASG027" type="DERScheduler_ASG" />
+      <DO name="ValASG028" type="DERScheduler_ASG" />
+      <DO name="ValASG029" type="DERScheduler_ASG" />
+      <DO name="ValASG030" type="DERScheduler_ASG" />
+      <DO name="ValASG031" type="DERScheduler_ASG" />
+      <DO name="ValASG032" type="DERScheduler_ASG" />
+      <DO name="ValASG033" type="DERScheduler_ASG" />
+      <DO name="ValASG034" type="DERScheduler_ASG" />
+      <DO name="ValASG035" type="DERScheduler_ASG" />
+      <DO name="ValASG036" type="DERScheduler_ASG" />
+      <DO name="ValASG037" type="DERScheduler_ASG" />
+      <DO name="ValASG038" type="DERScheduler_ASG" />
+      <DO name="ValASG039" type="DERScheduler_ASG" />
+      <DO name="ValASG040" type="DERScheduler_ASG" />
+      <DO name="ValASG041" type="DERScheduler_ASG" />
+      <DO name="ValASG042" type="DERScheduler_ASG" />
+      <DO name="ValASG043" type="DERScheduler_ASG" />
+      <DO name="ValASG044" type="DERScheduler_ASG" />
+      <DO name="ValASG045" type="DERScheduler_ASG" />
+      <DO name="ValASG046" type="DERScheduler_ASG" />
+      <DO name="ValASG047" type="DERScheduler_ASG" />
+      <DO name="ValASG048" type="DERScheduler_ASG" />
+      <DO name="ValASG049" type="DERScheduler_ASG" />
+      <DO name="ValASG050" type="DERScheduler_ASG" />
+      <DO name="ValASG051" type="DERScheduler_ASG" />
+      <DO name="ValASG052" type="DERScheduler_ASG" />
+      <DO name="ValASG053" type="DERScheduler_ASG" />
+      <DO name="ValASG054" type="DERScheduler_ASG" />
+      <DO name="ValASG055" type="DERScheduler_ASG" />
+      <DO name="ValASG056" type="DERScheduler_ASG" />
+      <DO name="ValASG057" type="DERScheduler_ASG" />
+      <DO name="ValASG058" type="DERScheduler_ASG" />
+      <DO name="ValASG059" type="DERScheduler_ASG" />
+      <DO name="ValASG060" type="DERScheduler_ASG" />
+      <DO name="ValASG061" type="DERScheduler_ASG" />
+      <DO name="ValASG062" type="DERScheduler_ASG" />
+      <DO name="ValASG063" type="DERScheduler_ASG" />
+      <DO name="ValASG064" type="DERScheduler_ASG" />
+      <DO name="ValASG065" type="DERScheduler_ASG" />
+      <DO name="ValASG066" type="DERScheduler_ASG" />
+      <DO name="ValASG067" type="DERScheduler_ASG" />
+      <DO name="ValASG068" type="DERScheduler_ASG" />
+      <DO name="ValASG069" type="DERScheduler_ASG" />
+      <DO name="ValASG070" type="DERScheduler_ASG" />
+      <DO name="ValASG071" type="DERScheduler_ASG" />
+      <DO name="ValASG072" type="DERScheduler_ASG" />
+      <DO name="ValASG073" type="DERScheduler_ASG" />
+      <DO name="ValASG074" type="DERScheduler_ASG" />
+      <DO name="ValASG075" type="DERScheduler_ASG" />
+      <DO name="ValASG076" type="DERScheduler_ASG" />
+      <DO name="ValASG077" type="DERScheduler_ASG" />
+      <DO name="ValASG078" type="DERScheduler_ASG" />
+      <DO name="ValASG079" type="DERScheduler_ASG" />
+      <DO name="ValASG080" type="DERScheduler_ASG" />
+      <DO name="ValASG081" type="DERScheduler_ASG" />
+      <DO name="ValASG082" type="DERScheduler_ASG" />
+      <DO name="ValASG083" type="DERScheduler_ASG" />
+      <DO name="ValASG084" type="DERScheduler_ASG" />
+      <DO name="ValASG085" type="DERScheduler_ASG" />
+      <DO name="ValASG086" type="DERScheduler_ASG" />
+      <DO name="ValASG087" type="DERScheduler_ASG" />
+      <DO name="ValASG088" type="DERScheduler_ASG" />
+      <DO name="ValASG089" type="DERScheduler_ASG" />
+      <DO name="ValASG090" type="DERScheduler_ASG" />
+      <DO name="ValASG091" type="DERScheduler_ASG" />
+      <DO name="ValASG092" type="DERScheduler_ASG" />
+      <DO name="ValASG093" type="DERScheduler_ASG" />
+      <DO name="ValASG094" type="DERScheduler_ASG" />
+      <DO name="ValASG095" type="DERScheduler_ASG" />
+      <DO name="ValASG096" type="DERScheduler_ASG" />
+      <DO name="ValASG097" type="DERScheduler_ASG" />
+      <DO name="ValASG098" type="DERScheduler_ASG" />
+      <DO name="ValASG099" type="DERScheduler_ASG" />
+      <DO name="ValASG100" type="DERScheduler_ASG" />
+      <DO name="StrTm01" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm02" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm03" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm04" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm05" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm06" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm07" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm08" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm09" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm10" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm11" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm12" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm13" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm14" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm15" type="DERScheduler_TSG_setCal" />
+      <DO name="StrTm16" type="DERScheduler_TSG_setCal" />
+      <DO desc="Schedule may be reused" name="SchdReuse" type="DERScheduler_SPG" />
+    </LNodeType>
+    <LNodeType id="DERScheduler_FSCH_ASG_100_nonperiodic" lnClass="FSCH">
+      <DO name="Beh" type="ENS_Beh_On" />
+      <DO name="SchdSt" type="DERScheduler_ENS_SchdSt" />
+      <DO name="SchdEntr" type="DERScheduler_INS" />
+      <DO name="ValMV" type="DERScheduler_MV_ValMV" />
+      <DO name="ActStrTm" type="DERScheduler_TCS" />
+      <DO name="NxtStrTm" type="DERScheduler_TCS" />
+      <DO name="SchdEnaErr" type="DERScheduler_ENS_SchdEnaErr" />
+      <DO name="EnaReq" type="DERScheduler_SPC_direct" />
+      <DO name="DsaReq" type="DERScheduler_SPC_direct" />
+      <DO name="SchdPrio" type="DERScheduler_ING" />
+      <DO name="NumEntr" type="DERScheduler_ING" />
+      <DO name="SchdIntv" type="DERScheduler_ING_s" />
+      <DO name="ValASG001" type="DERScheduler_ASG" />
+      <DO name="ValASG002" type="DERScheduler_ASG" />
+      <DO name="ValASG003" type="DERScheduler_ASG" />
+      <DO name="ValASG004" type="DERScheduler_ASG" />
+      <DO name="ValASG005" type="DERScheduler_ASG" />
+      <DO name="ValASG006" type="DERScheduler_ASG" />
+      <DO name="ValASG007" type="DERScheduler_ASG" />
+      <DO name="ValASG008" type="DERScheduler_ASG" />
+      <DO name="ValASG009" type="DERScheduler_ASG" />
+      <DO name="ValASG010" type="DERScheduler_ASG" />
+      <DO name="ValASG011" type="DERScheduler_ASG" />
+      <DO name="ValASG012" type="DERScheduler_ASG" />
+      <DO name="ValASG013" type="DERScheduler_ASG" />
+      <DO name="ValASG014" type="DERScheduler_ASG" />
+      <DO name="ValASG015" type="DERScheduler_ASG" />
+      <DO name="ValASG016" type="DERScheduler_ASG" />
+      <DO name="ValASG017" type="DERScheduler_ASG" />
+      <DO name="ValASG018" type="DERScheduler_ASG" />
+      <DO name="ValASG019" type="DERScheduler_ASG" />
+      <DO name="ValASG020" type="DERScheduler_ASG" />
+      <DO name="ValASG021" type="DERScheduler_ASG" />
+      <DO name="ValASG022" type="DERScheduler_ASG" />
+      <DO name="ValASG023" type="DERScheduler_ASG" />
+      <DO name="ValASG024" type="DERScheduler_ASG" />
+      <DO name="ValASG025" type="DERScheduler_ASG" />
+      <DO name="ValASG026" type="DERScheduler_ASG" />
+      <DO name="ValASG027" type="DERScheduler_ASG" />
+      <DO name="ValASG028" type="DERScheduler_ASG" />
+      <DO name="ValASG029" type="DERScheduler_ASG" />
+      <DO name="ValASG030" type="DERScheduler_ASG" />
+      <DO name="ValASG031" type="DERScheduler_ASG" />
+      <DO name="ValASG032" type="DERScheduler_ASG" />
+      <DO name="ValASG033" type="DERScheduler_ASG" />
+      <DO name="ValASG034" type="DERScheduler_ASG" />
+      <DO name="ValASG035" type="DERScheduler_ASG" />
+      <DO name="ValASG036" type="DERScheduler_ASG" />
+      <DO name="ValASG037" type="DERScheduler_ASG" />
+      <DO name="ValASG038" type="DERScheduler_ASG" />
+      <DO name="ValASG039" type="DERScheduler_ASG" />
+      <DO name="ValASG040" type="DERScheduler_ASG" />
+      <DO name="ValASG041" type="DERScheduler_ASG" />
+      <DO name="ValASG042" type="DERScheduler_ASG" />
+      <DO name="ValASG043" type="DERScheduler_ASG" />
+      <DO name="ValASG044" type="DERScheduler_ASG" />
+      <DO name="ValASG045" type="DERScheduler_ASG" />
+      <DO name="ValASG046" type="DERScheduler_ASG" />
+      <DO name="ValASG047" type="DERScheduler_ASG" />
+      <DO name="ValASG048" type="DERScheduler_ASG" />
+      <DO name="ValASG049" type="DERScheduler_ASG" />
+      <DO name="ValASG050" type="DERScheduler_ASG" />
+      <DO name="ValASG051" type="DERScheduler_ASG" />
+      <DO name="ValASG052" type="DERScheduler_ASG" />
+      <DO name="ValASG053" type="DERScheduler_ASG" />
+      <DO name="ValASG054" type="DERScheduler_ASG" />
+      <DO name="ValASG055" type="DERScheduler_ASG" />
+      <DO name="ValASG056" type="DERScheduler_ASG" />
+      <DO name="ValASG057" type="DERScheduler_ASG" />
+      <DO name="ValASG058" type="DERScheduler_ASG" />
+      <DO name="ValASG059" type="DERScheduler_ASG" />
+      <DO name="ValASG060" type="DERScheduler_ASG" />
+      <DO name="ValASG061" type="DERScheduler_ASG" />
+      <DO name="ValASG062" type="DERScheduler_ASG" />
+      <DO name="ValASG063" type="DERScheduler_ASG" />
+      <DO name="ValASG064" type="DERScheduler_ASG" />
+      <DO name="ValASG065" type="DERScheduler_ASG" />
+      <DO name="ValASG066" type="DERScheduler_ASG" />
+      <DO name="ValASG067" type="DERScheduler_ASG" />
+      <DO name="ValASG068" type="DERScheduler_ASG" />
+      <DO name="ValASG069" type="DERScheduler_ASG" />
+      <DO name="ValASG070" type="DERScheduler_ASG" />
+      <DO name="ValASG071" type="DERScheduler_ASG" />
+      <DO name="ValASG072" type="DERScheduler_ASG" />
+      <DO name="ValASG073" type="DERScheduler_ASG" />
+      <DO name="ValASG074" type="DERScheduler_ASG" />
+      <DO name="ValASG075" type="DERScheduler_ASG" />
+      <DO name="ValASG076" type="DERScheduler_ASG" />
+      <DO name="ValASG077" type="DERScheduler_ASG" />
+      <DO name="ValASG078" type="DERScheduler_ASG" />
+      <DO name="ValASG079" type="DERScheduler_ASG" />
+      <DO name="ValASG080" type="DERScheduler_ASG" />
+      <DO name="ValASG081" type="DERScheduler_ASG" />
+      <DO name="ValASG082" type="DERScheduler_ASG" />
+      <DO name="ValASG083" type="DERScheduler_ASG" />
+      <DO name="ValASG084" type="DERScheduler_ASG" />
+      <DO name="ValASG085" type="DERScheduler_ASG" />
+      <DO name="ValASG086" type="DERScheduler_ASG" />
+      <DO name="ValASG087" type="DERScheduler_ASG" />
+      <DO name="ValASG088" type="DERScheduler_ASG" />
+      <DO name="ValASG089" type="DERScheduler_ASG" />
+      <DO name="ValASG090" type="DERScheduler_ASG" />
+      <DO name="ValASG091" type="DERScheduler_ASG" />
+      <DO name="ValASG092" type="DERScheduler_ASG" />
+      <DO name="ValASG093" type="DERScheduler_ASG" />
+      <DO name="ValASG094" type="DERScheduler_ASG" />
+      <DO name="ValASG095" type="DERScheduler_ASG" />
+      <DO name="ValASG096" type="DERScheduler_ASG" />
+      <DO name="ValASG097" type="DERScheduler_ASG" />
+      <DO name="ValASG098" type="DERScheduler_ASG" />
+      <DO name="ValASG099" type="DERScheduler_ASG" />
+      <DO name="ValASG100" type="DERScheduler_ASG" />
+      <DO name="StrTm01" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm02" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm03" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm04" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm05" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm06" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm07" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm08" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm09" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm10" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm11" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm12" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm13" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm14" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm15" type="DERScheduler_TSG_setTm" />
+      <DO name="StrTm16" type="DERScheduler_TSG_setTm" />
+      <DO desc="Schedule may be reused" name="SchdReuse" type="DERScheduler_SPG" />
+    </LNodeType>
+    <LNodeType id="DERScheduler_FSCH_ASG_100_event" lnClass="FSCH">
+      <DO name="Beh" type="ENS_Beh_On" />
+      <DO name="SchdSt" type="DERScheduler_ENS_SchdSt" />
+      <DO name="SchdEntr" type="DERScheduler_INS" />
+      <DO name="ValMV" type="DERScheduler_MV_ValMV" />
+      <DO name="ActStrTm" type="DERScheduler_TCS" />
+      <DO name="NxtStrTm" type="DERScheduler_TCS" />
+      <DO name="SchdEnaErr" type="DERScheduler_ENS_SchdEnaErr" />
+      <DO name="EnaReq" type="DERScheduler_SPC_direct" />
+      <DO name="DsaReq" type="DERScheduler_SPC_direct" />
+      <DO name="SchdPrio" type="DERScheduler_ING" />
+      <DO name="NumEntr" type="DERScheduler_ING" />
+      <DO name="SchdIntv" type="DERScheduler_ING_s" />
+      <DO name="ValASG001" type="DERScheduler_ASG" />
+      <DO name="ValASG002" type="DERScheduler_ASG" />
+      <DO name="ValASG003" type="DERScheduler_ASG" />
+      <DO name="ValASG004" type="DERScheduler_ASG" />
+      <DO name="ValASG005" type="DERScheduler_ASG" />
+      <DO name="ValASG006" type="DERScheduler_ASG" />
+      <DO name="ValASG007" type="DERScheduler_ASG" />
+      <DO name="ValASG008" type="DERScheduler_ASG" />
+      <DO name="ValASG009" type="DERScheduler_ASG" />
+      <DO name="ValASG010" type="DERScheduler_ASG" />
+      <DO name="ValASG011" type="DERScheduler_ASG" />
+      <DO name="ValASG012" type="DERScheduler_ASG" />
+      <DO name="ValASG013" type="DERScheduler_ASG" />
+      <DO name="ValASG014" type="DERScheduler_ASG" />
+      <DO name="ValASG015" type="DERScheduler_ASG" />
+      <DO name="ValASG016" type="DERScheduler_ASG" />
+      <DO name="ValASG017" type="DERScheduler_ASG" />
+      <DO name="ValASG018" type="DERScheduler_ASG" />
+      <DO name="ValASG019" type="DERScheduler_ASG" />
+      <DO name="ValASG020" type="DERScheduler_ASG" />
+      <DO name="ValASG021" type="DERScheduler_ASG" />
+      <DO name="ValASG022" type="DERScheduler_ASG" />
+      <DO name="ValASG023" type="DERScheduler_ASG" />
+      <DO name="ValASG024" type="DERScheduler_ASG" />
+      <DO name="ValASG025" type="DERScheduler_ASG" />
+      <DO name="ValASG026" type="DERScheduler_ASG" />
+      <DO name="ValASG027" type="DERScheduler_ASG" />
+      <DO name="ValASG028" type="DERScheduler_ASG" />
+      <DO name="ValASG029" type="DERScheduler_ASG" />
+      <DO name="ValASG030" type="DERScheduler_ASG" />
+      <DO name="ValASG031" type="DERScheduler_ASG" />
+      <DO name="ValASG032" type="DERScheduler_ASG" />
+      <DO name="ValASG033" type="DERScheduler_ASG" />
+      <DO name="ValASG034" type="DERScheduler_ASG" />
+      <DO name="ValASG035" type="DERScheduler_ASG" />
+      <DO name="ValASG036" type="DERScheduler_ASG" />
+      <DO name="ValASG037" type="DERScheduler_ASG" />
+      <DO name="ValASG038" type="DERScheduler_ASG" />
+      <DO name="ValASG039" type="DERScheduler_ASG" />
+      <DO name="ValASG040" type="DERScheduler_ASG" />
+      <DO name="ValASG041" type="DERScheduler_ASG" />
+      <DO name="ValASG042" type="DERScheduler_ASG" />
+      <DO name="ValASG043" type="DERScheduler_ASG" />
+      <DO name="ValASG044" type="DERScheduler_ASG" />
+      <DO name="ValASG045" type="DERScheduler_ASG" />
+      <DO name="ValASG046" type="DERScheduler_ASG" />
+      <DO name="ValASG047" type="DERScheduler_ASG" />
+      <DO name="ValASG048" type="DERScheduler_ASG" />
+      <DO name="ValASG049" type="DERScheduler_ASG" />
+      <DO name="ValASG050" type="DERScheduler_ASG" />
+      <DO name="ValASG051" type="DERScheduler_ASG" />
+      <DO name="ValASG052" type="DERScheduler_ASG" />
+      <DO name="ValASG053" type="DERScheduler_ASG" />
+      <DO name="ValASG054" type="DERScheduler_ASG" />
+      <DO name="ValASG055" type="DERScheduler_ASG" />
+      <DO name="ValASG056" type="DERScheduler_ASG" />
+      <DO name="ValASG057" type="DERScheduler_ASG" />
+      <DO name="ValASG058" type="DERScheduler_ASG" />
+      <DO name="ValASG059" type="DERScheduler_ASG" />
+      <DO name="ValASG060" type="DERScheduler_ASG" />
+      <DO name="ValASG061" type="DERScheduler_ASG" />
+      <DO name="ValASG062" type="DERScheduler_ASG" />
+      <DO name="ValASG063" type="DERScheduler_ASG" />
+      <DO name="ValASG064" type="DERScheduler_ASG" />
+      <DO name="ValASG065" type="DERScheduler_ASG" />
+      <DO name="ValASG066" type="DERScheduler_ASG" />
+      <DO name="ValASG067" type="DERScheduler_ASG" />
+      <DO name="ValASG068" type="DERScheduler_ASG" />
+      <DO name="ValASG069" type="DERScheduler_ASG" />
+      <DO name="ValASG070" type="DERScheduler_ASG" />
+      <DO name="ValASG071" type="DERScheduler_ASG" />
+      <DO name="ValASG072" type="DERScheduler_ASG" />
+      <DO name="ValASG073" type="DERScheduler_ASG" />
+      <DO name="ValASG074" type="DERScheduler_ASG" />
+      <DO name="ValASG075" type="DERScheduler_ASG" />
+      <DO name="ValASG076" type="DERScheduler_ASG" />
+      <DO name="ValASG077" type="DERScheduler_ASG" />
+      <DO name="ValASG078" type="DERScheduler_ASG" />
+      <DO name="ValASG079" type="DERScheduler_ASG" />
+      <DO name="ValASG080" type="DERScheduler_ASG" />
+      <DO name="ValASG081" type="DERScheduler_ASG" />
+      <DO name="ValASG082" type="DERScheduler_ASG" />
+      <DO name="ValASG083" type="DERScheduler_ASG" />
+      <DO name="ValASG084" type="DERScheduler_ASG" />
+      <DO name="ValASG085" type="DERScheduler_ASG" />
+      <DO name="ValASG086" type="DERScheduler_ASG" />
+      <DO name="ValASG087" type="DERScheduler_ASG" />
+      <DO name="ValASG088" type="DERScheduler_ASG" />
+      <DO name="ValASG089" type="DERScheduler_ASG" />
+      <DO name="ValASG090" type="DERScheduler_ASG" />
+      <DO name="ValASG091" type="DERScheduler_ASG" />
+      <DO name="ValASG092" type="DERScheduler_ASG" />
+      <DO name="ValASG093" type="DERScheduler_ASG" />
+      <DO name="ValASG094" type="DERScheduler_ASG" />
+      <DO name="ValASG095" type="DERScheduler_ASG" />
+      <DO name="ValASG096" type="DERScheduler_ASG" />
+      <DO name="ValASG097" type="DERScheduler_ASG" />
+      <DO name="ValASG098" type="DERScheduler_ASG" />
+      <DO name="ValASG099" type="DERScheduler_ASG" />
+      <DO name="ValASG100" type="DERScheduler_ASG" />
+      <DO name="SchdReuse" type="DERScheduler_SPG" />
+      <DO name="EvTrg" type="DERScheduler_SPG" />
+      <DO name="InSyn" type="DERScheduler_ORG" />
+    </LNodeType>
+    <LNodeType id="DERScheduler_FSCC_APC" lnClass="FSCC">
+      <DO name="Beh" type="ENS_Beh_On" />
+      <DO name="ActSchdRef" type="DERScheduler_ORS" />
+      <DO name="ValMV" type="DERScheduler_MV_ValMV" />
+      <DO name="CtlEnt" type="DERScheduler_ORG" />
+      <DO name="Schd01" type="DERScheduler_ORG" />
+      <DO name="Schd02" type="DERScheduler_ORG" />
+      <DO name="Schd03" type="DERScheduler_ORG" />
+      <DO name="Schd04" type="DERScheduler_ORG" />
+      <DO name="Schd05" type="DERScheduler_ORG" />
+      <DO name="Schd06" type="DERScheduler_ORG" />
+      <DO name="Schd07" type="DERScheduler_ORG" />
+      <DO name="Schd08" type="DERScheduler_ORG" />
+      <DO name="Schd09" type="DERScheduler_ORG" />
+      <DO name="Schd10" type="DERScheduler_ORG" />
+    </LNodeType>
+    <LNodeType id="DERScheduler_FSCC_SPC" lnClass="FSCC">
+      <DO name="Beh" type="ENS_Beh_On" />
+      <DO name="ActSchdRef" type="DERScheduler_ORS" />
+      <DO name="ValSPS" type="DERScheduler_SPS_ScheduleOnOff" />
+      <DO name="CtlEnt" type="DERScheduler_ORG" />
+      <DO name="Schd01" type="DERScheduler_ORG" />
+      <DO name="Schd02" type="DERScheduler_ORG" />
+      <DO name="Schd03" type="DERScheduler_ORG" />
+      <DO name="Schd04" type="DERScheduler_ORG" />
+      <DO name="Schd05" type="DERScheduler_ORG" />
+      <DO name="Schd06" type="DERScheduler_ORG" />
+      <DO name="Schd07" type="DERScheduler_ORG" />
+      <DO name="Schd08" type="DERScheduler_ORG" />
+      <DO name="Schd09" type="DERScheduler_ORG" />
+      <DO name="Schd10" type="DERScheduler_ORG" />
+    </LNodeType>
+    <LNodeType id="DERScheduler_GGIO_ActPow" lnClass="GGIO">
+      <DO name="Beh" type="ENS_Beh_On" />
+      <DO name="AnOut1" type="DERScheduler_APC_ActPow" />
+    </LNodeType>
+    <LNodeType id="DERScheduler_GGIO_NaxPow" lnClass="GGIO">
+      <DO name="Beh" type="ENS_Beh_On" />
+      <DO name="AnOut1" type="DERScheduler_APC_MaxPow" />
+    </LNodeType>
+    <LNodeType id="DERScheduler_GGIO_OnOff" lnClass="GGIO">
+      <DO name="Beh" type="ENS_Beh_On" />
+      <DO name="SPCSO1" type="DERScheduler_SPC_direct" />
+    </LNodeType>
+    <LNodeType id="DERScheduler.LLN0" lnClass="LLN0">
+      <DO name="NamPlt" type="DERScheduler_LPL" />
+      <DO name="Beh" type="ENS_Beh_On" />
+      <DO name="Health" type="ENS_Health" />
+      <DO name="Mod" type="DERScheduler_Mode_On_statusOnly" />
+    </LNodeType>
+    <LNodeType id="DERScheduler_LPHD" lnClass="LPHD">
+      <DO name="PhyNam" type="DERScheduler_DPL_PhyNamePlate" />
+      <DO name="PhyHealth" type="DERScheduler_ENS_PhyHealth" />
+      <DO name="Proxy" type="DERScheduler_SPS" />
+    </LNodeType>
+    <DOType id="DERScheduler_TCS" cdc="TCS">
+      <DA name="stVal" bType="Timestamp" dchg="true" dupd="true" fc="ST" />
+      <DA name="q" bType="Quality" qchg="true" fc="ST" />
+      <DA name="t" bType="Timestamp" fc="ST" />
+    </DOType>
+    <DOType id="DERScheduler_SPG" cdc="SPG">
+      <DA name="setVal" bType="BOOLEAN" dchg="true" fc="SP" />
+    </DOType>
+    <DOType id="DERScheduler_TSG_setTm" cdc="TSG">
+      <DA name="setTm" bType="Timestamp" dchg="true" fc="SP" />
+    </DOType>
+    <DOType id="DERScheduler_TSG_setCal" cdc="TSG">
+      <DA name="setTm" bType="Timestamp" dchg="true" fc="SP" />
+      <DA name="setCal" bType="Struct" type="CalendarTime" dchg="true" fc="SP" />
+    </DOType>
+    <DOType id="DERScheduler_ASG" cdc="ASG">
+      <DA name="setMag" bType="Struct" type="AnalogueValue" dchg="true" fc="SP" />
+    </DOType>
+    <DOType id="DERScheduler_ING_s" cdc="ING">
+      <DA name="setVal" bType="INT32" dchg="true" fc="SP" />
+      <DA name="units" bType="Struct" type="DERScheduler_Units_s" dchg="true" fc="CF" />
+    </DOType>
+    <DOType id="DERScheduler_ING" cdc="ING">
+      <DA name="setVal" bType="INT32" dchg="true" fc="SP" />
+    </DOType>
+    <DOType id="DERScheduler_SPC_direct" cdc="SPC">
+      <DA name="origin" bType="Struct" type="DERScheduler_Originator" fc="ST" />
+      <DA name="ctlNum" bType="INT8U" desc="0..255" fc="ST" />
+      <DA name="stVal" bType="BOOLEAN" dchg="true" fc="ST" />
+      <DA name="q" bType="Quality" qchg="true" fc="ST" />
+      <DA name="t" bType="Timestamp" fc="ST" />
+      <DA name="ctlModel" bType="Enum" type="CtlModelKind" dchg="true" fc="CF">
+        <Val>direct-with-normal-security</Val>
+      </DA>
+      <DA name="Oper" bType="Struct" type="DERScheduler_SPC_Oper" fc="CO" />
+    </DOType>
+    <DOType id="DERScheduler_MV_ValMV" cdc="MV">
+      <DA name="mag" bType="Struct" type="AnalogueValue" dupd="true" fc="MX" />
+      <DA name="q" bType="Quality" qchg="true" fc="MX" />
+      <DA name="t" bType="Timestamp" fc="MX" />
+      <DA name="units" bType="Struct" type="DERScheduler_Units_kW" dchg="true" fc="CF" />
+      <DA name="d" bType="VisString255" fc="DC" />
+    </DOType>
+    <DOType id="DERScheduler_SPS_ScheduleOnOff" cdc="SPS">
+      <DA name="stVal" bType="BOOLEAN" dchg="true" fc="ST" />
+      <DA name="q" bType="Quality" qchg="true" fc="ST" />
+      <DA name="t" bType="Timestamp" fc="ST" />
+    </DOType>
+    <DOType id="DERScheduler_INS" cdc="INS">
+      <DA name="stVal" bType="INT32" dchg="true" dupd="true" fc="ST" />
+      <DA name="q" bType="Quality" qchg="true" fc="ST" />
+      <DA name="t" bType="Timestamp" fc="ST" />
+    </DOType>
+    <DOType id="DERScheduler_ENS_SchdSt" cdc="ENS">
+      <DA name="stVal" bType="Enum" type="ScheduleStateKind" dchg="true" fc="ST" />
+      <DA name="q" bType="Quality" qchg="true" fc="ST" />
+      <DA name="t" bType="Timestamp" fc="ST" />
+    </DOType>
+    <DOType id="ENS_Beh_On" desc="Behaviour" cdc="ENS">
+      <DA name="stVal" bType="Enum" type="BehaviourModeKind" dchg="true" dupd="true" fc="ST">
+        <Val>on</Val>
+      </DA>
+      <DA name="q" bType="Quality" qchg="true" fc="ST" />
+      <DA name="t" bType="Timestamp" fc="ST" />
+    </DOType>
+    <DOType id="ENS_Health" cdc="ENS" desc="Health">
+      <DA bType="Enum" dchg="true" dupd="true" fc="ST" name="stVal" type="HealthKind" />
+      <DA bType="Quality" fc="ST" name="q" qchg="true" />
+      <DA bType="Timestamp" fc="ST" name="t" />
+    </DOType>
+    <DOType id="DERScheduler_ENS_PhyHealth" cdc="ENS">
+      <DA bType="Enum" dchg="true" dupd="true" fc="ST" name="stVal" type="HealthKind" />
+      <DA bType="Quality" fc="ST" name="q" qchg="true" />
+      <DA bType="Timestamp" fc="ST" name="t" />
+    </DOType>
+    <DOType id="DERScheduler_Mode_On_statusOnly" cdc="ENC" desc="Mode">
+      <DA bType="Enum" name="stVal" type="BehaviourModeKind" dchg="true" fc="ST">
+        <Val>on</Val>
+      </DA>
+      <DA bType="Quality" fc="ST" name="q" qchg="true" />
+      <DA bType="Timestamp" fc="ST" name="t" />
+      <DA bType="Enum" name="ctlModel" type="CtlModelKind" dchg="true" fc="CF" valKind="RO">
+        <Val>status-only</Val>
+      </DA>
+    </DOType>
+    <DOType id="DERScheduler_ENS_SchdEnaErr" cdc="ENS">
+      <DA bType="Enum" dchg="true" fc="ST" name="stVal" type="ScheduleEnablingErrorKind">
+        <Val>None</Val>
+      </DA>
+      <DA bType="Quality" fc="ST" name="q" qchg="true" />
+      <DA bType="Timestamp" fc="ST" name="t" />
+    </DOType>
+    <DOType id="DERScheduler_APC_ActPow" cdc="APC" desc="Active Power Setpoint">
+      <DA bType="Struct" dchg="true" fc="MX" name="mxVal" type="AnalogueValue" />
+      <DA bType="Quality" fc="MX" name="q" qchg="true" />
+      <DA bType="Timestamp" fc="MX" name="t" />
+      <DA bType="Enum" name="ctlModel" type="CtlModelKind" dchg="true" fc="CF" valKind="RO">
+        <Val>status-only</Val>
+      </DA>
+      <DA bType="Struct" dchg="true" fc="CF" name="units" type="DERScheduler_Units_kW" />
+      <DA bType="Struct" dchg="true" fc="CF" name="minVal" type="AnalogueValue" />
+      <DA bType="Struct" dchg="true" fc="CF" name="maxVal" type="AnalogueValue" />
+    </DOType>
+    <DOType id="DERScheduler_APC_MaxPow" cdc="APC" desc="Maximum Output Power Setpoint">
+      <DA bType="Struct" dchg="true" fc="MX" name="mxVal" type="AnalogueValue" />
+      <DA bType="Quality" fc="MX" name="q" qchg="true" />
+      <DA bType="Timestamp" fc="MX" name="t" />
+      <DA bType="Enum" name="ctlModel" type="CtlModelKind" dchg="true" fc="CF" valKind="RO">
+        <Val>status-only</Val>
+      </DA>
+      <DA bType="Struct" dchg="true" fc="CF" name="units" type="DERScheduler_Units_kW" />
+    </DOType>
+    <DOType id="DERScheduler_LPL" cdc="LPL">
+      <DA bType="VisString255" fc="DC" name="vendor" />
+      <DA bType="VisString255" fc="DC" name="swRev" />
+      <DA bType="VisString255" fc="DC" name="d" />
+      <DA bType="VisString255" fc="DC" name="configRev" />
+    </DOType>
+    <DOType id="DERScheduler_ORS" cdc="ORS">
+      <DA name="stVal" bType="ObjRef" dchg="true" fc="ST" />
+      <DA name="q" bType="Quality" qchg="true" fc="ST" />
+      <DA name="t" bType="Timestamp" fc="ST" />
+    </DOType>
+    <DOType id="DERScheduler_SPS" cdc="SPS">
+      <DA bType="BOOLEAN" dchg="true" fc="ST" name="stVal" />
+      <DA bType="Quality" fc="ST" name="q" qchg="true" />
+      <DA bType="Timestamp" fc="ST" name="t" />
+    </DOType>
+    <DOType id="DERScheduler_DPL_PhyNamePlate" cdc="DPL">
+      <DA bType="VisString255" fc="DC" name="vendor" />
+      <DA bType="VisString255" fc="DC" name="hwRev" />
+      <DA bType="VisString255" fc="DC" name="swRev" />
+      <DA bType="VisString255" fc="DC" name="serNum" />
+      <DA bType="VisString255" fc="DC" name="model" />
+    </DOType>
+    <DOType id="DERScheduler_ORG" cdc="ORG">
+      <DA name="setSrcRef" bType="ObjRef" dchg="true" fc="ST" />
+    </DOType>
+    <DAType id="DERScheduler_SPC_Oper">
+      <BDA name="ctlVal" bType="BOOLEAN" />
+      <BDA name="origin" bType="Struct" type="DERScheduler_Originator" />
+      <BDA name="ctlNum" bType="INT8U" />
+      <BDA name="T" bType="Timestamp" />
+      <BDA name="Test" bType="BOOLEAN" />
+      <BDA name="Check" bType="Check" />
+      <ProtNs type="8-MMS">IEC 61850-8-1:2003</ProtNs>
+    </DAType>
+    <DAType id="DERScheduler_Originator">
+      <BDA name="orCat" bType="Enum" type="OriginatorCategoryKind" />
+      <BDA name="orIdent" bType="Octet64" />
+    </DAType>
+    <DAType id="CalendarTime">
+      <BDA name="occ" bType="INT16U" />
+      <BDA name="occType" bType="Enum" type="OccurrenceKind">
+        <Val>None</Val>
+      </BDA>
+      <BDA name="occPer" bType="Enum" type="PeriodKind" />
+      <BDA name="weekDay" bType="Enum" type="WeekdayKind" />
+      <BDA name="month" bType="Enum" type="MonthKind" />
+      <BDA name="day" bType="INT8U" />
+      <BDA name="hr" bType="INT8U" />
+      <BDA name="mn" bType="INT8U" />
+    </DAType>
+    <DAType id="AnalogueValue">
+      <BDA name="f" bType="FLOAT32" />
+    </DAType>
+    <DAType id="DERScheduler_Units_kW">
+      <BDA name="SIUnit" bType="Enum" type="SIUnitKind">
+        <Val>W</Val>
+      </BDA>
+      <BDA name="multiplier" bType="Enum" type="MultiplierKind">
+        <Val>k</Val>
+      </BDA>
+    </DAType>
+    <DAType id="DERScheduler_Units_s">
+      <BDA name="SIUnit" bType="Enum" type="SIUnitKind">
+        <Val>s</Val>
+      </BDA>
+      <BDA name="multiplier" bType="Enum" type="MultiplierKind" />
+    </DAType>
+    <EnumType id="MonthKind">
+      <EnumVal ord="0">reserved</EnumVal>
+      <EnumVal ord="1">January</EnumVal>
+      <EnumVal ord="2">February</EnumVal>
+      <EnumVal ord="3">March</EnumVal>
+      <EnumVal ord="4">April</EnumVal>
+      <EnumVal ord="5">May</EnumVal>
+      <EnumVal ord="6">June</EnumVal>
+      <EnumVal ord="7">July</EnumVal>
+      <EnumVal ord="8">August</EnumVal>
+      <EnumVal ord="9">September</EnumVal>
+      <EnumVal ord="10">October</EnumVal>
+      <EnumVal ord="11">November</EnumVal>
+      <EnumVal ord="12">December</EnumVal>
+    </EnumType>
+    <EnumType id="WeekdayKind">
+      <EnumVal ord="0">reserved</EnumVal>
+      <EnumVal ord="1">Monday</EnumVal>
+      <EnumVal ord="2">Tuesday</EnumVal>
+      <EnumVal ord="3">Wednesday</EnumVal>
+      <EnumVal ord="4">Thursday</EnumVal>
+      <EnumVal ord="5">Friday</EnumVal>
+      <EnumVal ord="6">Saturday</EnumVal>
+      <EnumVal ord="7">Sunday</EnumVal>
+    </EnumType>
+    <EnumType id="PeriodKind">
+      <EnumVal ord="0">Hour</EnumVal>
+      <EnumVal ord="1">Day</EnumVal>
+      <EnumVal ord="2">Week</EnumVal>
+      <EnumVal ord="3">Month</EnumVal>
+      <EnumVal ord="4">Year</EnumVal>
+    </EnumType>
+    <EnumType id="OccurrenceKind">
+      <EnumVal ord="0">Time</EnumVal>
+      <EnumVal ord="1">WeekDay</EnumVal>
+      <EnumVal ord="2">WeekOfYear</EnumVal>
+      <EnumVal ord="3">DayOfMonth</EnumVal>
+      <EnumVal ord="4">DayOfYear</EnumVal>
+    </EnumType>
+    <EnumType id="MultiplierKind">
+      <EnumVal ord="-24">y</EnumVal>
+      <EnumVal ord="-21">z</EnumVal>
+      <EnumVal ord="-18">a</EnumVal>
+      <EnumVal ord="-15">f</EnumVal>
+      <EnumVal ord="-12">p</EnumVal>
+      <EnumVal ord="-9">n</EnumVal>
+      <EnumVal ord="-6">µ</EnumVal>
+      <EnumVal ord="-3">m</EnumVal>
+      <EnumVal ord="-2">c</EnumVal>
+      <EnumVal ord="-1">d</EnumVal>
+      <EnumVal ord="0" />
+      <EnumVal ord="1">da</EnumVal>
+      <EnumVal ord="2">h</EnumVal>
+      <EnumVal ord="3">k</EnumVal>
+      <EnumVal ord="6">M</EnumVal>
+      <EnumVal ord="9">G</EnumVal>
+      <EnumVal ord="12">T</EnumVal>
+      <EnumVal ord="15">P</EnumVal>
+      <EnumVal ord="18">E</EnumVal>
+      <EnumVal ord="21">Z</EnumVal>
+      <EnumVal ord="24">Y</EnumVal>
+    </EnumType>
+    <EnumType id="SIUnitKind">
+      <EnumVal ord="1" />
+      <EnumVal ord="2">m</EnumVal>
+      <EnumVal ord="3">kg</EnumVal>
+      <EnumVal ord="4">s</EnumVal>
+      <EnumVal ord="5">A</EnumVal>
+      <EnumVal ord="6">K</EnumVal>
+      <EnumVal ord="7">mol</EnumVal>
+      <EnumVal ord="8">cd</EnumVal>
+      <EnumVal ord="9">deg</EnumVal>
+      <EnumVal ord="10">rad</EnumVal>
+      <EnumVal ord="11">sr</EnumVal>
+      <EnumVal ord="21">Gy</EnumVal>
+      <EnumVal ord="22">Bq</EnumVal>
+      <EnumVal ord="23">°C</EnumVal>
+      <EnumVal ord="24">Sv</EnumVal>
+      <EnumVal ord="25">F</EnumVal>
+      <EnumVal ord="26">C</EnumVal>
+      <EnumVal ord="27">S</EnumVal>
+      <EnumVal ord="28">H</EnumVal>
+      <EnumVal ord="29">V</EnumVal>
+      <EnumVal ord="30">ohm</EnumVal>
+      <EnumVal ord="31">J</EnumVal>
+      <EnumVal ord="32">N</EnumVal>
+      <EnumVal ord="33">Hz</EnumVal>
+      <EnumVal ord="34">lx</EnumVal>
+      <EnumVal ord="35">Lm</EnumVal>
+      <EnumVal ord="36">Wb</EnumVal>
+      <EnumVal ord="37">T</EnumVal>
+      <EnumVal ord="38">W</EnumVal>
+      <EnumVal ord="39">Pa</EnumVal>
+      <EnumVal ord="41">m²</EnumVal>
+      <EnumVal ord="42">m³</EnumVal>
+      <EnumVal ord="43">m/s</EnumVal>
+      <EnumVal ord="44">m/s²</EnumVal>
+      <EnumVal ord="45">m³/s</EnumVal>
+      <EnumVal ord="46">m/m³</EnumVal>
+      <EnumVal ord="47">M</EnumVal>
+      <EnumVal ord="48">kg/m³</EnumVal>
+      <EnumVal ord="49">m²/s</EnumVal>
+      <EnumVal ord="50">W/m K</EnumVal>
+      <EnumVal ord="51">J/K</EnumVal>
+      <EnumVal ord="52">ppm</EnumVal>
+      <EnumVal ord="53">1/s</EnumVal>
+      <EnumVal ord="54">rad/s</EnumVal>
+      <EnumVal ord="55">W/m²</EnumVal>
+      <EnumVal ord="56">J/m²</EnumVal>
+      <EnumVal ord="57">S/m</EnumVal>
+      <EnumVal ord="58">K/s</EnumVal>
+      <EnumVal ord="59">Pa/s</EnumVal>
+      <EnumVal ord="60">J/kg K</EnumVal>
+      <EnumVal ord="61">VA</EnumVal>
+      <EnumVal ord="62">Watts</EnumVal>
+      <EnumVal ord="63">VAr</EnumVal>
+      <EnumVal ord="64">phi</EnumVal>
+      <EnumVal ord="65">cos(phi)</EnumVal>
+      <EnumVal ord="66">Vs</EnumVal>
+      <EnumVal ord="67">V²</EnumVal>
+      <EnumVal ord="68">As</EnumVal>
+      <EnumVal ord="69">A²</EnumVal>
+      <EnumVal ord="70">A²t</EnumVal>
+      <EnumVal ord="71">VAh</EnumVal>
+      <EnumVal ord="72">Wh</EnumVal>
+      <EnumVal ord="73">VArh</EnumVal>
+      <EnumVal ord="74">V/Hz</EnumVal>
+      <EnumVal ord="75">Hz/s</EnumVal>
+      <EnumVal ord="76">char</EnumVal>
+      <EnumVal ord="77">char/s</EnumVal>
+      <EnumVal ord="78">kgm²</EnumVal>
+      <EnumVal ord="79">dB</EnumVal>
+      <EnumVal ord="80">J/Wh</EnumVal>
+      <EnumVal ord="81">W/s</EnumVal>
+      <EnumVal ord="82">l/s</EnumVal>
+      <EnumVal ord="83">dBm</EnumVal>
+    </EnumType>
+    <EnumType id="OriginatorCategoryKind">
+      <EnumVal ord="0">not-supported</EnumVal>
+    </EnumType>
+    <EnumType id="CtlModelKind">
+      <EnumVal ord="0">status-only</EnumVal>
+      <EnumVal ord="1">direct-with-normal-security</EnumVal>
+      <EnumVal ord="2">sbo-with-normal-security</EnumVal>
+      <EnumVal ord="3">direct-with-enhanced-security</EnumVal>
+      <EnumVal ord="4">sbo-with-enhanced-security</EnumVal>
+    </EnumType>
+    <EnumType id="ScheduleStateKind">
+      <EnumVal ord="1">Not ready</EnumVal>
+      <EnumVal ord="2">Start Time required</EnumVal>
+      <EnumVal ord="3">Ready</EnumVal>
+      <EnumVal ord="4">Running</EnumVal>
+    </EnumType>
+    <EnumType id="ScheduleEnablingErrorKind">
+      <EnumVal ord="1">None</EnumVal>
+      <EnumVal ord="2">Missing valid NumEntr</EnumVal>
+      <EnumVal ord="3">Missing valid SchdIntv</EnumVal>
+      <EnumVal ord="4">Missing valid schedule values</EnumVal>
+      <EnumVal ord="5">Inconsistent values CDC</EnumVal>
+      <EnumVal ord="6">Missing valid StrTm</EnumVal>
+      <EnumVal ord="99">Other</EnumVal>
+    </EnumType>
+    <EnumType id="BehaviourModeKind">
+      <EnumVal ord="1">on</EnumVal>
+      <EnumVal ord="2">blocked</EnumVal>
+      <EnumVal ord="3">test</EnumVal>
+      <EnumVal ord="4">test/blocked</EnumVal>
+      <EnumVal ord="5">off</EnumVal>
+    </EnumType>
+    <EnumType id="HealthKind">
+      <EnumVal ord="1">Ok</EnumVal>
+      <EnumVal ord="2">Warning</EnumVal>
+      <EnumVal ord="3">Alarm</EnumVal>
+    </EnumType>
+  </DataTypeTemplates>
+</SCL>
