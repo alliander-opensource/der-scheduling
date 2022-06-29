@@ -53,9 +53,6 @@
               <DAI name="d">
                 <Val>DER Scheduler example</Val>
               </DAI>
-              <DAI name="ldNs">
-                <Val>IEC 61850-7-4:2007B</Val>
-              </DAI>
             </DOI>
             <DOI desc="Health" name="Health">
               <DAI name="stVal">
@@ -1470,9 +1467,7 @@
     </DAType>
     <DAType id="CalendarTime">
       <BDA name="occ" bType="INT16U" />
-      <BDA name="occType" bType="Enum" type="OccurrenceKind">
-        <Val>None</Val>
-      </BDA>
+      <BDA name="occType" bType="Enum" type="OccurrenceKind"/>
       <BDA name="occPer" bType="Enum" type="PeriodKind" />
       <BDA name="weekDay" bType="Enum" type="WeekdayKind" />
       <BDA name="month" bType="Enum" type="MonthKind" />
