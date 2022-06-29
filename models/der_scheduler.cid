@@ -1419,6 +1419,7 @@
       <DA bType="Struct" dchg="true" fc="CF" name="units" type="DERScheduler_Units_kW" />
       <DA bType="Struct" dchg="true" fc="CF" name="minVal" type="AnalogueValue" />
       <DA bType="Struct" dchg="true" fc="CF" name="maxVal" type="AnalogueValue" />
+      <DA bType="FLOAT32" dchg="true" fc="CF" name="dbRef"/>
     </DOType>
     <DOType id="DERScheduler_APC_MaxPow" cdc="APC" desc="Maximum Output Power Setpoint">
       <DA bType="Struct" dchg="true" fc="MX" name="mxVal" type="AnalogueValue" />
@@ -1428,6 +1429,7 @@
         <Val>status-only</Val>
       </DA>
       <DA bType="Struct" dchg="true" fc="CF" name="units" type="DERScheduler_Units_kW" />
+      <DA bType="FLOAT32" dchg="true" fc="CF" name="dbRef"/>
     </DOType>
     <DOType id="DERScheduler_LPL" cdc="LPL">
       <DA bType="VisString255" fc="DC" name="vendor" />
