@@ -1452,7 +1452,7 @@
       <DA bType="VisString255" fc="DC" name="model" />
     </DOType>
     <DOType id="DERScheduler_ORG" cdc="ORG">
-      <DA name="setSrcRef" bType="ObjRef" dchg="true" fc="ST" />
+      <DA name="setSrcRef" bType="ObjRef" dchg="true" fc="SP" />
     </DOType>
     <DAType id="DERScheduler_SPC_Oper">
       <BDA name="ctlVal" bType="BOOLEAN" />
