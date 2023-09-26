@@ -1,8 +1,8 @@
 # DER-scheduling
-IEC-scheduling (or DER-scheduling) is a specific form of scheduling with a lot of properties that should not be confused with any [generic scheduling](https://en.wikipedia.org/wiki/Schedule) such also as in IT.
+IEC-scheduling (or DER-scheduling) is a specific form of scheduling with a lot of properties that should not be confused with any [generic scheduling](https://en.wikipedia.org/wiki/Schedule) such also as in IT. 
 
 ## Introduction
-This project aims to create a production grade open-source scheduling software stack, enabling consumers, manufacturers and automations suppliers to implement IEC Scheduling according to IEC 61850-7-4-2010 Annex K. Formaly known as TR IEC 61850-90-10. The main use-case is for controling Distributed Energy Resources (DER), but not limited to that. 
+This project aims to create a production grade open-source scheduling software stack, enabling consumers, manufacturers and automations suppliers to implement IEC Scheduling according to IEC 61850-7-4-2010 Annex K. Formaly known as TR IEC 61850-90-10. The main use-case is for controling Distributed Energy Resources (DER), but not limited to that. The software is (being) integrated to become useful for interacting with communication protocols in [project ReLevENT](https://github.com/alliander-opensource/ReLevENT). See also here for [use-cases](https://github.com/alliander-opensource/ReLevENT/blob/main/usecases/use-cases-edge-view.md) where it can be applied to.
 
 ## Targeted applicability
 - DER = Distributed Energy Resources (e.g. PV solar, Windpower, Battery infeed into distribution grid)
@@ -40,7 +40,7 @@ This has been realized till sofar. The main functionalities are to control a DER
 The configuration of how the software is configured is realized with the [SCL file](https://github.com/alliander-opensource/der-scheduling/blob/main/models/der_scheduler.cid) which can be managed and adopted by any SCL compliant tool, e.g. [CoMPAS](https://github.com/com-pas). Schedules themselves are now fed into the software with an API from the CLI.
 With positive results, the solution is benchmarked against German commercial FNN-steuerboxes to have the same behaviour and to have at least the same performance.
 
-### Scheduling integraded with official communication protol (active!)
+### Scheduling integraded with official communication protol (active! in [project ReLevENT](https://github.com/alliander-opensource/ReLevENT) )
 We currently integrate the IEC scheduling as stand-service into [FLEDGE](https://www.lfedge.org/projects/fledge/) in close collaboration with [FLEDGE POWER](https://lfenergy.org/projects/fledgepower/) as they share the vision to build productive software for the edge. (Please remark that "scheduling" in Fledge is not the same as IEC-scheduling or DER-scheduling developed here). In this stage we expect to communicate with one protocol (WAN) to central systems (SCADA / Substation automation like) and with one protocol (LAN and probably MQTT or Modbus) to local devices.
 
 ### Scheduling integrated with several exchangable communication protocols (stretched goal)
