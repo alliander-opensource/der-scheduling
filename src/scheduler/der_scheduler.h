@@ -3,6 +3,10 @@
 
 #include <libiec61850/iec61850_server.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct sScheduler* Scheduler;
 
 /**
@@ -110,5 +114,9 @@ Scheduler_enableWriteAccessToParameter(Scheduler self, const char* scheduleRef, 
  */
 void
 Scheduler_destroy(Scheduler self);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _DER_SCHEDULER_H */
