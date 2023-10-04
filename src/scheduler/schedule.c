@@ -1393,6 +1393,11 @@ schedule_thread(void* parameter)
         if (newState != state) {
             printf("INFO: schedule %s switch from state %i to state %i\n", scheduleRef, state, newState);
             schedule_setState(self, newState);
+
+            if (state == SCHD_STATE_RUNNING) {
+                /* set SchdEntr to 0 when schedule not running  */
+                schedule_updateSchdEntr(self, currentTime, 0);
+            }
         }        
 
         Thread_sleep(100);
