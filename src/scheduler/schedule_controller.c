@@ -662,4 +662,3 @@ ScheduleController_initialize(ScheduleController self)
     Schedule activeSchedule = scheduleController_getActiveSchedule(self);
     scheduleController_updateActSchdRef(self, activeSchedule);
 }
-

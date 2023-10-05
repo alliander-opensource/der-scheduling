@@ -112,8 +112,6 @@ getFilenameForSchedule(Schedule schedule, char* buffer)
 
     ModelNode_getObjectReferenceEx((ModelNode*)schedule->scheduleLn, objRef, false);
 
-    printf("objRef  : %s\n", objRef);
-
     return convertObjRefToFilename(objRef, buffer);
 }
 
@@ -123,8 +121,6 @@ getFilenameForScheduleController(ScheduleController controller, char* buffer)
     char objRef[130];
 
     ModelNode_getObjectReferenceEx((ModelNode*)controller->controllerLn, objRef, false);
-
-    printf("objRef  : %s\n", objRef);
 
     return convertObjRefToFilename(objRef, buffer);
 }
@@ -247,6 +243,42 @@ exit_error:
     return NULL;
 }
 
+static void
+addIntegerValue(cJSON* jsonObj, ModelNode* iedObj, const char* item)
+{
+    DataAttribute* da = (DataAttribute*)ModelNode_getChild(iedObj, item);
+
+    if (da) {
+        MmsValue* mmsValue = da->mmsValue;
+
+        if (mmsValue && (MmsValue_getType(mmsValue) == MMS_INTEGER)) {
+            int32_t val = MmsValue_toInt32(mmsValue);
+
+            cJSON* jsonValue = cJSON_CreateNumber((double)val);
+
+            cJSON_AddItemToObject(jsonObj, item, jsonValue);
+        }
+    }
+}
+
+static void
+addUnsignedValue(cJSON* jsonObj, ModelNode* iedObj, const char* item)
+{
+    DataAttribute* da = (DataAttribute*)ModelNode_getChild(iedObj, item);
+
+    if (da) {
+        MmsValue* mmsValue = da->mmsValue;
+
+        if (mmsValue && (MmsValue_getType(mmsValue) == MMS_UNSIGNED)) {
+            uint32_t val = MmsValue_toUint32(mmsValue);
+
+            cJSON* jsonValue = cJSON_CreateNumber((double)val);
+
+            cJSON_AddItemToObject(jsonObj, item, jsonValue);
+        }
+    }
+}
+
 static cJSON*
 createSchedule(Schedule schedule)
 {
@@ -333,6 +365,24 @@ createSchedule(Schedule schedule)
 
             cJSON_AddItemToObject(strTm, "t", startTimeT);
 
+            DataAttribute* strTm_setCal = (DataAttribute*)ModelNode_getChild((ModelNode*)dobj, "setCal");
+
+            if (strTm_setCal) {
+
+                cJSON* setCal = cJSON_CreateObject();
+
+                addUnsignedValue(setCal, (ModelNode*)strTm_setCal, "occ");
+                addIntegerValue(setCal, (ModelNode*)strTm_setCal, "occType");
+                addIntegerValue(setCal, (ModelNode*)strTm_setCal, "occPer");
+                addIntegerValue(setCal, (ModelNode*)strTm_setCal, "weekDay");
+                addIntegerValue(setCal, (ModelNode*)strTm_setCal, "month");
+                addUnsignedValue(setCal, (ModelNode*)strTm_setCal, "day");
+                addUnsignedValue(setCal, (ModelNode*)strTm_setCal, "hr");
+                addUnsignedValue(setCal, (ModelNode*)strTm_setCal, "mn");
+
+                cJSON_AddItemToObject(strTm, "setCal", setCal);
+            }
+
             cJSON_AddItemToArray(startTimes, strTm);
         }    
 
@@ -353,31 +403,6 @@ exit_error:
         cJSON_Delete(scheduleJson);
 
     return NULL;
-}
-
-static bool
-saveScheduleData(SchedulerStorage self, Schedule schedule)
-{
-    char schedRef[130];
-
-    ModelNode_getObjectReferenceEx((ModelNode*)schedule->scheduleLn, schedRef, true);
-
-    printf("Save schedule data for %s\n", schedRef);
-
-    cJSON* scheduleJson = cJSON_CreateObject();
-
-    if (scheduleJson == NULL)
-    {
-        return false;
-    }
-
-    cJSON* objRef = cJSON_CreateString(schedRef);
-
-    cJSON_AddItemToObject(scheduleJson, "objRef", objRef);
-
-    char* jsonStr = cJSON_Print(scheduleJson);
-
-    printf("\n%s\n", jsonStr);
 }
 
 bool
@@ -589,8 +614,6 @@ getScheduleData(SchedulerStorage self, Schedule schedule, const char* scheduleJs
         return false;
     }
 
-    //printf("  objRef: %s\n", objRef->valuestring);
-
     cJSON* state = cJSON_GetObjectItem(json, "state");
 
     if (state == NULL) {
@@ -626,8 +649,6 @@ getScheduleData(SchedulerStorage self, Schedule schedule, const char* scheduleJs
 
         return false;
     }
-    
-    //printf("  reuse: %i\n", reuse->valueint);
 
     Schedule_setSchdReuse(schedule, (bool)reuse->valueint);
     
@@ -649,8 +670,6 @@ getScheduleData(SchedulerStorage self, Schedule schedule, const char* scheduleJs
         return false;
     }
 
-    //printf("  prio: %i\n", prio->valueint);
-
     Schedule_setPrio(schedule, prio->valueint);
 
     cJSON* numEntr = cJSON_GetObjectItem(json, "numEntr");
@@ -671,8 +690,6 @@ getScheduleData(SchedulerStorage self, Schedule schedule, const char* scheduleJs
         return false;
     }
 
-    //printf("  numEntr: %i\n", numEntr->valueint);
-
     Schedule_setNumEntr(schedule, numEntr->valueint);
 
     cJSON* schdIntv = cJSON_GetObjectItem(json, "schdIntv");
@@ -692,8 +709,6 @@ getScheduleData(SchedulerStorage self, Schedule schedule, const char* scheduleJs
 
         return false;
     }
-
-    //printf("  schdIntv: %i\n", schdIntv->valueint);
 
     Schedule_setSchIntvInMs(schedule, schdIntv->valueint);
 
@@ -729,15 +744,12 @@ getScheduleData(SchedulerStorage self, Schedule schedule, const char* scheduleJs
         if (mmsValue) {
             if (MmsValue_getType(mmsValue) == MMS_BOOLEAN) {
                 MmsValue_setBoolean(mmsValue, value->valueint);
-                //printf("    values[%i]: %s\n", i, value->valueint != 0 ? "true" : "false");
             }
             else if (MmsValue_getType(mmsValue) == MMS_FLOAT) {
                 MmsValue_setFloat(mmsValue, (float)value->valuedouble);
-                //printf("    values[%i]: %f\n", i, (float)value->valuedouble);
             }
             else if (MmsValue_getType(mmsValue) == MMS_INTEGER) {
                 MmsValue_setInt32(mmsValue, value->valueint);
-                //printf("    values[%i]: %i\n", i, value->valueint);
             }
         }
         else {
@@ -759,22 +771,91 @@ getScheduleData(SchedulerStorage self, Schedule schedule, const char* scheduleJs
                 cJSON* id = cJSON_GetObjectItem(startTime, "id");
 
                 if (id) {
-                    cJSON* t = cJSON_GetObjectItem(startTime, "t");
-
-                    uint64_t tValue = t ? (uint64_t)t->valuedouble : (uint64_t)0;
-
                     DataAttribute* strTm = (DataAttribute*)ModelNode_getChild((ModelNode*)schedule->scheduleLn, id->valuestring);
 
                     if (strTm) {
-                         DataAttribute* strTm_setTm = (DataAttribute*)ModelNode_getChild((ModelNode*)strTm, "setTm");
+                        DataAttribute* strTm_setTm = (DataAttribute*)ModelNode_getChild((ModelNode*)strTm, "setTm");
 
                         if (strTm_setTm) {
+
                             if (strTm_setTm->mmsValue && MmsValue_getType(strTm_setTm->mmsValue) == MMS_UTC_TIME) {
+
+                                cJSON* t = cJSON_GetObjectItem(startTime, "t");
+
+                                uint64_t tValue = t ? (uint64_t)t->valuedouble : (uint64_t)0;
+
                                 MmsValue_setUtcTimeMs(strTm_setTm->mmsValue, tValue);
                             }
                         }
                         else {
-                            printf("ERROR: Start time %s has no setTm attribute\n", id->valuestring);
+                            printf("INFO: Start time %s has no setTm attribute\n", id->valuestring);
+                        }
+
+                        DataAttribute* strTm_setCal = (DataAttribute*)ModelNode_getChild((ModelNode*)strTm, "setCal");
+
+                        if (strTm_setCal) {
+
+                            cJSON* setCal = cJSON_GetObjectItem(startTime, "setCal");
+
+                            if (setCal) {
+
+                                cJSON* setCal_occ = cJSON_GetObjectItem(setCal, "occ");
+                                DataAttribute* strTm_setCal_occ = (DataAttribute*)ModelNode_getChild((ModelNode*)strTm_setCal, "occ");
+
+                                if (setCal_occ && strTm_setCal_occ) {
+                                    MmsValue_setUint32(strTm_setCal_occ->mmsValue, setCal_occ->valueint);
+                                }
+
+                                cJSON* setCal_occType = cJSON_GetObjectItem(setCal, "occType");
+                                DataAttribute* strTm_setCal_occType = (DataAttribute*)ModelNode_getChild((ModelNode*)strTm_setCal, "occType");
+
+                                if (setCal_occType && strTm_setCal_occType) {
+                                    MmsValue_setInt32(strTm_setCal_occType->mmsValue, setCal_occType->valueint);
+                                }
+
+                                cJSON* setCal_occPer = cJSON_GetObjectItem(setCal, "occPer");
+                                DataAttribute* strTm_setCal_occPer = (DataAttribute*)ModelNode_getChild((ModelNode*)strTm_setCal, "occPer");
+
+                                if (setCal_occPer && strTm_setCal_occPer) {
+                                    MmsValue_setInt32(strTm_setCal_occPer->mmsValue, setCal_occPer->valueint);
+                                }
+
+                                cJSON* setCal_weekDay = cJSON_GetObjectItem(setCal, "weekDay");
+                                DataAttribute* strTm_setCal_weekDay = (DataAttribute*)ModelNode_getChild((ModelNode*)strTm_setCal, "weekDay");
+
+                                if (setCal_weekDay && strTm_setCal_weekDay) {
+                                    MmsValue_setInt32(strTm_setCal_weekDay->mmsValue, setCal_weekDay->valueint);
+                                }
+
+                                cJSON* setCal_month = cJSON_GetObjectItem(setCal, "month");
+                                DataAttribute* strTm_setCal_month = (DataAttribute*)ModelNode_getChild((ModelNode*)strTm_setCal, "month");
+
+                                if (setCal_month && strTm_setCal_month) {
+                                    MmsValue_setInt32(strTm_setCal_month->mmsValue, setCal_month->valueint);
+                                }
+
+                                cJSON* setCal_day = cJSON_GetObjectItem(setCal, "day");
+                                DataAttribute* strTm_setCal_day = (DataAttribute*)ModelNode_getChild((ModelNode*)strTm_setCal, "day");
+
+                                if (setCal_day && strTm_setCal_day) {
+                                    MmsValue_setUint32(strTm_setCal_day->mmsValue, setCal_day->valueint);
+                                }
+
+                                cJSON* setCal_hr = cJSON_GetObjectItem(setCal, "hr");
+                                DataAttribute* strTm_setCal_hr = (DataAttribute*)ModelNode_getChild((ModelNode*)strTm_setCal, "hr");
+
+                                if (setCal_hr && strTm_setCal_hr) {
+                                    MmsValue_setUint32(strTm_setCal_hr->mmsValue, setCal_hr->valueint);
+                                }
+
+                                cJSON* setCal_mn = cJSON_GetObjectItem(setCal, "mn");
+                                DataAttribute* strTm_setCal_mn = (DataAttribute*)ModelNode_getChild((ModelNode*)strTm_setCal, "mn");
+
+                                if (setCal_mn && strTm_setCal_mn) {
+                                    MmsValue_setUint32(strTm_setCal_mn->mmsValue, setCal_mn->valueint);
+                                }
+                            }
+
                         }
                     }
                     else {

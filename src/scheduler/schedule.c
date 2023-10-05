@@ -39,6 +39,126 @@ schedule_getState(Schedule self)
     return state;
 }
 
+static bool
+handleSetCal(Schedule self, ModelNode* setCal)
+{
+    char objRef[130];
+
+    DataAttribute* occ = (DataAttribute*)ModelNode_getChild(setCal, "occ");
+
+    if (occ == NULL) {
+        printf("ERROR: %s is missing occ attribute\n", ModelNode_getObjectReference(setCal, objRef));
+        return false;
+    }
+
+    DataAttribute* occType = (DataAttribute*)ModelNode_getChild(setCal, "occType");
+
+    if (occType == NULL) {
+        printf("ERROR: %s is missing occType attribute\n", ModelNode_getObjectReference(setCal, objRef));
+        return false;
+    }
+
+    if (occType->type != IEC61850_ENUMERATED) {
+        printf("ERROR: %s.occType attribute is of wrong type (ENUMERATED expected)\n", ModelNode_getObjectReference(setCal, objRef));
+        return false;
+    }
+
+    int occTypeVal = MmsValue_toInt32(occType->mmsValue);
+
+    if (occTypeVal < 0 || occTypeVal > 4) {
+        printf("WARN: %s.occType attribute value %u is out of known range (0-4))\n", ModelNode_getObjectReference(setCal, objRef), occTypeVal);
+    }
+
+    DataAttribute* occPer = (DataAttribute*)ModelNode_getChild(setCal, "occPer");
+
+    if (occPer == NULL) {
+        printf("ERROR: %s is missing occPer attribute\n", ModelNode_getObjectReference(setCal, objRef));
+        return false;
+    }
+
+    if (occPer->type != IEC61850_ENUMERATED) {
+        printf("ERROR: %s.occPer attribute is of wrong type (ENUMERATED expected)\n", ModelNode_getObjectReference(setCal, objRef));
+        return false;
+    }
+
+    int occPerVal = MmsValue_toInt32(occPer->mmsValue);
+
+    if (occPerVal < 0 || occPerVal > 4) {
+        printf("WARN: %s.occPer attribute value %u is out of known range (0-4))\n", ModelNode_getObjectReference(setCal, objRef), occPerVal);
+    }
+
+    DataAttribute* weekDay = (DataAttribute*)ModelNode_getChild(setCal, "weekDay");
+
+    if (weekDay == NULL) {
+        printf("ERROR: %s is missing weekDay attribute\n", ModelNode_getObjectReference(setCal, objRef));
+        return false;
+    }
+
+    DataAttribute* month = (DataAttribute*)ModelNode_getChild(setCal, "month");
+
+    if (month == NULL) {
+        printf("ERROR: %s is missing month attribute\n", ModelNode_getObjectReference(setCal, objRef));
+        return false;
+    }
+
+    DataAttribute* day = (DataAttribute*)ModelNode_getChild(setCal, "day");
+
+    if (day == NULL) {
+        printf("ERROR: %s is missing day attribute\n", ModelNode_getObjectReference(setCal, objRef));
+        return false;
+    }
+
+    if (day->type != IEC61850_INT8U) {
+        printf("ERROR: %s.day attribute is of wrong type (INT8U expected)\n", ModelNode_getObjectReference(setCal, objRef));
+        return false;
+    }
+
+    uint32_t dayVal = MmsValue_toUint32(day->mmsValue);
+
+    if (dayVal > 31) {
+        printf("ERROR: %s.day attribute value %u is out of range (0-31)\n", ModelNode_getObjectReference(setCal, objRef), dayVal);
+        return false;
+    }
+
+    DataAttribute* hr = (DataAttribute*)ModelNode_getChild(setCal, "hr");
+
+    if (hr == NULL) {
+        printf("ERROR: %s is missing hr attribute\n", ModelNode_getObjectReference(setCal, objRef));
+        return false;
+    }
+
+    if (hr->type != IEC61850_INT8U) {
+        printf("ERROR: %s.hr attribute is of wrong type (INT8U expected)\n", ModelNode_getObjectReference(setCal, objRef));
+        return false;
+    }
+
+    uint32_t hrVal = MmsValue_toUint32(hr->mmsValue);
+
+    if (hrVal > 23) {
+        printf("ERROR: %s.hr attribute value %u is out of range (0-23)\n", ModelNode_getObjectReference(setCal, objRef), hrVal);
+        return false;
+    }
+
+    DataAttribute* mn = (DataAttribute*)ModelNode_getChild(setCal, "mn");
+
+    if (mn == NULL) {
+        printf("ERROR: %s is missing mn attribute\n", ModelNode_getObjectReference(setCal, objRef));
+        return false;
+    }
+
+    if (mn->type != IEC61850_INT8U) {
+        printf("ERROR: %s.ms attribute is of wrong type (INT8U expected)\n", ModelNode_getObjectReference(setCal, objRef));
+        return false;
+    }
+
+    uint32_t mnVal = MmsValue_toUint32(mn->mmsValue);
+
+    if (mnVal > 59) {
+        printf("ERROR: %s.mn attribute value %u is out of range (0-59)\n", ModelNode_getObjectReference(setCal, objRef), mnVal);
+        return false;
+    }
+}
+
 static void
 checkIfTimeTriggeredAndPeriodic(Schedule self)
 {
@@ -535,6 +655,32 @@ strTm_writeAccessHandler(DataAttribute* dataAttribute, MmsValue* value, ClientCo
 }
 
 static MmsDataAccessError
+strTm_setCal_writeAccessHandler(DataAttribute* dataAttribute, MmsValue* value, ClientConnection connection, void* parameter)
+{
+    Schedule self = (Schedule)parameter;
+
+    char objRefBuf[130];
+
+    ModelNode_getObjectReference((ModelNode*) dataAttribute, objRefBuf);
+
+    printf("INFO: Write access to %s\n", objRefBuf);
+
+    if (self->allowWriteToStrTm)
+    {
+        IedServer_updateAttributeValue(self->server, dataAttribute, value);
+
+        if (self->storage) {
+            SchedulerStorage_saveSchedule(self->storage, self);
+        }
+
+        return DATA_ACCESS_ERROR_SUCCESS_NO_UPDATE;
+    }
+    else {
+        return DATA_ACCESS_ERROR_OBJECT_ACCESS_DENIED;
+    }
+}
+
+static MmsDataAccessError
 schdPrio_writeAccessHandler(DataAttribute* dataAttribute, MmsValue* value, ClientConnection connection, void* parameter)
 {
     Schedule self = (Schedule)parameter;
@@ -667,13 +813,9 @@ checkSyncInput(Schedule self)
         
         printf("INFO: InSyn set to (%s)\n", srcRef);
 
-        //TODO check if object reference is valid and a possible trigger signal
-
         ModelNode* triggerSignal = IedModel_getModelNodeByShortObjectReference(self->model, srcRef);
 
         if (triggerSignal) {
-            //TODO check if the trigger signal is a boolean or SPS (has "stVal" of type boolean)
-
             if (triggerSignal->modelType == DataAttributeModelType) {
                 DataAttribute* triggerDa = (DataAttribute*)triggerSignal;
 
@@ -720,6 +862,12 @@ schedule_installWriteAccessHandlersForStrTm(Schedule self)
 
             if (setTm) {
                 IedServer_handleWriteAccess(self->server, setTm, strTm_writeAccessHandler, self);            
+            }
+
+            DataAttribute* setCal = (DataAttribute*)ModelNode_getChild((ModelNode*)dObj, "setCal");
+
+            if (setCal) {
+                IedServer_handleWriteAccessForComplexAttribute(self->server, setCal, strTm_setCal_writeAccessHandler, self);
             }
         }
 
