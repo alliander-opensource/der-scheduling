@@ -288,12 +288,12 @@ Scheduler_setTargetValueHandler(Scheduler self, Scheduler_TargetValueChanged han
 }
 
 void
-scheduler_targetValueChanged(Scheduler self, DataAttribute* targetAttr, MmsValue* value, Quality quality, uint64_t timestampMs)
+scheduler_targetValueChanged(Scheduler self, ModelNode* targetAttr, MmsValue* value, Quality quality, uint64_t timestampMs)
 {
     if (self->targetValueHandler) {
         char targetValueObjRef[130];
 
-        ModelNode_getObjectReferenceEx((ModelNode*)targetAttr, targetValueObjRef, true);
+        ModelNode_getObjectReferenceEx(targetAttr, targetValueObjRef, true);
 
         self->targetValueHandler(self->targetValueHandlerParameter, targetValueObjRef, value, quality, timestampMs);
     }

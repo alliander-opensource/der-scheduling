@@ -102,7 +102,7 @@ struct sScheduler
 };
 
 void
-scheduler_targetValueChanged(Scheduler self, DataAttribute* targetAttr, MmsValue* value, Quality quality, uint64_t timestampMs);
+scheduler_targetValueChanged(Scheduler self, ModelNode* targetAttr, MmsValue* value, Quality quality, uint64_t timestampMs);
 
 ScheduleController
 ScheduleController_create(LogicalNode* fsccLn, Scheduler scheduler);

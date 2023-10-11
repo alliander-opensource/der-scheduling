@@ -77,7 +77,6 @@ static void
 scheduleController_updateTargetValue(ScheduleController self, ScheduleTargetType targetType, MmsValue* val, uint64_t currentTime)
 {
     if (self->controlEntity) {
-
         DataAttribute* valueAttr = NULL;
         DataAttribute* qAttr = NULL;
         DataAttribute* tAttr = NULL;
@@ -142,7 +141,10 @@ scheduleController_updateTargetValue(ScheduleController self, ScheduleTargetType
         }
 
         if (valueAttr) {
-            scheduler_targetValueChanged(self->scheduler, valueAttr, val, q, currentTime);
+            scheduler_targetValueChanged(self->scheduler, (ModelNode*)valueAttr, val, q, currentTime);
+        }
+        else {
+            scheduler_targetValueChanged(self->scheduler, self->controlEntity, val, q, currentTime);
         }
         
     }
