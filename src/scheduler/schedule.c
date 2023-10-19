@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <math.h>
 
+#include <time.h>
+
 #include "der_scheduler_internal.h"
 
 void
@@ -11,9 +13,44 @@ Schedule_setListeningController(Schedule self, ScheduleController controller)
     }
 }
 
-static bool checkIfStrTm(const char* name)
+static bool
+checkIfStrTm(const char* name)
 {
     return scheduler_checkIfMultiObjInst(name, "StrTm");
+}
+
+static bool
+hasSetTm(DataObject* dobj)
+{
+    DataAttribute* setTm = (DataAttribute*)ModelNode_getChild((ModelNode*)dobj, "setTm");
+
+    if (setTm == NULL)
+        return false;
+
+    if (setTm->modelType != DataAttributeModelType)
+        return false;
+
+    if (setTm->type != IEC61850_TIMESTAMP)
+        return false;
+
+    return true;
+}
+
+static bool
+hasSetCal(DataObject* dobj)
+{
+    DataAttribute* setCal = (DataAttribute*)ModelNode_getChild((ModelNode*)dobj, "setCal");
+
+    if (setCal == NULL)
+        return false;
+
+    if (setCal->modelType != DataAttributeModelType)
+        return false;
+
+    if (setCal->type != IEC61850_CONSTRUCTED)
+        return false;
+
+    return true;
 }
 
 static ScheduleState
@@ -40,9 +77,37 @@ schedule_getState(Schedule self)
 }
 
 static bool
-handleSetCal(Schedule self, ModelNode* setCal)
+isTimeTriggered(Schedule self)
+{
+    return self->isTimeTriggerd;
+}
+
+static bool
+isPeriodic(Schedule self)
+{
+    return self->isPeriodic;
+}
+
+typedef struct sSetCalValues* SetCalValues;
+
+struct sSetCalValues {
+    int occTypeVal;
+    int occPerVal;
+    uint32_t hrVal;
+    uint32_t mnVal;
+};
+
+static bool
+handleSetCal(Schedule self, DataObject* dObj, SetCalValues values)
 {
     char objRef[130];
+
+    ModelNode* setCal = ModelNode_getChild((ModelNode*)dObj, "setCal");
+
+    if (setCal == NULL) {
+        printf("ERROR: %s is missing setCal attribute\n", ModelNode_getObjectReference((ModelNode*)dObj, objRef));
+        return false;
+    }
 
     DataAttribute* occ = (DataAttribute*)ModelNode_getChild(setCal, "occ");
 
@@ -69,6 +134,9 @@ handleSetCal(Schedule self, ModelNode* setCal)
         printf("WARN: %s.occType attribute value %u is out of known range (0-4))\n", ModelNode_getObjectReference(setCal, objRef), occTypeVal);
     }
 
+    if (values)
+        values->occTypeVal = occTypeVal;
+
     DataAttribute* occPer = (DataAttribute*)ModelNode_getChild(setCal, "occPer");
 
     if (occPer == NULL) {
@@ -86,6 +154,9 @@ handleSetCal(Schedule self, ModelNode* setCal)
     if (occPerVal < 0 || occPerVal > 4) {
         printf("WARN: %s.occPer attribute value %u is out of known range (0-4))\n", ModelNode_getObjectReference(setCal, objRef), occPerVal);
     }
+
+    if (values)
+        values->occPerVal = occPerVal;
 
     DataAttribute* weekDay = (DataAttribute*)ModelNode_getChild(setCal, "weekDay");
 
@@ -139,6 +210,9 @@ handleSetCal(Schedule self, ModelNode* setCal)
         return false;
     }
 
+    if (values)
+        values->hrVal = hrVal;
+
     DataAttribute* mn = (DataAttribute*)ModelNode_getChild(setCal, "mn");
 
     if (mn == NULL) {
@@ -157,6 +231,9 @@ handleSetCal(Schedule self, ModelNode* setCal)
         printf("ERROR: %s.mn attribute value %u is out of range (0-59)\n", ModelNode_getObjectReference(setCal, objRef), mnVal);
         return false;
     }
+
+    if (values)
+        values->mnVal = mnVal;
 }
 
 static void
@@ -179,9 +256,7 @@ checkIfTimeTriggeredAndPeriodic(Schedule self)
             self->isTimeTriggerd = true;
 
             /* check if "StrTm" has a "setVal" element */
-            ModelNode* setCal = ModelNode_getChild((ModelNode*)dObj, "setCal");
-
-            if (setCal) {
+            if (hasSetCal(dObj)) {
                 self->isPeriodic = true;
                 break;
             }
@@ -331,6 +406,94 @@ schedule_updateNxtStrTm(Schedule self, uint64_t nextStartTime)
 }
 
 static uint64_t
+updateNextStartTime(DataObject* dObj, uint64_t nextStartTime, uint64_t currentTime)
+{
+    DataAttribute* setTm = (DataAttribute*)ModelNode_getChild((ModelNode*)dObj, "setTm");
+
+    if (setTm && setTm->mmsValue) {
+        uint64_t strTmVal = MmsValue_getUtcTimeInMs(setTm->mmsValue);
+
+        if (strTmVal > currentTime) {
+
+            if (nextStartTime == 0) {
+                nextStartTime = strTmVal;
+            }
+            else {
+                if (strTmVal <= nextStartTime) {
+                    nextStartTime = strTmVal;
+                }
+            }
+        }
+    }
+
+    return nextStartTime;
+}
+
+static uint64_t
+updateNextPeriodicStartTime(DataObject* dObj, uint64_t nextStartTime, uint64_t currentTime, SetCalValues setCalValues)
+{
+    /* check if setCal values are supported */
+
+    if (setCalValues->occTypeVal != 0) {
+        printf("ERROR: Only occType = Time(0) is supported\n");
+
+        return nextStartTime;
+    }
+
+    if (setCalValues->occPerVal != 0 && setCalValues->occPerVal != 1) {
+        printf("ERROR: Only occPer = Hour(0) or Day(1) is supported\n");
+
+        return nextStartTime;        
+    }
+ 
+    /* convert current time to broken down time */
+
+    uint64_t msPart = currentTime % 1000;
+
+    time_t curTm = currentTime / 1000;
+
+    struct tm btTimeBuf;
+
+    struct tm* brokenDownTime = localtime_r(&curTm, &btTimeBuf);
+
+    if (brokenDownTime == NULL) {
+        printf("ERROR: Failed to convert timestamp to local time\n");
+
+        return nextStartTime;
+    }
+
+    if (setCalValues->occPerVal == 1 /* Day */) 
+    {
+        brokenDownTime->tm_hour = setCalValues->hrVal;
+
+        // TODO convert to unix time and check if is in the future or past
+        // if this time is in the future then check if it is the new nextStartTime
+        // if this time is in the past then add one day and check if it is the new nextStartTime
+
+        return nextStartTime;
+    }
+    else /* (setCalValues->occPerVal == 0 (Hour)) */ 
+    {
+        brokenDownTime->tm_min = setCalValues->mnVal;
+
+        /* convert to unix time and check if is in the future or past */
+        uint64_t startTime = (timelocal(brokenDownTime) * 1000) + msPart;
+
+        // if this time is in the future then check if it is the new nextStartTime
+        if (startTime >= currentTime) {
+            if (startTime <= nextStartTime) {
+                nextStartTime = startTime;
+            }
+        }
+        else {
+            // TODO if this time is in the past then add one day and check if it is the new nextStartTime
+        }
+
+        return nextStartTime;
+    }
+}
+
+static uint64_t
 schedule_getNextStartTime(Schedule self)
 {
     uint64_t nextStartTime = 0;
@@ -347,23 +510,21 @@ schedule_getNextStartTime(Schedule self)
         // check that data object name is "StrTmXXX"
         if (checkIfStrTm(dObj->name)) {
 
-            DataAttribute* setTm = (DataAttribute*)ModelNode_getChild((ModelNode*)dObj, "setTm");
+            if (isPeriodic(self)) {
+                //TODO get the next periodic start time
+                struct sSetCalValues setCalValues;
 
-            if (setTm->mmsValue) {
-                uint64_t strTmVal = MmsValue_getUtcTimeInMs(setTm->mmsValue);
-
-                if (strTmVal > currentTime) {
-
-                    if (nextStartTime == 0) {
-                        nextStartTime = strTmVal;
-                    }
-                    else {
-                        if (strTmVal <= nextStartTime) {
-                            nextStartTime = strTmVal;
-                        }
-                    }
+                if (handleSetCal(self, dObj, &setCalValues)) {
+                    nextStartTime = updateNextPeriodicStartTime(dObj, nextStartTime, currentTime, &setCalValues);
+                }
+                else {
+                    printf("ERROR: Invalid setCal attribute\n");
                 }
             }
+            else {
+                nextStartTime = updateNextStartTime(dObj, nextStartTime, currentTime);
+            }
+
         }
 
         doElem = LinkedList_getNext(doElem);
@@ -833,18 +994,6 @@ checkSyncInput(Schedule self)
     return checkResult;
 }
 
-static bool
-isTimeTriggered(Schedule self)
-{
-    return self->isTimeTriggerd;
-}
-
-static bool
-isPeriodic(Schedule self)
-{
-    return self->isPeriodic;
-}
-
 static void
 schedule_installWriteAccessHandlersForStrTm(Schedule self)
 {
@@ -916,34 +1065,6 @@ getStartTime(DataObject* strTm)
     }
 
     return strTmVal;
-}
-
-static bool
-hasSetTm(DataObject* dobj)
-{
-    ModelNode* setTm = ModelNode_getChild((ModelNode*)dobj, "setTm");
-
-    if (setTm) {
-        //TODO check type?
-        return true;
-    }
-    else {
-        return false;
-    }
-}
-
-static bool
-hasSetCal(DataObject* dobj)
-{
-    ModelNode* setCal = ModelNode_getChild((ModelNode*)dobj, "setCal");
-
-    if (setCal) {
-        //TODO check type?
-        return true;
-    }
-    else {
-        return false;
-    }
 }
 
 static void
