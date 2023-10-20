@@ -393,7 +393,7 @@ createSchedule(Schedule schedule)
     
     char* jsonStr = cJSON_PrintUnformatted(scheduleJson);
 
-    printf("\n%s\n", jsonStr);
+    //printf("\n%s\n", jsonStr);
 
 exit:
     return scheduleJson;
@@ -408,7 +408,7 @@ exit_error:
 bool
 SchedulerStorage_saveSchedule(SchedulerStorage self, Schedule schedule)
 {
-    printf("Save schedule:\n");
+    //printf("Save schedule:\n");
 
     char filename[200];
     getFilenameForSchedule(schedule, filename);
@@ -443,7 +443,7 @@ SchedulerStorage_saveSchedule(SchedulerStorage self, Schedule schedule)
 bool
 SchedulerStorage_saveScheduleController(SchedulerStorage self, ScheduleController controller)
 {
-    printf("Save schedule controller\n");
+    //printf("Save schedule controller\n");
 
     char filename[200];
     getFilenameForScheduleController(controller, filename);

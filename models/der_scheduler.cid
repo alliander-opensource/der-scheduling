@@ -355,7 +355,7 @@
             <DOI name="ValASG001">
               <SDI name="setMag">
                 <DAI name="f">
-                  <Val>0</Val>
+                  <Val>11</Val>
                 </DAI>
               </SDI>
             </DOI>
@@ -374,6 +374,9 @@
                 </DAI>
                 <DAI name="occPer">
                   <Val>Hour</Val>
+                </DAI>
+                <DAI name="mn">
+                  <Val>0</Val>
                 </DAI>
               </SDI>
             </DOI>
@@ -728,21 +731,6 @@
       <DO name="ValSPG099" type="DERScheduler_SPG" />
       <DO name="ValSPG100" type="DERScheduler_SPG" />
       <DO name="StrTm01" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm02" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm03" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm04" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm05" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm06" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm07" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm08" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm09" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm10" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm11" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm12" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm13" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm14" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm15" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm16" type="DERScheduler_TSG_setCal" />
       <DO name="SchdReuse" type="DERScheduler_SPG" />
     </LNodeType>
     <LNodeType id="DERScheduler_FSCH_SPG_100_nonperiodic" lnClass="FSCH">
@@ -1107,21 +1095,6 @@
       <DO name="ValASG099" type="DERScheduler_ASG" />
       <DO name="ValASG100" type="DERScheduler_ASG" />
       <DO name="StrTm01" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm02" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm03" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm04" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm05" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm06" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm07" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm08" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm09" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm10" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm11" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm12" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm13" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm14" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm15" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm16" type="DERScheduler_TSG_setCal" />
       <DO desc="Schedule may be reused" name="SchdReuse" type="DERScheduler_SPG" />
     </LNodeType>
     <LNodeType id="DERScheduler_FSCH_ASG_100_nonperiodic" lnClass="FSCH">

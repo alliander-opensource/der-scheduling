@@ -430,12 +430,12 @@ updateNextStartTime(DataObject* dObj, uint64_t nextStartTime, uint64_t currentTi
 }
 
 static uint64_t
-updateNextPeriodicStartTime(DataObject* dObj, uint64_t nextStartTime, uint64_t currentTime, SetCalValues setCalValues)
+updateNextPeriodicStartTime(Schedule self, DataObject* dObj, uint64_t nextStartTime, uint64_t currentTime, SetCalValues setCalValues)
 {
     /* check if setCal values are supported */
 
     if (setCalValues->occTypeVal != 0) {
-        printf("ERROR: Only occType = Time(0) is supported\n");
+        printf("ERROR: Only occType = Time(0) is supported (is %i)\n", setCalValues->occTypeVal);
 
         return nextStartTime;
     }
@@ -466,9 +466,37 @@ updateNextPeriodicStartTime(DataObject* dObj, uint64_t nextStartTime, uint64_t c
     {
         brokenDownTime->tm_hour = setCalValues->hrVal;
 
-        // TODO convert to unix time and check if is in the future or past
-        // if this time is in the future then check if it is the new nextStartTime
-        // if this time is in the past then add one day and check if it is the new nextStartTime
+        /* convert to unix time and check if is in the future or past */
+        uint64_t startTime = (timelocal(brokenDownTime) * 1000) + msPart;
+
+        /* if this time is in the future then check if it is the new nextStartTime */
+        if (startTime >= currentTime) {
+            if (startTime <= startTime <= nextStartTime || nextStartTime == 0) {
+                printf("updateNextPeriodicStartTime[1]\n");
+                nextStartTime = startTime;
+            }
+        }
+        else {
+            /* check if the periodic schedule is currently running */
+            uint64_t lastExecutionEnd = startTime + (Schedule_getSchdIntvInMs(self) * Schedule_getNumEntr(self));
+
+            if (currentTime < lastExecutionEnd) {
+                printf("updateNextPeriodicStartTime[5]\n");
+                nextStartTime = startTime;
+            }
+            else {
+                 /* if this time is in the past then add one hour and check if it is the new nextStartTime */
+                startTime = startTime + (60 * 60 * 1000);
+
+                if (startTime <= nextStartTime || nextStartTime == 0) {
+                    if (startTime <= nextStartTime) {
+                        printf("updateNextPeriodicStartTime[2]\n");
+                        nextStartTime = startTime;
+                    }
+                }
+            }
+
+        }
 
         return nextStartTime;
     }
@@ -479,18 +507,43 @@ updateNextPeriodicStartTime(DataObject* dObj, uint64_t nextStartTime, uint64_t c
         /* convert to unix time and check if is in the future or past */
         uint64_t startTime = (timelocal(brokenDownTime) * 1000) + msPart;
 
-        // if this time is in the future then check if it is the new nextStartTime
+        /* if this time is in the future then check if it is the new nextStartTime */
         if (startTime >= currentTime) {
-            if (startTime <= nextStartTime) {
+            if (startTime <= startTime <= nextStartTime || nextStartTime == 0) {
                 nextStartTime = startTime;
             }
         }
         else {
-            // TODO if this time is in the past then add one day and check if it is the new nextStartTime
+            /* check if the periodic schedule is currently running */
+            uint64_t lastExecutionEnd = startTime + (Schedule_getSchdIntvInMs(self) * Schedule_getNumEntr(self));
+
+            if (currentTime < lastExecutionEnd) {
+                nextStartTime = startTime;
+            }
+            else {
+
+                /* if this time is in the past then add one hour and check if it is the new nextStartTime */
+                startTime = startTime + (60 * 60 * 1000);
+
+                if (startTime >= currentTime) {
+                    if (startTime <= nextStartTime || nextStartTime == 0) {
+                        nextStartTime = startTime;
+                    }
+                }
+            }
         }
 
         return nextStartTime;
     }
+}
+
+/* return 0 when no current active startTime */
+static uint64_t
+getCurrentPeriodicStartTime()
+{
+
+
+    return 0;
 }
 
 static uint64_t
@@ -514,8 +567,12 @@ schedule_getNextStartTime(Schedule self)
                 //TODO get the next periodic start time
                 struct sSetCalValues setCalValues;
 
+                 
+
                 if (handleSetCal(self, dObj, &setCalValues)) {
-                    nextStartTime = updateNextPeriodicStartTime(dObj, nextStartTime, currentTime, &setCalValues);
+                    nextStartTime = updateNextPeriodicStartTime(self, dObj, nextStartTime, currentTime, &setCalValues);
+
+                    printf("schedule_getNextStartTime: periodic %p: %lu\n", self, nextStartTime);
                 }
                 else {
                     printf("ERROR: Invalid setCal attribute\n");
@@ -1576,6 +1633,10 @@ schedule_thread(void* parameter)
                 self->nextStartTime = schedule_getNextStartTime(self);
             }
             
+            if (isPeriodic(self)) {
+
+            }
+
             if ((self->nextStartTime != 0) && (currentTime > self->nextStartTime)) {
 
                 self->startTime = self->nextStartTime;
