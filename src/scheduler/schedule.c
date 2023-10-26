@@ -320,6 +320,7 @@ schedule_udpateState(Schedule self, ScheduleState newState)
     ScheduleState currentState = schedule_getState(self);
 
     if (currentState != newState) {
+        printf("schedule_udpateState(%p) %i -> %i\n", self, currentState, newState);
         schedule_setState(self, newState);
     }
 }
@@ -537,13 +538,60 @@ updateNextPeriodicStartTime(Schedule self, DataObject* dObj, uint64_t nextStartT
     }
 }
 
-/* return 0 when no current active startTime */
 static uint64_t
-getCurrentPeriodicStartTime()
+checkIfStrTmIsActive(DataObject* dObj, uint64_t activeStartTime, uint64_t currentTime, int scheduleDuration)
 {
+    DataAttribute* setTm = (DataAttribute*)ModelNode_getChild((ModelNode*)dObj, "setTm");
 
+    if (setTm && setTm->mmsValue) {
+        uint64_t strTmVal = MmsValue_getUtcTimeInMs(setTm->mmsValue);
 
-    return 0;
+        if ((strTmVal < currentTime) && (strTmVal + scheduleDuration > currentTime)) {
+
+            if (activeStartTime == 0) {
+                activeStartTime = strTmVal;
+            }
+            else {
+                if (strTmVal > activeStartTime) {
+                    activeStartTime = strTmVal;
+                }
+            }
+        }
+    }
+
+    return activeStartTime;
+}
+
+/* get the start time of the currently running schedule or 0 if the schedule is not running */
+static uint64_t
+schedule_getActiveStartTime(Schedule self)
+{
+    uint64_t activeStartTime = 0;
+
+    int scheduleDuration = Schedule_getSchdIntvInMs(self) * Schedule_getNumEntr(self);
+
+    uint64_t currentTime = Hal_getTimeInMs();
+
+    LinkedList dataObjects = ModelNode_getChildren((ModelNode*)self->scheduleLn);
+
+    LinkedList doElem = LinkedList_getNext(dataObjects);
+
+    while (doElem) {
+        DataObject* dObj = (DataObject*)LinkedList_getData(doElem);
+
+        // check that data object name is "StrTmXXX"
+        if (checkIfStrTm(dObj->name)) {
+            if (isPeriodic(self) == false) {
+                activeStartTime = checkIfStrTmIsActive(dObj, activeStartTime, currentTime, scheduleDuration);
+            }
+        }
+
+        doElem = LinkedList_getNext(doElem);
+    }
+
+    LinkedList_destroyStatic(dataObjects);
+
+    return activeStartTime;
 }
 
 static uint64_t
@@ -566,8 +614,6 @@ schedule_getNextStartTime(Schedule self)
             if (isPeriodic(self)) {
                 //TODO get the next periodic start time
                 struct sSetCalValues setCalValues;
-
-                 
 
                 if (handleSetCal(self, dObj, &setCalValues)) {
                     nextStartTime = updateNextPeriodicStartTime(self, dObj, nextStartTime, currentTime, &setCalValues);
@@ -668,7 +714,6 @@ schedule_getNumberOfScheduleEntries(Schedule self)
         DataObject* dObj = (DataObject*)LinkedList_getData(doElem);
 
         if (scheduler_checkIfMultiObjInst(dObj->name, multiObjStr)) {
-           // printf("Found schedule instance %s\n", dObj->name);
             scheduleEntryCount++;
         }
 
@@ -676,8 +721,6 @@ schedule_getNumberOfScheduleEntries(Schedule self)
     }
 
     LinkedList_destroyStatic(dataObjects);
-
-    printf("INFO: Schedule has %i elements\n", scheduleEntryCount);
 
     return scheduleEntryCount;
 }
@@ -970,8 +1013,6 @@ schdIntv_writeAccessHandler(DataAttribute* dataAttribute, MmsValue* value, Clien
 {
     Schedule self = (Schedule)parameter;
 
-    printf("write access to schdIntv\n");
-
     if (self->allowWriteToSchdIntv) {
 
         IedServer_updateAttributeValue(self->server, dataAttribute, value);
@@ -1101,8 +1142,6 @@ schedule_installWriteAccessHandlersForValues(Schedule self)
             idx++;
         }
         else {
-            printf("schedue write attribute not found for index %i\n", idx);
-
             break;
         }
     }
@@ -1273,12 +1312,13 @@ checkForValidStartTimes(Schedule self)
 
         // check that data object name is "StrTmXXX"
         if (checkIfStrTm(dObj->name)) {
-            printf("INFO: Found start time: %s\n", dObj->name);
-
             if (isPeriodic(self)) {
                 if (hasSetCal(dObj)) {
                     if (hasSetTm(dObj)) {
-                        if (getStartTime(dObj) < currentTime) {
+                        // if (getStartTime(dObj) < currentTime) {
+                        //     hasValidStartTimes = true;
+                        // }
+                        if (getStartTime(dObj) + scheduleDurationMs > currentTime) {
                             hasValidStartTimes = true;
                         }
                     }
@@ -1293,9 +1333,6 @@ checkForValidStartTimes(Schedule self)
             else {
                 if (getStartTime(dObj) + scheduleDurationMs > currentTime) {
                     hasValidStartTimes = true;
-                }
-                else {
-                    printf("     start time is in the past and consumed!\n");
                 }
             }
         }
@@ -1341,8 +1378,6 @@ performGenericScheduleValidityChecks(Schedule self)
         return false;
     }
 
-    printf("INFO: NumEntr is valid\n");
-
     /* check if SchdIntv is valied */
 
     DataAttribute* schdIntv = (DataAttribute*)ModelNode_getChild((ModelNode*)self->scheduleLn, "SchdIntv.setVal");
@@ -1364,10 +1399,6 @@ performGenericScheduleValidityChecks(Schedule self)
 
         return false;
     }
-
-    printf("INFO: SchdIntv interval: %lu ms\n", getSchdIntvValueInMs(self));
-
-    printf("INFO: SchdIntv is valid\n");
 
     return true;
  }
@@ -1391,7 +1422,6 @@ enabledSchedule(Schedule self)
         else if(isTimeTriggered(self)) {
 
             if (checkForValidStartTimes(self)) {
-                printf("INFO: valid schedules found\n");
                 newState = SCHD_STATE_READY;
             }
             else {
@@ -1463,8 +1493,6 @@ schedule_performCheckHandler(ControlAction action, void* parameter, MmsValue* ct
         }
     }
 
-    printf("Controlhandler (%s) -> %i\n", scheduleRef, result);
-
     return result;
 }
 
@@ -1487,6 +1515,8 @@ schedule_controlHandler(ControlAction action, void* parameter, MmsValue* ctlVal,
             else {
                 //TODO figure out how a negative answer can be sent?
                 printf("WARN: Cannot enable schedule %s\n", scheduleRef);
+
+                return CONTROL_RESULT_FAILED;
             }
         }
     }
@@ -1507,8 +1537,10 @@ schedule_getCurrentIdx(Schedule self, uint64_t currentTime)
 {
     int currentIdx = (currentTime - self->startTime) / self->entryDurationInMs;
 
-    if (currentIdx >= self->numberOfScheduleEntries) 
+    if (currentIdx >= self->numberOfScheduleEntries) {
+        printf("self->entryDurationInMs: %i self->numberOfScheduleEntries: %i\n", self->entryDurationInMs,self->numberOfScheduleEntries);
         currentIdx = -1;
+    }
 
     return currentIdx;
 }
@@ -1617,7 +1649,7 @@ schedule_thread(void* parameter)
     char scheduleRef[130];
     ModelNode_getObjectReference((ModelNode*)self->scheduleLn, scheduleRef);
 
-    schedule_updateActStrTm(self, 0);
+    //schedule_updateActStrTm(self, 0);
 
     while (self->alive) {
 
@@ -1629,17 +1661,33 @@ schedule_thread(void* parameter)
 
         if (state == SCHD_STATE_READY) {
 
+            bool startSchedule = false;
+
             if (self->nextStartTime == 0) {
                 self->nextStartTime = schedule_getNextStartTime(self);
             }
             
             if (isPeriodic(self)) {
+                //TODO?
+            }
 
+            uint64_t activeStartTime = schedule_getActiveStartTime(self);
+
+            if (activeStartTime > 0) {
+                printf("activeStartTime: %lu\n", activeStartTime);
+                printf("currentTime:     %lu\n", currentTime);
+                printf("sched-duration:  %i\n", Schedule_getSchdIntvInMs(self) * Schedule_getNumEntr(self));
+                self->startTime = activeStartTime;
+                startSchedule = true;
             }
 
             if ((self->nextStartTime != 0) && (currentTime > self->nextStartTime)) {
-
                 self->startTime = self->nextStartTime;
+                startSchedule = true;
+            } 
+
+            if (startSchedule) 
+            {    
                 self->entryDurationInMs = getSchdIntvValueInMs(self);
                 self->numberOfScheduleEntries = schedule_getNumEntrValue(self);
                 self->currentEntryIdx = -2;
@@ -1658,7 +1706,6 @@ schedule_thread(void* parameter)
 
                 newState = SCHD_STATE_RUNNING;
                 printf("INFO: Schedule %s switchted to running state\n", scheduleRef);
-
             }
         }
         else if (state == SCHD_STATE_RUNNING) {
@@ -1696,14 +1743,14 @@ schedule_thread(void* parameter)
             else {
 
                 if (currentIdx == -1) {
+                    printf("self->startTime: %lu\n", self->startTime);
+
                     printf("INFO: schedule %s ended\n", scheduleRef);
 
-                    //TODO check for next state
+                    /* check for next state */
                     self->nextStartTime = schedule_getNextStartTime(self);
                    
                     if (self->nextStartTime) {
-                        // update ActStrTime = 0(invalid)
-
                         schedule_updateNxtStrTm(self, self->nextStartTime);
 
                         newState = SCHD_STATE_READY;
@@ -1747,35 +1794,35 @@ Schedule_create(LogicalNode* schedLn, IedServer server, IedModel* model)
     ModelNode* schdSt = ModelNode_getChild((ModelNode*)schedLn, "SchdSt");
 
     if (schdSt == NULL) {
-        printf("SchdSt not found in LN %s -> skip LN\n", schedLn->name);
+        printf("ERROR: SchdSt not found in LN %s -> skip LN\n", schedLn->name);
         isSchedule = false;
     }
 
     ModelNode* nxtStrTm = ModelNode_getChild((ModelNode*)schedLn, "NxtStrTm");
 
     if (nxtStrTm == NULL) {
-        printf("NxtStrTm not found in LN %s -> skip LN\n", schedLn->name);
+        printf("ERROR: NxtStrTm not found in LN %s -> skip LN\n", schedLn->name);
         isSchedule = false;
     }
 
     DataAttribute* schdPrio_setVal = (DataAttribute*)ModelNode_getChild((ModelNode*)schedLn, "SchdPrio.setVal");
 
     if (schdPrio_setVal == NULL) {
-        printf("SchdPrio.setVal not found in LN %s -> skip LN\n", schedLn->name);
+        printf("ERROR: SchdPrio.setVal not found in LN %s -> skip LN\n", schedLn->name);
         isSchedule = false;
     }
 
     ModelNode* enaReq = ModelNode_getChild((ModelNode*)schedLn, "EnaReq");
 
     if (enaReq == NULL) {
-        printf("EnaReq not found in LN %s -> skip LN\n", schedLn->name);
+        printf("ERROR: EnaReq not found in LN %s -> skip LN\n", schedLn->name);
         isSchedule = false;
     }
 
     ModelNode* dsaReq = ModelNode_getChild((ModelNode*)schedLn, "DsaReq");
 
     if (enaReq == NULL) {
-        printf("DsaReq not found in LN %s -> skip LN\n", schedLn->name);
+        printf("ERROR: DsaReq not found in LN %s -> skip LN\n", schedLn->name);
         isSchedule = false;
     }
 
@@ -1936,7 +1983,7 @@ Schedule_setPrio(Schedule self, int value)
         MmsValue_setInt32(schdPrio_setVal->mmsValue, value);
     }
     else {
-        printf("Schedule_setPrio: failed\n");
+        printf("ERROR: Schedule_setPrio: failed\n");
     }
 }
 

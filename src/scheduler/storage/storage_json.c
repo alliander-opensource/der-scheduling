@@ -101,8 +101,6 @@ convertObjRefToFilename(const char* objRef, char* buffer)
     buffer[outPos++] = 'o';
     buffer[outPos++] = 'n';
     buffer[outPos++] = 0;
-
-    printf("filename: %s\n", buffer);
 }
 
 static char*
@@ -307,6 +305,9 @@ createSchedule(Schedule schedule)
 
     cJSON* schdIntv = cJSON_CreateNumber((double)(Schedule_getSchdIntvInMs(schedule)));
     cJSON_AddItemToObject(scheduleJson, "schdIntv", schdIntv);
+
+    cJSON* actStrTm = cJSON_CreateNumber((double)(schedule->startTime));
+    cJSON_AddItemToObject(scheduleJson, "ActStrTm", actStrTm);
 
     /* save values */
     cJSON* values = cJSON_CreateArray();
@@ -551,8 +552,6 @@ getScheduleControllerData(SchedulerStorage self, ScheduleController controller, 
 
     int valueCount = cJSON_GetArraySize(schedules);
 
-    printf("  found %i schedule references\n", valueCount);
-
     for (int i = 0; i < valueCount; i++) {
         cJSON* schedule = cJSON_GetArrayItem(schedules, i);
     
@@ -692,6 +691,8 @@ getScheduleData(SchedulerStorage self, Schedule schedule, const char* scheduleJs
 
     Schedule_setNumEntr(schedule, numEntr->valueint);
 
+    schedule->numberOfScheduleEntries = numEntr->valueint;
+
     cJSON* schdIntv = cJSON_GetObjectItem(json, "schdIntv");
 
     if (schdIntv == NULL) {
@@ -712,7 +713,16 @@ getScheduleData(SchedulerStorage self, Schedule schedule, const char* scheduleJs
 
     Schedule_setSchIntvInMs(schedule, schdIntv->valueint);
 
-    printf("Schedule_setSchIntvInMs(after): %i json:%i\n", schedule->entryDurationInMs, schdIntv->valueint);
+    cJSON* actStrTm = cJSON_GetObjectItem(json, "ActStrTm");
+
+    if (actStrTm) {
+        if (cJSON_IsNumber(actStrTm) == false) {
+            printf("JSON-DB(ERROR): ActStrTm has invalid type\n");
+        }
+        else {
+            schedule->startTime = (uint64_t)(actStrTm->valuedouble);
+        }
+    }
 
     cJSON* values = cJSON_GetObjectItem(json, "values");
 
@@ -734,8 +744,6 @@ getScheduleData(SchedulerStorage self, Schedule schedule, const char* scheduleJs
 
     int valueCount = cJSON_GetArraySize(values);
 
-    printf("  found %i values\n", valueCount);
-
     for (int i = 0; i < valueCount; i++) {
         cJSON* value = cJSON_GetArrayItem(values, i);
        
@@ -753,7 +761,7 @@ getScheduleData(SchedulerStorage self, Schedule schedule, const char* scheduleJs
             }
         }
         else {
-            printf("   value with index %i not found in schedule!\n", i);
+            printf("ERROR:   value with index %i not found in schedule!\n", i);
         }
     }
 
@@ -761,8 +769,6 @@ getScheduleData(SchedulerStorage self, Schedule schedule, const char* scheduleJs
 
     if (startTimes) {
         int startTimeCount = cJSON_GetArraySize(startTimes);
-
-        printf("  found %i start times:\n", startTimeCount);
 
         for (int i = 0; i < startTimeCount; i++) {
             cJSON* startTime = cJSON_GetArrayItem(startTimes, i);
@@ -872,6 +878,7 @@ getScheduleData(SchedulerStorage self, Schedule schedule, const char* scheduleJs
     /* update schedule state as the last step to ensure that all schedule data is already available
        when schedule is about to run */
     ScheduleState schedState = getStateFromString(state->valuestring);
+    printf("restore: state %i (%s) for schedule %s (%p)\n", schedState,  state->valuestring, schedRef, schedule);
     Schedule_setState(schedule, schedState);
 
     cJSON_Delete(json);

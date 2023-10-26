@@ -286,9 +286,15 @@ scheduleController_scheduleStateUpdated(ScheduleController self, Schedule sched,
             // change active schedule
             self->activeSchedule = activeSchedule;
 
-            //TODO get current value from new running schedule
+            // get current value from new running schedule
 
             MmsValue* outputValue = Schedule_getCurrentValue(activeSchedule);
+
+            char valueBuf[100];
+
+            MmsValue_printToBuffer(outputValue, valueBuf, 100);
+
+            printf("INFO: New value %s\n", valueBuf);
 
             scheduleController_updateActSchdRef(self, self->activeSchedule);
             scheduleController_updateCurrentValue(self, activeSchedule->targetType, outputValue, Hal_getTimeInMs());
@@ -297,6 +303,7 @@ scheduleController_scheduleStateUpdated(ScheduleController self, Schedule sched,
     }
     else {
         // there is no running schedule
+        printf("[1]No running schedule\n");
         scheduleController_updateActSchdRef(self, NULL);
         scheduleController_updateCurrentValue(self, SCHD_TYPE_UNKNOWN, NULL, Hal_getTimeInMs());
         scheduleController_updateTargetValue(self,  SCHD_TYPE_UNKNOWN, NULL, Hal_getTimeInMs());
@@ -315,6 +322,7 @@ scheduleController_scheduleValueUpdated(ScheduleController self, Schedule sched,
     // check if the schedule is the actve schedule
 
     if (sched == self->activeSchedule) {
+        printf("[2]scheduleController_scheduleValueUpdated\n");
         scheduleController_updateCurrentValue(self, sched->targetType, val, timestamp);
         scheduleController_updateTargetValue(self, sched->targetType, val, timestamp);
     }
