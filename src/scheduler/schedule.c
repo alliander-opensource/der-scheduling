@@ -320,7 +320,6 @@ schedule_udpateState(Schedule self, ScheduleState newState)
     ScheduleState currentState = schedule_getState(self);
 
     if (currentState != newState) {
-        printf("schedule_udpateState(%p) %i -> %i\n", self, currentState, newState);
         schedule_setState(self, newState);
     }
 }
@@ -398,6 +397,13 @@ static void
 schedule_updateActStrTm(Schedule self, uint64_t actStartTime)
 {
     updateTimeStatus(self, actStartTime, "ActStrTm");
+}
+
+void
+Schedule_updateActStrTm(Schedule self, uint64_t actStartTime)
+{
+    self->startTime = actStartTime;
+    schedule_updateActStrTm(self, actStartTime);
 }
 
 static void
@@ -536,62 +542,6 @@ updateNextPeriodicStartTime(Schedule self, DataObject* dObj, uint64_t nextStartT
 
         return nextStartTime;
     }
-}
-
-static uint64_t
-checkIfStrTmIsActive(DataObject* dObj, uint64_t activeStartTime, uint64_t currentTime, int scheduleDuration)
-{
-    DataAttribute* setTm = (DataAttribute*)ModelNode_getChild((ModelNode*)dObj, "setTm");
-
-    if (setTm && setTm->mmsValue) {
-        uint64_t strTmVal = MmsValue_getUtcTimeInMs(setTm->mmsValue);
-
-        if ((strTmVal < currentTime) && (strTmVal + scheduleDuration > currentTime)) {
-
-            if (activeStartTime == 0) {
-                activeStartTime = strTmVal;
-            }
-            else {
-                if (strTmVal > activeStartTime) {
-                    activeStartTime = strTmVal;
-                }
-            }
-        }
-    }
-
-    return activeStartTime;
-}
-
-/* get the start time of the currently running schedule or 0 if the schedule is not running */
-static uint64_t
-schedule_getActiveStartTime(Schedule self)
-{
-    uint64_t activeStartTime = 0;
-
-    int scheduleDuration = Schedule_getSchdIntvInMs(self) * Schedule_getNumEntr(self);
-
-    uint64_t currentTime = Hal_getTimeInMs();
-
-    LinkedList dataObjects = ModelNode_getChildren((ModelNode*)self->scheduleLn);
-
-    LinkedList doElem = LinkedList_getNext(dataObjects);
-
-    while (doElem) {
-        DataObject* dObj = (DataObject*)LinkedList_getData(doElem);
-
-        // check that data object name is "StrTmXXX"
-        if (checkIfStrTm(dObj->name)) {
-            if (isPeriodic(self) == false) {
-                activeStartTime = checkIfStrTmIsActive(dObj, activeStartTime, currentTime, scheduleDuration);
-            }
-        }
-
-        doElem = LinkedList_getNext(doElem);
-    }
-
-    LinkedList_destroyStatic(dataObjects);
-
-    return activeStartTime;
 }
 
 static uint64_t
@@ -1538,7 +1488,6 @@ schedule_getCurrentIdx(Schedule self, uint64_t currentTime)
     int currentIdx = (currentTime - self->startTime) / self->entryDurationInMs;
 
     if (currentIdx >= self->numberOfScheduleEntries) {
-        printf("self->entryDurationInMs: %i self->numberOfScheduleEntries: %i\n", self->entryDurationInMs,self->numberOfScheduleEntries);
         currentIdx = -1;
     }
 
@@ -1649,7 +1598,7 @@ schedule_thread(void* parameter)
     char scheduleRef[130];
     ModelNode_getObjectReference((ModelNode*)self->scheduleLn, scheduleRef);
 
-    //schedule_updateActStrTm(self, 0);
+    schedule_updateActStrTm(self, self->startTime);
 
     while (self->alive) {
 
@@ -1665,20 +1614,6 @@ schedule_thread(void* parameter)
 
             if (self->nextStartTime == 0) {
                 self->nextStartTime = schedule_getNextStartTime(self);
-            }
-            
-            if (isPeriodic(self)) {
-                //TODO?
-            }
-
-            uint64_t activeStartTime = schedule_getActiveStartTime(self);
-
-            if (activeStartTime > 0) {
-                printf("activeStartTime: %lu\n", activeStartTime);
-                printf("currentTime:     %lu\n", currentTime);
-                printf("sched-duration:  %i\n", Schedule_getSchdIntvInMs(self) * Schedule_getNumEntr(self));
-                self->startTime = activeStartTime;
-                startSchedule = true;
             }
 
             if ((self->nextStartTime != 0) && (currentTime > self->nextStartTime)) {
@@ -1705,7 +1640,7 @@ schedule_thread(void* parameter)
                 schedule_updateNxtStrTm(self, self->nextStartTime);
 
                 newState = SCHD_STATE_RUNNING;
-                printf("INFO: Schedule %s switchted to running state\n", scheduleRef);
+                printf("INFO: Schedule %s switched to running state\n", scheduleRef);
             }
         }
         else if (state == SCHD_STATE_RUNNING) {
@@ -1742,9 +1677,8 @@ schedule_thread(void* parameter)
             }
             else {
 
-                if (currentIdx == -1) {
-                    printf("self->startTime: %lu\n", self->startTime);
-
+                if (currentIdx == -1) 
+                {
                     printf("INFO: schedule %s ended\n", scheduleRef);
 
                     /* check for next state */

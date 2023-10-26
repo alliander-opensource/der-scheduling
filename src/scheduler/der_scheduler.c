@@ -69,7 +69,6 @@ scheduler_parseModel(Scheduler self)
 
                 while (ln) {
                     /* check if LN name contains "FSCC" */
-
                     if (strstr(ln->name, "FSCC")) {
 
                         /* check for other indications DO "ActSchdRef", DO "CtlEnt", DO "ValXX", DO "SchdXX" */

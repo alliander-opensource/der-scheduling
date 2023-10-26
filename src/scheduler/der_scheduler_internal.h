@@ -180,6 +180,9 @@ void
 Schedule_setState(Schedule self, ScheduleState state);
 
 void
+Schedule_updateActStrTm(Schedule self, uint64_t actStartTime);
+
+void
 Schedule_destroy(Schedule self);
 
 bool 

@@ -483,13 +483,11 @@ getScheduleControllerData(SchedulerStorage self, ScheduleController controller, 
 
     ModelNode_getObjectReferenceEx((ModelNode*)controller->controllerLn, controllerRef, true);
 
-    printf("Restore schedule controller data for %s\n", controllerRef);
-
     cJSON* json = cJSON_Parse(controllerJsonStr);
 
     if (json == NULL)
     {
-        printf("Failed to parse schedule controller\n");
+        printf("JSON-DB(ERROR): Failed to parse schedule controller\n");
 
         return false;
     }
@@ -584,13 +582,11 @@ getScheduleData(SchedulerStorage self, Schedule schedule, const char* scheduleJs
 
     ModelNode_getObjectReferenceEx((ModelNode*)schedule->scheduleLn, schedRef, true);
 
-    printf("Restore schedule data for %s\n", schedRef);
-
     cJSON* json = cJSON_Parse(scheduleJsonStr);
 
     if (json == NULL)
     {
-        printf("Failed to parse schedule\n");
+        printf("JSON-DB(ERROR): Failed to parse schedule\n");
 
         return false;
     }
@@ -720,7 +716,7 @@ getScheduleData(SchedulerStorage self, Schedule schedule, const char* scheduleJs
             printf("JSON-DB(ERROR): ActStrTm has invalid type\n");
         }
         else {
-            schedule->startTime = (uint64_t)(actStrTm->valuedouble);
+            Schedule_updateActStrTm(schedule, (uint64_t)(actStrTm->valuedouble));
         }
     }
 
@@ -878,7 +874,7 @@ getScheduleData(SchedulerStorage self, Schedule schedule, const char* scheduleJs
     /* update schedule state as the last step to ensure that all schedule data is already available
        when schedule is about to run */
     ScheduleState schedState = getStateFromString(state->valuestring);
-    printf("restore: state %i (%s) for schedule %s (%p)\n", schedState,  state->valuestring, schedRef, schedule);
+
     Schedule_setState(schedule, schedState);
 
     cJSON_Delete(json);

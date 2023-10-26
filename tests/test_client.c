@@ -44,13 +44,13 @@ main(int argc, char** argv)
             printf("ERROR: failed to set schedule priority\n");
         }
 
-        IedConnection_writeInt32Value(con, &err, "DER_Scheduler_Control/ActPow_FSCH01.NumEntr.setVal", IEC61850_FC_SP, 4);
+        IedConnection_writeInt32Value(con, &err, "DER_Scheduler_Control/ActPow_FSCH01.NumEntr.setVal", IEC61850_FC_SP, 30);
 
         if (err != IED_ERROR_OK) {
             printf("ERROR: failed to set schedule number of entries\n");
         }
 
-        IedConnection_writeInt32Value(con, &err, "DER_Scheduler_Control/ActPow_FSCH01.SchdIntv.setVal", IEC61850_FC_SP, 2);
+        IedConnection_writeInt32Value(con, &err, "DER_Scheduler_Control/ActPow_FSCH01.SchdIntv.setVal", IEC61850_FC_SP, 5);
 
         if (err != IED_ERROR_OK) {
             printf("ERROR: failed to set SchdIntv.setVal\n");
@@ -67,7 +67,7 @@ main(int argc, char** argv)
             }
         }
 
-        MmsValue* strTmVal = MmsValue_newUtcTimeByMsTime(Hal_getTimeInMs() + 3000);
+        MmsValue* strTmVal = MmsValue_newUtcTimeByMsTime(Hal_getTimeInMs() + 5000);
 
         IedConnection_writeObject(con, &err, "DER_Scheduler_Control/ActPow_FSCH01.StrTm01.setTm", IEC61850_FC_SP, strTmVal);
 
@@ -77,25 +77,25 @@ main(int argc, char** argv)
 
         MmsValue_delete(strTmVal);
 
-        strTmVal = MmsValue_newUtcTimeByMsTime(Hal_getTimeInMs() + 15000);
+        // strTmVal = MmsValue_newUtcTimeByMsTime(Hal_getTimeInMs() + 15000);
 
-        IedConnection_writeObject(con, &err, "DER_Scheduler_Control/ActPow_FSCH01.StrTm02.setTm", IEC61850_FC_SP, strTmVal);
+        // IedConnection_writeObject(con, &err, "DER_Scheduler_Control/ActPow_FSCH01.StrTm02.setTm", IEC61850_FC_SP, strTmVal);
 
-        if (err != IED_ERROR_OK) {
-            printf("ERROR: failed to set DER_Scheduler_Control/ActPow_FSCH01.StrTm01.setTm\n");
-        }
+        // if (err != IED_ERROR_OK) {
+        //     printf("ERROR: failed to set DER_Scheduler_Control/ActPow_FSCH01.StrTm01.setTm\n");
+        // }
 
-        MmsValue_delete(strTmVal);
+        // MmsValue_delete(strTmVal);
 
-        strTmVal = MmsValue_newUtcTimeByMsTime(Hal_getTimeInMs() + 25000);
+        // strTmVal = MmsValue_newUtcTimeByMsTime(Hal_getTimeInMs() + 25000);
 
-        IedConnection_writeObject(con, &err, "DER_Scheduler_Control/ActPow_FSCH01.StrTm03.setTm", IEC61850_FC_SP, strTmVal);
+        // IedConnection_writeObject(con, &err, "DER_Scheduler_Control/ActPow_FSCH01.StrTm03.setTm", IEC61850_FC_SP, strTmVal);
 
-        if (err != IED_ERROR_OK) {
-            printf("ERROR: failed to set DER_Scheduler_Control/ActPow_FSCH01.StrTm01.setTm\n");
-        }
+        // if (err != IED_ERROR_OK) {
+        //     printf("ERROR: failed to set DER_Scheduler_Control/ActPow_FSCH01.StrTm01.setTm\n");
+        // }
 
-        MmsValue_delete(strTmVal);
+        // MmsValue_delete(strTmVal);
 
         //TODO enable schedule
         ControlObjectClient control
