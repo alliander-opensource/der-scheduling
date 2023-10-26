@@ -1,3 +1,16 @@
+/*
+ * Copyright 2023 MZ Automation GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
 #include "der_scheduler_internal.h"
 #include <libiec61850/hal_thread.h>
 
@@ -394,8 +407,6 @@ createSchedule(Schedule schedule)
     
     char* jsonStr = cJSON_PrintUnformatted(scheduleJson);
 
-    //printf("\n%s\n", jsonStr);
-
 exit:
     return scheduleJson;
 
@@ -409,8 +420,6 @@ exit_error:
 bool
 SchedulerStorage_saveSchedule(SchedulerStorage self, Schedule schedule)
 {
-    //printf("Save schedule:\n");
-
     char filename[200];
     getFilenameForSchedule(schedule, filename);
 
@@ -444,8 +453,6 @@ SchedulerStorage_saveSchedule(SchedulerStorage self, Schedule schedule)
 bool
 SchedulerStorage_saveScheduleController(SchedulerStorage self, ScheduleController controller)
 {
-    //printf("Save schedule controller\n");
-
     char filename[200];
     getFilenameForScheduleController(controller, filename);
 
