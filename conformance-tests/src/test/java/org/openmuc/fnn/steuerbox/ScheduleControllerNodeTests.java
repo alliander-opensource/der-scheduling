@@ -140,7 +140,7 @@ public class ScheduleControllerNodeTests extends AllianderBaseTest {
         }
 
         //test, that ActSchdRef contains a reference of the active schedule
-        assertEquals(schedule, "FNN_STEUERBOX" + dut.readActiveSchedule(scheduleConstants.getController()));
+        assertEquals(schedule,  dut.readActiveSchedule(scheduleConstants.getController()));
 
         // wait until the active schedule finished service
         Thread.sleep(2000);
