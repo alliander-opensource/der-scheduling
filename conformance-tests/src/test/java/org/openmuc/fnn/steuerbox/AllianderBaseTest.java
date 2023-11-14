@@ -95,7 +95,9 @@ public abstract class AllianderBaseTest {
         for (int i = 0; i < expectedValues.size(); i++) {
             Float expected = expectedValues.get(i);
             Float actual = actualValues.get(i);
-            Assertions.assertTrue(areClose(actual, expected, withPercentage));
+            Assertions.assertEquals(expected, actual,withPercentage,"Array does not match at index "+i+". "
+                    + "\nExpected values: "+expectedValues+""
+                    + "\nactual values  : "+actualValues+"\n");
         }
     }
 
@@ -110,7 +112,9 @@ public abstract class AllianderBaseTest {
         for (int i = 0; i < expectedValues.size(); i++) {
             boolean expected = expectedValues.get(i);
             boolean actual = actualValues.get(i);
-            Assertions.assertEquals(expected, actual);
+            Assertions.assertEquals(expected, actual,"Array does not match at index "+i+". "
+                    + "\nExpected values: "+expectedValues+""
+                    + "\nactual values  : "+actualValues+"\n");
         }
     }
 
