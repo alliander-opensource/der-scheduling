@@ -188,7 +188,7 @@ public class ScheduleExecutionTest extends AllianderBaseTest {
         dut.writeAndEnableSchedule(scheduleConstants.prepareSchedule(Arrays.asList(s9), 9, interval,
                 schedulesStart.plus(interval.multipliedBy(9)), 90));
         //schedule 10: starts together with schedule 9 but with lower priority. lasts longer, so is activated after schedule 9 is stopped
-        dut.writeAndEnableSchedule(scheduleConstants.prepareSchedule(Arrays.asList(s9, s9), 10, interval,
+        dut.writeAndEnableSchedule(scheduleConstants.prepareSchedule(Arrays.asList(s10, s10), 10, interval,
                 schedulesStart.plus(interval.multipliedBy(9)), 11));
 
         List<Boolean> expectedValues = Arrays.asList(sysResValue, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10, sysResValue);
