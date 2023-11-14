@@ -227,16 +227,17 @@ public class ScheduleNodeTests extends AllianderBaseTest {
         for (String scheduleName : scheduleConstants.getAllScheduleNames()) {
 
             PreparedSchedule schedule = scheduleConstants.prepareSchedule(scheduleConstants.getDefaultValues(1),
-                    scheduleConstants.getScheduleNumber(scheduleName), ofSeconds(2), Instant.now(), 20);
+                    scheduleConstants.getScheduleNumber(scheduleName), ofSeconds(2), Instant.now().plusMillis(500), 20);
 
             if (ScheduleType.SPG.equals(scheduleConstants.getScheduleType())) {
 
                 //test, that node ValSPS is present
                 assertTrue(dut.nodeExists(scheduleName + ".ValSPS"));
+                testOptionalNodeNotPresent(scheduleConstants, "ValMV");
 
                 //initial valid status
                 dut.writeAndEnableSchedule(schedule);
-                Thread.sleep(1000);
+                Thread.sleep(1500);
                 dut.disableSchedules(scheduleName);
 
                 //if schedule is inactive, quality of ValSPS should be set to invalid
@@ -249,12 +250,13 @@ public class ScheduleNodeTests extends AllianderBaseTest {
                 assertValuesMatch(expectedValues, actualValues);
             }
             else {
-                testOptionalNodeNotPresent(scheduleConstants, "ValSPS");
+                // float schedule
                 assertTrue(dut.nodeExists(scheduleName + ".ValMV"));
+                testOptionalNodeNotPresent(scheduleConstants, "ValSPS");
 
                 //initial valid status
                 dut.writeAndEnableSchedule(schedule);
-                Thread.sleep(1000);
+                Thread.sleep(1500);
                 dut.disableSchedules(scheduleName);
 
                 //if schedule is inactive, quality of ValMV should be set to invalid
@@ -297,11 +299,11 @@ public class ScheduleNodeTests extends AllianderBaseTest {
         for (String scheduleName : scheduleConstants.getAllScheduleNames()) {
             if (dut.nodeExists(scheduleName + ".ActStrTm")) {
                 PreparedSchedule schedule = scheduleConstants.prepareSchedule(scheduleConstants.getDefaultValues(1),
-                        scheduleConstants.getScheduleNumber(scheduleName), ofSeconds(2), Instant.now(), 20);
+                        scheduleConstants.getScheduleNumber(scheduleName), ofSeconds(2), Instant.now().plusMillis(500), 20);
 
                 //initial status
                 dut.writeAndEnableSchedule(schedule);
-                Thread.sleep(1000);
+                Thread.sleep(1500);
                 dut.disableSchedules(scheduleName);
 
                 //if schedule is disabled, quality of ActStrTm should be invalid
@@ -328,11 +330,11 @@ public class ScheduleNodeTests extends AllianderBaseTest {
             throws ServiceError, IOException, InterruptedException {
         for (String scheduleName : scheduleConstants.getAllScheduleNames()) {
             PreparedSchedule schedule = scheduleConstants.prepareSchedule(scheduleConstants.getDefaultValues(1),
-                    scheduleConstants.getScheduleNumber(scheduleName), ofSeconds(2), Instant.now(), 20);
+                    scheduleConstants.getScheduleNumber(scheduleName), ofSeconds(2), Instant.now().plusMillis(500), 20);
 
             //initial status
             dut.writeAndEnableSchedule(schedule);
-            Thread.sleep(1000);
+            Thread.sleep(1500);
             dut.disableSchedules(scheduleName);
 
             //if schedule is disabled, quality of ActStrTm should be invalid
