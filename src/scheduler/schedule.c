@@ -348,15 +348,11 @@ updateIntStatusValue(IedServer server, DataObject* dobj, int32_t value, uint64_t
 
                 DataAttribute* t = (DataAttribute*)ModelNode_getChild((ModelNode*)dobj, "t");
 
-                IedServer_lockDataModel(server);
-
                 if (t) {
                     IedServer_updateUTCTimeAttributeValue(server, t, timestamp);
                 }
 
                 IedServer_updateInt32AttributeValue(server, stVal, value);
-
-                IedServer_unlockDataModel(server);
             }
         }
     }
@@ -492,7 +488,6 @@ updateNextPeriodicStartTime(Schedule self, DataObject* dObj, uint64_t nextStartT
         /* if this time is in the future then check if it is the new nextStartTime */
         if (startTime >= currentTime) {
             if (startTime <= startTime <= nextStartTime || nextStartTime == 0) {
-                printf("updateNextPeriodicStartTime[1]\n");
                 nextStartTime = startTime;
             }
         }
@@ -501,7 +496,6 @@ updateNextPeriodicStartTime(Schedule self, DataObject* dObj, uint64_t nextStartT
             uint64_t lastExecutionEnd = startTime + (Schedule_getSchdIntvInMs(self) * Schedule_getNumEntr(self));
 
             if (currentTime < lastExecutionEnd) {
-                printf("updateNextPeriodicStartTime[5]\n");
                 nextStartTime = startTime;
             }
             else {
@@ -510,7 +504,6 @@ updateNextPeriodicStartTime(Schedule self, DataObject* dObj, uint64_t nextStartT
 
                 if (startTime <= nextStartTime || nextStartTime == 0) {
                     if (startTime <= nextStartTime) {
-                        printf("updateNextPeriodicStartTime[2]\n");
                         nextStartTime = startTime;
                     }
                 }
@@ -580,8 +573,6 @@ schedule_getNextStartTime(Schedule self)
 
                 if (handleSetCal(self, dObj, &setCalValues)) {
                     nextStartTime = updateNextPeriodicStartTime(self, dObj, nextStartTime, currentTime, &setCalValues);
-
-                    printf("schedule_getNextStartTime: periodic %p: %lu\n", self, nextStartTime);
                 }
                 else {
                     printf("ERROR: Invalid setCal attribute\n");
@@ -1367,6 +1358,10 @@ static bool
 enabledSchedule(Schedule self)
 {
     ScheduleState newState = SCHD_STATE_NOT_READY;
+
+    char objRefBuf[130];
+    ModelNode_getObjectReference((ModelNode*)(self->scheduleLn), objRefBuf);
+
     /* TODO check for conditions to enable schedule */
 
     //TODO check if a Start time (StrTm) is defined or an external trigger option is set (EvTeg == true}
@@ -1379,6 +1374,10 @@ enabledSchedule(Schedule self)
                 newState = SCHD_STATE_READY;
             }
         }
+        else if (isPeriodic(self)) {
+            printf("INFO: enable periodic schedule\n");
+            newState = SCHD_STATE_READY;
+        }
         else if(isTimeTriggered(self)) {
 
             if (checkForValidStartTimes(self)) {
@@ -1388,6 +1387,12 @@ enabledSchedule(Schedule self)
                 schedule_updateScheduleEnableError(self, SCHD_ENA_ERR_MISSING_VALID_STRTM);
             }
         }
+        else {
+            printf("ERROR: %s unkown schedule type\n", objRefBuf);
+        }
+    }
+    else {
+        printf("ERROR: Failed to enable schedule %s - validity checks failed\n", objRefBuf);
     }
 
     schedule_udpateState(self, newState);
@@ -1399,16 +1404,46 @@ enabledSchedule(Schedule self)
 
         schedule_updateScheduleEnableError(self, SCHD_ENA_ERR_NONE);
 
+        printf("INFO: Enabled schedule %s\n", objRefBuf);
+
         return true;
     }
-    else
+    else {
+        printf("INFO: schedule %s NOT enabled\n", objRefBuf);
+
         return false;
+    }
+}
+
+static void
+schedule_updateCurrentValueQuality(Schedule self, uint64_t currentTime, bool invalid)
+{
+    DataAttribute* currentValAttr = schedule_getCurrentValueAttribute(self);
+
+    if (currentValAttr) {
+        DataAttribute* q = schedule_getCurrentValueSubAttribute(self, "q");
+        DataAttribute* t = schedule_getCurrentValueSubAttribute(self, "t");
+
+        if (t) {
+            //TODO change to IedServer_updateTimestampAttributeValue 
+            IedServer_updateUTCTimeAttributeValue(self->server, t, currentTime);
+        }
+
+        if (q) {
+            if (invalid)
+                IedServer_updateQuality(self->server, q, QUALITY_VALIDITY_INVALID);
+            else
+                IedServer_updateQuality(self->server, q, QUALITY_VALIDITY_GOOD);
+        }
+    }
 }
 
 static void
 disableSchedule(Schedule self)
 {
     ScheduleState newState = SCHD_STATE_NOT_READY;
+
+    schedule_updateCurrentValueQuality(self, Hal_getTimeInMs(), true);
 
     schedule_udpateState(self, newState);
 }
@@ -1429,7 +1464,13 @@ schedule_performCheckHandler(ControlAction action, void* parameter, MmsValue* ct
         if ((test == false) && (MmsValue_getBoolean(ctlVal) == true)) {
             if (self->allowRemoteControl) {
                 //TODO perform check if schedule is valid
-                result = CONTROL_ACCEPTED;
+
+                if (performGenericScheduleValidityChecks(self)) {
+                    result = CONTROL_ACCEPTED;
+                }
+                else {
+                    result = CONTROL_VALUE_INVALID;
+                }
             }
             else {
                 result = CONTROL_OBJECT_ACCESS_DENIED;
@@ -1690,6 +1731,8 @@ schedule_thread(void* parameter)
                 if (currentIdx == -1) 
                 {
                     printf("INFO: schedule %s ended\n", scheduleRef);
+
+                    schedule_updateCurrentValueQuality(self, currentTime, true);
 
                     /* check for next state */
                     self->nextStartTime = schedule_getNextStartTime(self);
