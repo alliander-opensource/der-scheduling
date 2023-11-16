@@ -1329,6 +1329,36 @@ performGenericScheduleValidityChecks(Schedule self)
         return false;
     }
 
+    /* Check for invalid schedule values */
+    {
+        int i;
+
+        for (i = 1; i <= numEntrVal; i++) {
+
+            DataAttribute* da = schedule_getScheduleValueAttribute(self, i);
+
+            if (da && da->mmsValue) {
+                if (da->mmsValue) {
+                    if (MmsValue_getType(da->mmsValue) == MMS_FLOAT) {
+                        float val = MmsValue_toFloat(da->mmsValue);
+
+                        printf("VAL[%i]: %f\n", i, val);
+
+                        if (isnan(val)) {
+
+                            printf("VALUE IS NAN\n");
+
+                            schedule_updateScheduleEnableError(self, SCHD_ENA_ERR_MISSING_VALID_SCHEDULE_VALUES);
+
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+
     /* check if SchdIntv is valied */
 
     DataAttribute* schdIntv = (DataAttribute*)ModelNode_getChild((ModelNode*)self->scheduleLn, "SchdIntv.setVal");
@@ -1416,6 +1446,27 @@ enabledSchedule(Schedule self)
 }
 
 static void
+schedule_updateObjectQuality(Schedule self, DataObject* dobj, uint64_t currentTime, bool invalid)
+{
+    if (dobj) {
+        DataAttribute* q = (DataAttribute*)ModelNode_getChild((ModelNode*)dobj, "q");
+        DataAttribute* t = (DataAttribute*)ModelNode_getChild((ModelNode*)dobj, "t");
+
+        if (t) {
+            //TODO change to IedServer_updateTimestampAttributeValue 
+            IedServer_updateUTCTimeAttributeValue(self->server, t, currentTime);
+        }
+
+        if (q) {
+            if (invalid)
+                IedServer_updateQuality(self->server, q, QUALITY_VALIDITY_INVALID);
+            else
+                IedServer_updateQuality(self->server, q, QUALITY_VALIDITY_GOOD);
+        }
+    }
+}
+
+static void
 schedule_updateCurrentValueQuality(Schedule self, uint64_t currentTime, bool invalid)
 {
     DataAttribute* currentValAttr = schedule_getCurrentValueAttribute(self);
@@ -1439,12 +1490,26 @@ schedule_updateCurrentValueQuality(Schedule self, uint64_t currentTime, bool inv
 }
 
 static void
+schedule_setActStrTmQualityInvalid(Schedule self, uint64_t currentTime, bool invalid)
+{
+    DataObject* actStrTm = (DataObject*)ModelNode_getChild((ModelNode*)self->scheduleLn, "ActStrTm");
+
+    if (actStrTm) {
+        schedule_updateObjectQuality(self, actStrTm, currentTime, invalid);
+    }
+}
+
+static void
 disableSchedule(Schedule self)
 {
     ScheduleState newState = SCHD_STATE_NOT_READY;
 
-    schedule_updateCurrentValueQuality(self, Hal_getTimeInMs(), true);
+    uint64_t currentTime = Hal_getTimeInMs();
 
+    schedule_updateCurrentValueQuality(self, currentTime, true);
+
+    schedule_setActStrTmQualityInvalid(self, currentTime, true);
+   
     schedule_udpateState(self, newState);
 }
 
@@ -1733,6 +1798,8 @@ schedule_thread(void* parameter)
                     printf("INFO: schedule %s ended\n", scheduleRef);
 
                     schedule_updateCurrentValueQuality(self, currentTime, true);
+
+                    schedule_setActStrTmQualityInvalid(self, currentTime, true);
 
                     /* check for next state */
                     self->nextStartTime = schedule_getNextStartTime(self);

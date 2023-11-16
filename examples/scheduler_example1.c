@@ -118,7 +118,7 @@ main(int argc, char** argv)
         Scheduler_enableScheduleControl(sched, "@Control/OnOff_Res_FSCH01", false);
 
         /* block remote change of schedule parameters */
-        Scheduler_enableWriteAccessToParameter(sched, "@Control/ActPow_Res_FSCH01", SCHED_PARAM_STR_TM, true);
+        Scheduler_enableWriteAccessToParameter(sched, "@Control/ActPow_Res_FSCH01", SCHED_PARAM_STR_TM, false);
         Scheduler_enableWriteAccessToParameter(sched, "@Control/ActPow_Res_FSCH01", SCHED_PARAM_SCHD_PRIO, false);
 
         Scheduler_enableWriteAccessToParameter(sched, "@Control/MaxPow_Res_FSCH01", SCHED_PARAM_STR_TM, false);
