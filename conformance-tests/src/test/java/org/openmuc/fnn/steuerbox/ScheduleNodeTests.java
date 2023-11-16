@@ -496,8 +496,9 @@ public class ScheduleNodeTests extends AllianderBaseTest {
         for (String scheduleName : scheduleConstants.getAllScheduleNames()) {
 
             // intial: valid values in SchdValues, test that it shows no error kind
+            int scheduleNumber = scheduleConstants.getScheduleNumber(scheduleName);
             PreparedSchedule schedule = scheduleConstants.prepareSchedule(scheduleConstants.getDefaultValues(1),
-                    scheduleConstants.getScheduleNumber(scheduleName), ofSeconds(1), Instant.now().plusSeconds(2), 100);
+                    scheduleNumber, ofSeconds(1), Instant.now().plusSeconds(2), 100);
             dut.writeAndEnableSchedule(schedule);
             Thread.sleep(200);
             Assertions.assertEquals(ScheduleEnablingErrorKind.NONE, dut.getSchdEnaErr(scheduleName));
@@ -506,7 +507,7 @@ public class ScheduleNodeTests extends AllianderBaseTest {
             //Provoke MISSING_VALID_SCHEDULE_VALUES error kind by writing invalid values
             Executable excecutable = () -> {
                 dut.writeAndEnableSchedule(scheduleConstants.prepareSchedule(
-                        Arrays.asList(Float.NaN, Float.MAX_VALUE, Float.POSITIVE_INFINITY), 1, ofSeconds(2),
+                        Arrays.asList(Float.NaN, Float.MAX_VALUE, Float.POSITIVE_INFINITY), scheduleNumber, ofSeconds(2),
                         Instant.now().plusSeconds(1), 100));
             };
             Assertions.assertThrows(ServiceError.class, excecutable);
