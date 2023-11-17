@@ -244,9 +244,16 @@ public class ScheduleNodeTests extends AllianderBaseTest {
                 Assertions.assertEquals("INVALID", dut.getNodeEntryasString(scheduleName, "ValSPS", "q"));
 
                 //if schedule is active, ValSPS should hold the current value determined by the schedule
-                dut.writeAndEnableSchedule(schedule);
+                //activate schedule
+                Instant timestamp = Instant.now().plusSeconds(2).truncatedTo(ChronoUnit.SECONDS);
+
+                PreparedSchedule preparedSchedule = scheduleConstants.prepareSchedule(
+                        scheduleConstants.getDefaultValues(1), scheduleConstants.getScheduleNumber(scheduleName),
+                        ofSeconds(2), timestamp, 20);
+
+                dut.writeAndEnableSchedule(preparedSchedule);
                 List<Boolean> actualValues = dut.monitor(Instant.now(), ofSeconds(2), ofSeconds(2), scheduleConstants);
-                List<Boolean> expectedValues = Arrays.asList(true);
+                List<Boolean> expectedValues = Arrays.asList(false);
                 assertValuesMatch(expectedValues, actualValues);
             }
             else {
