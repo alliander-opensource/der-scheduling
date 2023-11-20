@@ -244,7 +244,7 @@ public class ScheduleExecutionTest extends AllianderBaseTest {
      * earlier start time, test for boolean schedules
      */
     @Requirements(description = "IEC61850-90-10 ed 2017 Schedule Controller Definitions, section 5.5.3")
-    @ParameterizedTest(name = "testSamePriosOnOffSchedule running {0}")
+    @ParameterizedTest(name = "testSamePriosDifferentStartOnOffSchedule running {0}")
     @MethodSource("getOnOffSchedules")
     public void testSamePriosDifferentStartOnOffSchedule(ScheduleDefinitions scheduleConstants)
             throws ServiceError, IOException, InterruptedException, IEC61850MissconfiguredException {
