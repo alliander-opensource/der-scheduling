@@ -229,23 +229,19 @@ public class ScheduleNodeTests extends AllianderBaseTest {
             final Duration interval = ofSeconds(1);
             final int anyPriorityHigherThanReserveSchedules = 20;
             final PreparedSchedule schedule = scheduleConstants.prepareSchedule(scheduleConstants.getDefaultValues(1),
-                    scheduleConstants.getScheduleNumber(scheduleName), interval, Instant.now().plusMillis(500), anyPriorityHigherThanReserveSchedules);
+                    scheduleConstants.getScheduleNumber(scheduleName), interval, Instant.now().plusMillis(500),
+                    anyPriorityHigherThanReserveSchedules);
 
             // initialize: enable schedule, then disable it again
             dut.writeAndEnableSchedule(schedule);
             Thread.sleep(1500);
             dut.disableSchedules(scheduleName);
 
-            final Instant startSecondSchedule = Instant.now().plus(interval).truncatedTo(ChronoUnit.SECONDS);
-            final Instant startMonitoring = startSecondSchedule.plus(interval.dividedBy(2));
-
             final String spsValue = "ValSPS";
             final String mvValue = "ValMV";
             final String shouldExist;
             final String shouldNotExist;
             final List<?> expectedValues = new LinkedList<>(scheduleConstants.getDefaultValues(1));
-            final PreparedSchedule preparedSchedule = scheduleConstants.prepareSchedule(scheduleConstants.getDefaultValues(1), scheduleConstants.getScheduleNumber(scheduleName),
-                    interval, startSecondSchedule, anyPriorityHigherThanReserveSchedules);
 
             if (ScheduleType.SPG.equals(scheduleConstants.getScheduleType())) {
                 shouldExist = spsValue;
@@ -260,6 +256,11 @@ public class ScheduleNodeTests extends AllianderBaseTest {
             testOptionalNodeNotPresent(scheduleConstants, shouldNotExist);
             Assertions.assertEquals("INVALID", dut.getNodeEntryasString(scheduleName, shouldExist, "q"));
 
+            final Instant startSecondSchedule = Instant.now().plus(interval).truncatedTo(ChronoUnit.SECONDS);
+            final Instant startMonitoring = startSecondSchedule.plus(interval.dividedBy(2));
+            final PreparedSchedule preparedSchedule = scheduleConstants.prepareSchedule(
+                    scheduleConstants.getDefaultValues(1), scheduleConstants.getScheduleNumber(scheduleName), interval,
+                    startSecondSchedule, anyPriorityHigherThanReserveSchedules);
             dut.writeAndEnableSchedule(preparedSchedule);
             List<?> actualValues = dut.monitor(startMonitoring, interval, interval, scheduleConstants);
 
@@ -292,7 +293,8 @@ public class ScheduleNodeTests extends AllianderBaseTest {
         for (String scheduleName : scheduleConstants.getAllScheduleNames()) {
             if (dut.nodeExists(scheduleName + ".ActStrTm")) {
                 PreparedSchedule schedule = scheduleConstants.prepareSchedule(scheduleConstants.getDefaultValues(1),
-                        scheduleConstants.getScheduleNumber(scheduleName), ofSeconds(2), Instant.now().plusMillis(500), 20);
+                        scheduleConstants.getScheduleNumber(scheduleName), ofSeconds(2), Instant.now().plusMillis(500),
+                        20);
 
                 //initial status
                 dut.writeAndEnableSchedule(schedule);
@@ -330,6 +332,8 @@ public class ScheduleNodeTests extends AllianderBaseTest {
             Thread.sleep(1500);
             dut.disableSchedules(scheduleName);
 
+            Thread.sleep(200);
+
             //if schedule is disabled, quality of ActStrTm should be invalid
             Assertions.assertEquals("INVALID", dut.getNodeEntryasString(scheduleName, "NxtStrTm", "q"));
 
@@ -338,6 +342,7 @@ public class ScheduleNodeTests extends AllianderBaseTest {
             PreparedSchedule preparedSchedule = scheduleConstants.prepareSchedule(scheduleConstants.getDefaultValues(1),
                     scheduleConstants.getScheduleNumber(scheduleName), ofSeconds(2), timestamp, 20);
             dut.writeAndEnableSchedule(preparedSchedule);
+            Thread.sleep(200);
             Assertions.assertEquals(timestamp.toString(), dut.getNodeEntryasString(scheduleName, "NxtStrTm", "stVal"));
         }
     }
@@ -500,8 +505,8 @@ public class ScheduleNodeTests extends AllianderBaseTest {
             //Provoke MISSING_VALID_SCHEDULE_VALUES error kind by writing invalid values
             Executable excecutable = () -> {
                 dut.writeAndEnableSchedule(scheduleConstants.prepareSchedule(
-                        Arrays.asList(Float.NaN, Float.MAX_VALUE, Float.POSITIVE_INFINITY), scheduleNumber, ofSeconds(2),
-                        Instant.now().plusSeconds(1), 100));
+                        Arrays.asList(Float.NaN, Float.MAX_VALUE, Float.POSITIVE_INFINITY), scheduleNumber,
+                        ofSeconds(2), Instant.now().plusSeconds(1), 100));
             };
             Assertions.assertThrows(ServiceError.class, excecutable);
             Assertions.assertEquals(ScheduleEnablingErrorKind.MISSING_VALID_SCHEDULE_VALUES,
