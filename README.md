@@ -71,6 +71,7 @@ You can skip this step when libiec61850 is already installed on your PC
         $ cmake ..
         $ make
         $ sudo make install
+        $ sudo ldconfig
 
 Building the scheduler code
 
