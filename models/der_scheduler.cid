@@ -366,7 +366,7 @@
             </DOI>
             <DOI name="StrTm01">
               <DAI name="setTm">
-                <Val>2020-01-01T00:00:00Z</Val>
+                <Val>1970-01-01T00:00:01Z</Val>
               </DAI>
               <SDI name="setCal">
                 <DAI name="occType">
@@ -486,7 +486,7 @@
             </DOI>
             <DOI name="StrTm01">
               <DAI name="setTm">
-                <Val>2020-01-01T00:00:00Z</Val>
+                <Val>1970-01-01T00:00:01Z</Val>
               </DAI>
               <SDI name="setCal">
                 <DAI name="occType">
@@ -600,7 +600,7 @@
             </DOI>
             <DOI name="StrTm01">
               <DAI name="setTm">
-                <Val>2020-01-01T00:00:00Z</Val>
+                <Val>1970-01-01T00:00:01Z</Val>
               </DAI>
               <SDI name="setCal">
                 <DAI name="occType">
