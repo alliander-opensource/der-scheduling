@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -219,15 +220,21 @@ public class ScheduleNodeTests extends AllianderBaseTest {
      **/
     @Requirements(value = LN03,
             description = "Test ValSPS/ValMv behaves as defined in IEC 61850-90-10:2017, table 7 (page 26) ")
-    @ParameterizedTest(name = "ValSpsIsUpdatedWithCurrentlyRunningScheduleIfPresent running {0}")
+    @ParameterizedTest(name = "ValSpsOrValMvIsUpdatedWithCurrentlyRunningSchedule running {0}")
     @MethodSource("getAllSchedules")
     <X> void ValSpsOrValMvIsUpdatedWithCurrentlyRunningSchedule(ScheduleDefinitions<X> scheduleConstants)
             throws ServiceError, IOException, InterruptedException {
 
         for (String scheduleName : scheduleConstants.getAllScheduleNames()) {
 
-            PreparedSchedule schedule = scheduleConstants.prepareSchedule(scheduleConstants.getDefaultValues(1),
-                    scheduleConstants.getScheduleNumber(scheduleName), ofSeconds(2), Instant.now().plusMillis(500), 20);
+
+            final Duration interval = ofSeconds(2);
+            final int prio = 20;
+            final PreparedSchedule schedule = scheduleConstants.prepareSchedule(scheduleConstants.getDefaultValues(1),
+                    scheduleConstants.getScheduleNumber(scheduleName), interval, Instant.now().plusMillis(500), prio);
+
+            final Instant startSecondSchedule = Instant.now().plus(interval).truncatedTo(ChronoUnit.SECONDS);
+            final Instant startMonitoring = startSecondSchedule.plus(interval.dividedBy(2));
 
             if (ScheduleType.SPG.equals(scheduleConstants.getScheduleType())) {
 
@@ -245,14 +252,12 @@ public class ScheduleNodeTests extends AllianderBaseTest {
 
                 //if schedule is active, ValSPS should hold the current value determined by the schedule
                 //activate schedule
-                Instant timestamp = Instant.now().plusSeconds(2).truncatedTo(ChronoUnit.SECONDS);
-
                 PreparedSchedule preparedSchedule = scheduleConstants.prepareSchedule(
                         scheduleConstants.getDefaultValues(1), scheduleConstants.getScheduleNumber(scheduleName),
-                        ofSeconds(2), timestamp, 20);
+                        interval, startSecondSchedule, prio);
 
                 dut.writeAndEnableSchedule(preparedSchedule);
-                List<Boolean> actualValues = dut.monitor(Instant.now(), ofSeconds(2), ofSeconds(2), scheduleConstants);
+                List<Boolean> actualValues = dut.monitor(startMonitoring, interval, interval, scheduleConstants);
                 List<Boolean> expectedValues = Arrays.asList(false);
                 assertValuesMatch(expectedValues, actualValues);
             }
@@ -270,17 +275,17 @@ public class ScheduleNodeTests extends AllianderBaseTest {
                 Assertions.assertEquals("INVALID", dut.getNodeEntryasString(scheduleName, "ValMV", "q"));
 
                 //activate schedule
-                Instant timestamp = Instant.now().plusSeconds(2).truncatedTo(ChronoUnit.SECONDS);
                 PreparedSchedule preparedSchedule = scheduleConstants.prepareSchedule(
                         scheduleConstants.getDefaultValues(1), scheduleConstants.getScheduleNumber(scheduleName),
-                        ofSeconds(8), timestamp, 20);
+                interval, startSecondSchedule, prio);
                 dut.writeAndEnableSchedule(preparedSchedule);
 
                 //monitor returns the ValMV-values, need to be the one we set with the schedule
-                List<Float> actualValues = dut.monitor(timestamp, ofSeconds(8), ofSeconds(8), scheduleConstants);
+                List<Float> actualValues = dut.monitor(startMonitoring, interval,interval, scheduleConstants);
                 List<Float> expectedValues = Arrays.asList(0.0f);
                 assertValuesMatch(expectedValues, actualValues, 0.1);
             }
+            log.debug("SUCCESSfully tested {}",scheduleName);
         }
     }
 
