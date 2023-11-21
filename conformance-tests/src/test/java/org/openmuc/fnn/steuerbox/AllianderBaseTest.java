@@ -118,6 +118,26 @@ public abstract class AllianderBaseTest {
         }
     }
 
+
+    protected void assertUntypedValuesMatch(List<?> expectedValues, List<?> actualValues) {
+        if(expectedValues.size() <= 0){
+            if(expectedValues.size() == 0 && actualValues.size()==0){
+
+            }
+            else {
+                Assertions.fail("Values do not match, different array sizes. Expected "+expectedValues.size()+" but got "+actualValues.size());
+            }
+        }
+        if (Float.class.equals(expectedValues.get(0).getClass())) {
+            assertValuesMatch((List<Float>) expectedValues, (List<Float>) actualValues,0.1);
+        }
+        else if (Boolean.class.equals(expectedValues.get(0).getClass())) {
+            assertValuesMatch((List<Boolean>) expectedValues, (List<Boolean>) actualValues);
+        }else {
+            throw new IllegalArgumentException("Expected Float or Boolean, got:"+expectedValues.get(0).getClass());
+        }
+    }
+
     protected Collection<String> testMandatoryNodes(Map<String, Fc> mandatory, String parentNode) {
         Collection<String> violations = new LinkedList<>();
 

@@ -226,68 +226,49 @@ public class ScheduleNodeTests extends AllianderBaseTest {
             throws ServiceError, IOException, InterruptedException {
 
         for (String scheduleName : scheduleConstants.getAllScheduleNames()) {
-
-
-            final Duration interval = ofSeconds(2);
-            final int prio = 20;
+            final Duration interval = ofSeconds(1);
+            final int anyPriorityHigherThanReserveSchedules = 20;
             final PreparedSchedule schedule = scheduleConstants.prepareSchedule(scheduleConstants.getDefaultValues(1),
-                    scheduleConstants.getScheduleNumber(scheduleName), interval, Instant.now().plusMillis(500), prio);
+                    scheduleConstants.getScheduleNumber(scheduleName), interval, Instant.now().plusMillis(500), anyPriorityHigherThanReserveSchedules);
+
+            // initialize: enable schedule, then disable it again
+            dut.writeAndEnableSchedule(schedule);
+            Thread.sleep(1500);
+            dut.disableSchedules(scheduleName);
 
             final Instant startSecondSchedule = Instant.now().plus(interval).truncatedTo(ChronoUnit.SECONDS);
             final Instant startMonitoring = startSecondSchedule.plus(interval.dividedBy(2));
 
+            final String spsValue = "ValSPS";
+            final String mvValue = "ValMV";
+            final String shouldExist;
+            final String shouldNotExist;
+            final List<?> expectedValues = new LinkedList<>(scheduleConstants.getDefaultValues(1));
+            final PreparedSchedule preparedSchedule = scheduleConstants.prepareSchedule(scheduleConstants.getDefaultValues(1), scheduleConstants.getScheduleNumber(scheduleName),
+                    interval, startSecondSchedule, anyPriorityHigherThanReserveSchedules);
+
             if (ScheduleType.SPG.equals(scheduleConstants.getScheduleType())) {
-
-                //test, that node ValSPS is present
-                assertTrue(dut.nodeExists(scheduleName + ".ValSPS"));
-                testOptionalNodeNotPresent(scheduleConstants, "ValMV");
-
-                //initial valid status
-                dut.writeAndEnableSchedule(schedule);
-                Thread.sleep(1500);
-                dut.disableSchedules(scheduleName);
-
-                //if schedule is inactive, quality of ValSPS should be set to invalid
-                Assertions.assertEquals("INVALID", dut.getNodeEntryasString(scheduleName, "ValSPS", "q"));
-
-                //if schedule is active, ValSPS should hold the current value determined by the schedule
-                //activate schedule
-                PreparedSchedule preparedSchedule = scheduleConstants.prepareSchedule(
-                        scheduleConstants.getDefaultValues(1), scheduleConstants.getScheduleNumber(scheduleName),
-                        interval, startSecondSchedule, prio);
-
-                dut.writeAndEnableSchedule(preparedSchedule);
-                List<Boolean> actualValues = dut.monitor(startMonitoring, interval, interval, scheduleConstants);
-                List<Boolean> expectedValues = Arrays.asList(false);
-                assertValuesMatch(expectedValues, actualValues);
+                shouldExist = spsValue;
+                shouldNotExist = mvValue;
             }
             else {
-                // float schedule
-                assertTrue(dut.nodeExists(scheduleName + ".ValMV"));
-                testOptionalNodeNotPresent(scheduleConstants, "ValSPS");
-
-                //initial valid status
-                dut.writeAndEnableSchedule(schedule);
-                Thread.sleep(1500);
-                dut.disableSchedules(scheduleName);
-
-                //if schedule is inactive, quality of ValMV should be set to invalid
-                Assertions.assertEquals("INVALID", dut.getNodeEntryasString(scheduleName, "ValMV", "q"));
-
-                //activate schedule
-                PreparedSchedule preparedSchedule = scheduleConstants.prepareSchedule(
-                        scheduleConstants.getDefaultValues(1), scheduleConstants.getScheduleNumber(scheduleName),
-                interval, startSecondSchedule, prio);
-                dut.writeAndEnableSchedule(preparedSchedule);
-
-                //monitor returns the ValMV-values, need to be the one we set with the schedule
-                List<Float> actualValues = dut.monitor(startMonitoring, interval,interval, scheduleConstants);
-                List<Float> expectedValues = Arrays.asList(0.0f);
-                assertValuesMatch(expectedValues, actualValues, 0.1);
+                shouldExist = mvValue;
+                shouldNotExist = spsValue;
             }
-            log.debug("SUCCESSfully tested {}",scheduleName);
+
+            assertTrue(dut.nodeExists(scheduleName + "." + shouldExist));
+            testOptionalNodeNotPresent(scheduleConstants, shouldNotExist);
+            Assertions.assertEquals("INVALID", dut.getNodeEntryasString(scheduleName, shouldExist, "q"));
+
+            dut.writeAndEnableSchedule(preparedSchedule);
+            List<?> actualValues = dut.monitor(startMonitoring, interval, interval, scheduleConstants);
+
+            assertUntypedValuesMatch(expectedValues, actualValues);
+
+            log.debug("SUCCESSfully tested {}", scheduleName);
         }
     }
+
 
     /**
      * ENS = enumerated status, we do not have a schedule with enumerated value thus we can not have the node ValENS
