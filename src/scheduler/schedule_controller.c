@@ -77,6 +77,11 @@ scheduleController_getActiveSchedule(ScheduleController self)
                 if (Schedule_getPrio(schedule) > Schedule_getPrio(activeSchedule)) {
                     activeSchedule = schedule;
                 }
+                else if (Schedule_getPrio(schedule) == Schedule_getPrio(activeSchedule)) {
+                    if (schedule->startTime > activeSchedule->startTime) {
+                        activeSchedule = schedule;
+                    }
+                }
             }
         }
 
@@ -322,6 +327,7 @@ scheduleController_scheduleStateUpdated(ScheduleController self, Schedule sched,
         self->activeSchedule = NULL;
     }
 }
+
 /**
  * @brief Schedule informs the controller that its scheduled value was updated
  * 
