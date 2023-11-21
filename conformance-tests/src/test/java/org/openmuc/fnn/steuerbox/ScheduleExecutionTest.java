@@ -55,6 +55,7 @@ public class ScheduleExecutionTest extends AllianderBaseTest {
                 dut.maxPowerSchedules.getValueAccess().prepareWriting(0, dut.maxPowerSchedules.getReserveSchedule()));
         dut.writeScheduleValues(
                 dut.onOffSchedules.getValueAccess().prepareWriting(false, dut.onOffSchedules.getReserveSchedule()));
+        log.info("Set default values for reserve schedules");
     }
 
     @Requirements({ E02, S02, S05c, E01, LN01, S09 })

@@ -559,6 +559,7 @@ public class ScheduleNodeTests extends AllianderBaseTest {
             throws ServiceError, IOException {
 
         disableAllRunningSchedules();
+        log.debug("Disabled all running schedules");
 
         // if all other schedules are deactivated, the reserve schedule should be running
         final String reserveSchedule = scheduleConstants.getReserveSchedule();

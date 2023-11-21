@@ -21,6 +21,7 @@ import com.beanit.iec61850bean.ServiceError;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.openmuc.fnn.steuerbox.models.AllianderDER;
 import org.openmuc.fnn.steuerbox.scheduling.ScheduleDefinitions;
 import org.openmuc.fnn.steuerbox.scheduling.ScheduleType;
@@ -47,10 +48,14 @@ public abstract class AllianderBaseTest {
     protected static AllianderDER dut;
 
     @BeforeAll
-    public static void init() throws ServiceError, IOException {
+    public static void connectToDUT() throws ServiceError, IOException {
         dut = AllianderDER.getWithDefaultSettings();
+    }
 
+    @BeforeEach
+    public  void stopAllRunningSchedules(){
         disableAllRunningSchedules();
+        logger.debug("Disabled all schedules during init");
     }
 
     @AfterAll
@@ -69,7 +74,6 @@ public abstract class AllianderBaseTest {
                 }
             });
         });
-        logger.debug("Disabled all schedules during init");
     }
 
     /**
