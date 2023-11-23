@@ -31,6 +31,7 @@ public class AllianderDER extends IEC61850Utility {
     }
 
     public final ScheduleDefinitions<Number> powerSchedules = ScheduleType.ASG.withScheduleDefinitions(this,
+            "Active power schedules",//
             "DER_Scheduler_Control/ActPow_GGIO1",//
             "DER_Scheduler_Control/ActPow_FSCC1",//
             "DER_Scheduler_Control/ActPow_Res_FSCH01",//
@@ -46,6 +47,7 @@ public class AllianderDER extends IEC61850Utility {
             "DER_Scheduler_Control/ActPow_FSCH10");
 
     public final ScheduleDefinitions<Number> maxPowerSchedules = ScheduleType.ASG.withScheduleDefinitions(this,
+            "Max power schedules",//
             "DER_Scheduler_Control/MaxPow_GGIO1",//
             "DER_Scheduler_Control/MaxPow_FSCC1",//
             "DER_Scheduler_Control/MaxPow_Res_FSCH01",//
@@ -61,6 +63,7 @@ public class AllianderDER extends IEC61850Utility {
             "DER_Scheduler_Control/MaxPow_FSCH10");
 
     public final ScheduleDefinitions<Boolean> onOffSchedules = ScheduleType.SPG.withScheduleDefinitions(this,
+            "On/off schedules",//
             "DER_Scheduler_Control/OnOff_GGIO1",//
             "DER_Scheduler_Control/OnOff_FSCC1",//
             "DER_Scheduler_Control/OnOff_Res_FSCH01",//

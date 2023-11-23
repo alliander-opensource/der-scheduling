@@ -30,9 +30,10 @@ public enum ScheduleType {
      */
     ASG((device, schedule) -> ValueAccess.asgAccess(device, schedule)) {
         @Override
-        public ScheduleDefinitions<Float> withScheduleDefinitions(IEC61850Utility device, String ggio,
-                String controller, String reserveSchedule, String... schedules) {
-            return ASG.createScheduleDefinitionsFrom(device, ggio, controller, reserveSchedule, 0f, schedules);
+        public ScheduleDefinitions<Float> withScheduleDefinitions(IEC61850Utility device, String displayName,
+                String ggio, String controller, String reserveSchedule, String... schedules) {
+            return ASG.createScheduleDefinitionsFrom(device, displayName, ggio, controller, reserveSchedule, 0f,
+                    schedules);
         }
     },
     /**
@@ -40,9 +41,10 @@ public enum ScheduleType {
      */
     SPG((device, schedule) -> ValueAccess.spgAccess(device, schedule)) {
         @Override
-        public ScheduleDefinitions<Boolean> withScheduleDefinitions(IEC61850Utility device, String ggio,
-                String controller, String reserveSchedule, String... schedules) {
-            return SPG.createScheduleDefinitionsFrom(device, ggio, controller, reserveSchedule, false, schedules);
+        public ScheduleDefinitions<Boolean> withScheduleDefinitions(IEC61850Utility device, String displayName,
+                String ggio, String controller, String reserveSchedule, String... schedules) {
+            return SPG.createScheduleDefinitionsFrom(device, displayName, ggio, controller, reserveSchedule, false,
+                    schedules);
         }
     };
 
@@ -52,11 +54,11 @@ public enum ScheduleType {
         this.valueAccessFunction = valueAccessFunction;
     }
 
-    public abstract <X> ScheduleDefinitions<X> withScheduleDefinitions(IEC61850Utility device, String ggio,
-            String controller, String reserveSchedule, String... schedules);
+    public abstract <X> ScheduleDefinitions<X> withScheduleDefinitions(IEC61850Utility device, String displayName,
+            String ggio, String controller, String reserveSchedule, String... schedules);
 
-    private <T> ScheduleDefinitions<T> createScheduleDefinitionsFrom(IEC61850Utility device, String ggio,
-            String controller, String reserveSchedule, T defaultValue, String... schedules) {
+    private <T> ScheduleDefinitions<T> createScheduleDefinitionsFrom(IEC61850Utility device, String displayName,
+            String ggio, String controller, String reserveSchedule, T defaultValue, String... schedules) {
 
         List<String> scheduleNames = Arrays.asList(schedules);
 
@@ -122,7 +124,7 @@ public enum ScheduleType {
 
             @Override
             public String toString() {
-                return ScheduleDefinitions.class.getSimpleName() + " with GGIO " + getControlledGGIO();
+                return displayName;
             }
         };
     }
