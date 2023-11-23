@@ -14,6 +14,7 @@
 package org.openmuc.fnn.steuerbox;
 
 import com.beanit.iec61850bean.ServiceError;
+import de.fhg.ise.testtool.utils.annotations.label.Description;
 import de.fhg.ise.testtool.utils.annotations.label.Requirements;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;

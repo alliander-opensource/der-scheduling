@@ -13,15 +13,13 @@
 
 package de.fhg.ise.testtool.utils.annotations.label;
 
-import org.openmuc.fnn.steuerbox.models.Requirement;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 
 /**
- * Custom Label for test methods to link to requirements
+ * Custom Label for test methods to a description
  */
 @Target({ ElementType.METHOD })
-public @interface Requirements {
-    Requirement[] value() default Requirement.NONE;
+public @interface Description {
+    String value() default "";
 }
