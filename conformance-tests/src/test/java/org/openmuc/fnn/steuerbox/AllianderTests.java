@@ -15,6 +15,7 @@ package org.openmuc.fnn.steuerbox;
 
 import de.fhg.ise.testtool.utils.annotations.label.Requirements;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -43,13 +44,13 @@ import static org.openmuc.fnn.steuerbox.models.Requirement.S12;
  * <p>
  * General tests related to 61850 are to be found in {@link ScheduleExecutionTest}
  */
-
 public class AllianderTests extends AllianderBaseTest {
 
     private static final Logger log = LoggerFactory.getLogger(AllianderTests.class);
 
+    @DisplayName("tenSchedulesAreSupportedPerType")
     @Requirements(S01)
-    @ParameterizedTest(name = "tenSchedulesAreSupportedPerType running {0}")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getAllSchedules")
     void tenSchedulesAreSupportedPerType(ScheduleDefinitions<?> scheduleConstants) {
         int j = 0;
@@ -62,8 +63,9 @@ public class AllianderTests extends AllianderBaseTest {
         log.info("There are {} existing schedules at this logical node", j);
     }
 
+    @DisplayName("scheduleSupports100values")
     @Requirements(S10)
-    @ParameterizedTest(name = "scheduleSupports100values running {0}")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getAllSchedules")
     void scheduleSupports100values(ScheduleDefinitions<?> scheduleConstants) {
         for (String scheduleName : scheduleConstants.getAllScheduleNames()) {
@@ -71,8 +73,9 @@ public class AllianderTests extends AllianderBaseTest {
         }
     }
 
+    @DisplayName("reserveScheduleSupports100values")
     @Requirements(S12)
-    @ParameterizedTest(name = "reserveScheduleSupports100values running {0}")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getAllSchedules")
     void reserveScheduleSupports100values(ScheduleDefinitions<?> scheduleConstants) {
         assert100ScheduleValuesAreSupported(scheduleConstants, scheduleConstants.getReserveSchedule());
@@ -92,8 +95,9 @@ public class AllianderTests extends AllianderBaseTest {
         }
     }
 
+    @DisplayName("scheduleSupportsTimebasedScheduling")
     @Requirements(S02)
-    @ParameterizedTest(name = "scheduleSupportsTimebasedScheduling running {0}")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getAllSchedules")
     void scheduleSupportsTimebasedScheduling(ScheduleDefinitions scheduleConstants) {
         for (int i = 1; i <= 10; i++) {
@@ -103,8 +107,9 @@ public class AllianderTests extends AllianderBaseTest {
         }
     }
 
+    @DisplayName("allExpectedSchedulesExist")
     @Requirements({ LN02a, LN02b, LN02c })
-    @ParameterizedTest(name = "allExpectedSchedulesExist running {0}")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getAllSchedules")
     void allExpectedSchedulesExist(ScheduleDefinitions<?> scheduleConstants) {
         for (String scheduleName : scheduleConstants.getAllScheduleNames()) {
@@ -113,8 +118,9 @@ public class AllianderTests extends AllianderBaseTest {
         }
     }
 
+    @DisplayName("reserveSchedulesExist")
     @Requirements(S04)
-    @ParameterizedTest(name = "reserveSchedulesExist running {0}")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getAllSchedules")
     void reserveSchedulesExist(ScheduleDefinitions scheduleConstants) {
         Assertions.assertTrue(dut.nodeExists(scheduleConstants.getReserveSchedule()));

@@ -16,6 +16,7 @@ package org.openmuc.fnn.steuerbox;
 import com.beanit.iec61850bean.ServiceError;
 import de.fhg.ise.testtool.utils.annotations.label.Requirements;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.openmuc.fnn.steuerbox.scheduling.PreparedSchedule;
@@ -58,8 +59,9 @@ public class ScheduleExecutionTest extends AllianderBaseTest {
         log.info("Set default values for reserve schedules");
     }
 
+    @DisplayName("test_prioritiesPowerSchedules")
     @Requirements({ E02, S02, S05c, E01, LN01, S09 })
-    @ParameterizedTest(name = "test_prioritiesPowerSchedules running {0}")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getPowerValueSchedules")
     public void test_prioritiesPowerSchedules(ScheduleDefinitions<Number> scheduleConstants)
             throws ServiceError, IOException, InterruptedException, IEC61850MissconfiguredException {
@@ -130,8 +132,9 @@ public class ScheduleExecutionTest extends AllianderBaseTest {
         assertValuesMatch(expectedValues, actualValues, 0.01);
     }
 
+    @DisplayName("test_prioritiesOnOffSchedules")
     @Requirements({ E02, S02, S05c, E01 })
-    @ParameterizedTest(name = "test_prioritiesOnOffSchedules running {0}")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getOnOffSchedules")
     public void test_prioritiesOnOffSchedules(ScheduleDefinitions<Boolean> scheduleConstants)
             throws ServiceError, IOException, IEC61850MissconfiguredException, InterruptedException {
@@ -206,8 +209,9 @@ public class ScheduleExecutionTest extends AllianderBaseTest {
      * concerning IEC61850 a schedule with the same prio but later start time rules out the one with this prio but
      * earlier start time, test for float schedules
      */
-    @Requirements(description = "IEC61850-90-10 ed 2017 Schedule Controller Definitions, section 5.5.3")
-    @ParameterizedTest(name = "testSamePriosDifferentStartFloatSchedules running {0}")
+    @DisplayName("testSamePriosDifferentStartPowerSchedules")
+    @Description("IEC61850-90-10 ed 2017 Schedule Controller Definitions, section 5.5.3")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getPowerValueSchedules")
     public void testSamePriosDifferentStartPowerSchedules(ScheduleDefinitions scheduleConstants)
             throws ServiceError, IOException, InterruptedException, IEC61850MissconfiguredException {
@@ -244,8 +248,9 @@ public class ScheduleExecutionTest extends AllianderBaseTest {
      * concerning IEC61850 a schedule with the same prio but later start time rules out the one with this prio but
      * earlier start time, test for boolean schedules
      */
-    @Requirements(description = "IEC61850-90-10 ed 2017 Schedule Controller Definitions, section 5.5.3")
-    @ParameterizedTest(name = "testSamePriosDifferentStartOnOffSchedule running {0}")
+    @DisplayName("testSamePriosDifferentStartOnOffSchedule")
+    @Description("IEC61850-90-10 ed 2017 Schedule Controller Definitions, section 5.5.3")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getOnOffSchedules")
     public void testSamePriosDifferentStartOnOffSchedule(ScheduleDefinitions scheduleConstants)
             throws ServiceError, IOException, InterruptedException, IEC61850MissconfiguredException {
@@ -277,8 +282,9 @@ public class ScheduleExecutionTest extends AllianderBaseTest {
      * e.g. OnOffPow_FSCH04 rules put OnOffPow_FSCH10 IEC61850 does not determine a certain behavior in this case, this
      * is just a detail that was fixed for implementation
      */
+    @DisplayName("test_samePrioAndStartFloatSchedule")
     @Requirements({ S17 })
-    @ParameterizedTest(name = "test_samePrioAndStartFloatSchedule running {0}")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getPowerValueSchedules")
     public void test_samePrioAndStartFloatSchedule(ScheduleDefinitions<Number> scheduleConstants)
             throws ServiceError, IOException, IEC61850MissconfiguredException, InterruptedException {
@@ -306,8 +312,9 @@ public class ScheduleExecutionTest extends AllianderBaseTest {
      * e.g. OnOffPow_FSCH04 rules put OnOffPow_FSCH10 IEC61850 does not determine a certain behavior in this case, this
      * is just a detail that was fixed for implementation
      */
+    @DisplayName("test_samePrioAndStartOnOffSchedule")
     @Requirements({ S17 })
-    @ParameterizedTest(name = "test_samePrioAndStartOnOffSchedule running {0}")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getOnOffSchedules")
     public void test_samePrioAndStartOnOffSchedule(ScheduleDefinitions<Boolean> scheduleConstants)
             throws ServiceError, IOException, IEC61850MissconfiguredException, InterruptedException {

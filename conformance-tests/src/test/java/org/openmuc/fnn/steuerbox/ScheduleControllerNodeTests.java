@@ -16,6 +16,7 @@ package org.openmuc.fnn.steuerbox;
 import com.beanit.iec61850bean.Fc;
 import com.beanit.iec61850bean.ServiceError;
 import de.fhg.ise.testtool.utils.annotations.label.Requirements;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.openmuc.fnn.steuerbox.scheduling.ScheduleDefinitions;
@@ -47,8 +48,9 @@ public class ScheduleControllerNodeTests extends AllianderBaseTest {
      * Test if the scheduler has the required nodes with correct types as defined in IEC 61850-90-10:2017, table 6 (page
      * 25)
      **/
+    @DisplayName("checkSubnodes")
     @Requirements({ LN03, LN01, LN02 })
-    @ParameterizedTest(name = "checkSubnodes running {0}")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getAllSchedules")
     void checkSubnodes(ScheduleDefinitions scheduleConstants) {
 
@@ -117,8 +119,9 @@ public class ScheduleControllerNodeTests extends AllianderBaseTest {
     /**
      * {@ link Requirements#LN02a}
      */
+    @DisplayName("activeControllerIsUpdated")
     @Requirements({ LN03, LN02a, LN02b, LN02c })
-    @ParameterizedTest(name = "activeControllerIsUpdated running {0}")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getAllSchedules")
     void activeControllerIsUpdated(ScheduleDefinitions scheduleConstants)
             throws ServiceError, IOException, InterruptedException {
@@ -140,7 +143,7 @@ public class ScheduleControllerNodeTests extends AllianderBaseTest {
         }
 
         //test, that ActSchdRef contains a reference of the active schedule
-        assertEquals(schedule,  dut.readActiveSchedule(scheduleConstants.getController()));
+        assertEquals(schedule, dut.readActiveSchedule(scheduleConstants.getController()));
 
         // wait until the active schedule finished service
         Thread.sleep(2000);
@@ -150,8 +153,9 @@ public class ScheduleControllerNodeTests extends AllianderBaseTest {
                 "Did not return to system reserve schedule after execution time");
     }
 
+    @DisplayName("activeControllerIsUpdatedWithScheduleOfHighestPrio")
     @Requirements({ LN03, E01 })
-    @ParameterizedTest(name = "activeControllerIsUpdatedWithScheduleOfHighestPrio running {0}")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getAllSchedules")
     void activeControllerIsUpdatedWithScheduleOfHighestPrio(ScheduleDefinitions scheduleConstants)
             throws ServiceError, IOException, InterruptedException {

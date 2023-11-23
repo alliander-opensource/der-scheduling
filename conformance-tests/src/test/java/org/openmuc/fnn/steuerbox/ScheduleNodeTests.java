@@ -19,6 +19,7 @@ import com.beanit.iec61850bean.FcModelNode;
 import com.beanit.iec61850bean.ServiceError;
 import de.fhg.ise.testtool.utils.annotations.label.Requirements;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -58,9 +59,10 @@ public class ScheduleNodeTests extends AllianderBaseTest {
 
     private static final Logger log = LoggerFactory.getLogger(ScheduleNodeTests.class);
 
-    @Requirements(value = { LN03, LN01 },
-            description = "Test if the scheduler has the required nodes with correct types as defined in IEC 61850-90-10:2017, table 7 (page 26)")
-    @ParameterizedTest(name = "hasRequiredSubNodes running {0}")
+    @DisplayName("hasRequiredSubNodes")
+    @Requirements(value = { LN03, LN01 })
+    @Description("Test if the scheduler has the required nodes with correct types as defined in IEC 61850-90-10:2017, table 7 (page 26)")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getAllSchedules")
     <X> void hasRequiredSubNodes(ScheduleDefinitions<X> scheduleConstants) {
 
@@ -153,9 +155,10 @@ public class ScheduleNodeTests extends AllianderBaseTest {
         }
     }
 
-    @Requirements(value = LN03,
-            description = "Test that SchdEntr is present and is updated by the currently running schedule as described in  IEC 61850-90-10:2017, table 7 (page 26)")
-    @ParameterizedTest(name = "SchdEntrIsUpdatedWithCurrentlyRunningScheduleIfPresent running {0}")
+    @DisplayName("SchdEntrIsUpdatedWithCurrentlyRunningScheduleIfPresent")
+    @Requirements(value = LN03)
+    @Description("Test that SchdEntr is present and is updated by the currently running schedule as described in  IEC 61850-90-10:2017, table 7 (page 26)")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getAllSchedules")
     <X> void SchdEntrIsUpdatedWithCurrentlyRunningScheduleIfPresent(ScheduleDefinitions<X> scheduleConstants)
             throws ServiceError, IOException, InterruptedException {
@@ -204,9 +207,10 @@ public class ScheduleNodeTests extends AllianderBaseTest {
      * not present (because it is not relevant for our use case thus we cannot/do not want to test the expected
      * behaviour). IEC 61850-90-10:2017, table 7 (page 26)
      **/
-    @Requirements(value = LN03,
-            description = "Test that ValINS is not available")
-    @ParameterizedTest(name = "ValINSIsUpdatedWithCurrentlyRunningScheduleIfPresent running {0}")
+    @DisplayName("ValINSIsUpdatedWithCurrentlyRunningScheduleIfPresent")
+    @Requirements(value = LN03)
+    @Description("Test that ValINS is not available")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getAllSchedules")
     void ValINSIsUpdatedWithCurrentlyRunningScheduleIfPresent(ScheduleDefinitions scheduleConstants) {
         testOptionalNodeNotPresent(scheduleConstants, "ValINS");
@@ -218,9 +222,10 @@ public class ScheduleNodeTests extends AllianderBaseTest {
      * 7 (page 26) if we don't have a boolean schedule we have a float schedule; in this case test that ValMV is present
      * and that it behaves like defined in the same table
      **/
-    @Requirements(value = LN03,
-            description = "Test ValSPS/ValMv behaves as defined in IEC 61850-90-10:2017, table 7 (page 26) ")
-    @ParameterizedTest(name = "ValSpsOrValMvIsUpdatedWithCurrentlyRunningSchedule running {0}")
+    @DisplayName("ValSpsOrValMvIsUpdatedWithCurrentlyRunningSchedule")
+    @Requirements(value = LN03)
+    @Description("Test ValSPS/ValMv behaves as defined in IEC 61850-90-10:2017, table 7 (page 26) ")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getAllSchedules")
     <X> void ValSpsOrValMvIsUpdatedWithCurrentlyRunningSchedule(ScheduleDefinitions<X> scheduleConstants)
             throws ServiceError, IOException, InterruptedException {
@@ -270,23 +275,24 @@ public class ScheduleNodeTests extends AllianderBaseTest {
         }
     }
 
-
     /**
      * ENS = enumerated status, we do not have a schedule with enumerated value thus we can not have the node ValENS
      * Test that ValENS is not present (because it is not relevant for our use case  thus we cannot/do not want to test
      * the expected behaviour). IEC 61850-90-10:2017, table 7 (page 26)
      **/
-    @Requirements(value = LN03,
-            description = "Test that ValENS is not available")
-    @ParameterizedTest(name = "ValEnsIsUpdatedWithCurrentlyRunningScheduleIfPresent running {0}")
+    @DisplayName("ValEnsIsUpdatedWithCurrentlyRunningScheduleIfPresent")
+    @Requirements(value = LN03)
+    @Description("Test that ValENS is not available")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getAllSchedules")
     void ValEnsIsUpdatedWithCurrentlyRunningScheduleIfPresent(ScheduleDefinitions<?> scheduleConstants) {
         testOptionalNodeNotPresent(scheduleConstants, "ValENS");
     }
 
-    @Requirements(value = LN03,
-            description = "Test if optional node ActStrTm is present it should behave like defined in IEC 61850-90-10:2017, table 7 (page 26)")
-    @ParameterizedTest(name = "ActStrTmIsUpdatedProperly running {0}")
+    @DisplayName("ActStrTmIsUpdatedProperly")
+    @Requirements(value = LN03)
+    @Description("Test if optional node ActStrTm is present it should behave like defined in IEC 61850-90-10:2017, table 7 (page 26)")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getAllSchedules")
     <X> void ActStrTmIsUpdatedProperly(ScheduleDefinitions<X> scheduleConstants)
             throws ServiceError, IOException, InterruptedException {
@@ -317,19 +323,20 @@ public class ScheduleNodeTests extends AllianderBaseTest {
         }
     }
 
-    @Requirements(value = LN03,
-            description = "Test if NxtStrTm is mandatory and should behave like defined in IEC 61850-90-10:2017, table 7 (page 26)")
-    @ParameterizedTest(name = "NxtStrTmIsUpdatedProperly running {0}")
+    @DisplayName("NxtStrTmIsUpdatedProperly")
+    @Requirements(value = LN03)
+    @Description("Test if NxtStrTm is mandatory and should behave like defined in IEC 61850-90-10:2017, table 7 (page 26)")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getAllSchedules")
     <X> void NxtStrTmIsUpdatedProperly(ScheduleDefinitions<X> scheduleConstants)
             throws ServiceError, IOException, InterruptedException {
         for (String scheduleName : scheduleConstants.getAllScheduleNames()) {
             PreparedSchedule schedule = scheduleConstants.prepareSchedule(scheduleConstants.getDefaultValues(1),
-                    scheduleConstants.getScheduleNumber(scheduleName), ofSeconds(2), Instant.now().plusMillis(500), 20);
+                    scheduleConstants.getScheduleNumber(scheduleName), ofSeconds(1), Instant.now().plusMillis(500), 20);
 
             //initial status
             dut.writeAndEnableSchedule(schedule);
-            Thread.sleep(1500);
+            Thread.sleep(2000);
             dut.disableSchedules(scheduleName);
 
             Thread.sleep(200);
@@ -347,11 +354,11 @@ public class ScheduleNodeTests extends AllianderBaseTest {
         }
     }
 
-    @Requirements(value = LN03,
-            description =
-                    "Test that EnaReq holds a reasonable error code after provoking errors whilst enabling schedules. "
-                            + "See IEC 61850-90-10:2017, table 7 (page 26)")
-    @ParameterizedTest(name = "EnaReq_operating running {0}")
+    @DisplayName("EnaReq_operating")
+    @Requirements(value = LN03)
+    @Description("Test that EnaReq holds a reasonable error code after provoking errors whilst enabling schedules. "
+            + "See IEC 61850-90-10:2017, table 7 (page 26)")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getAllSchedules")
     <X> void EnaReq_operating(ScheduleDefinitions<X> scheduleConstants)
             throws ServiceError, IOException, InterruptedException {
@@ -380,9 +387,10 @@ public class ScheduleNodeTests extends AllianderBaseTest {
         }
     }
 
-    @Requirements(value = LN03,
-            description = "Test that DsaReq behaves as described in IEC 61850-90-10:2017, table 7 (page 26)")
-    @ParameterizedTest(name = "DsaReq_operating running {0}")
+    @DisplayName("DsaReq_operating")
+    @Requirements(value = LN03)
+    @Description("Test that DsaReq behaves as described in IEC 61850-90-10:2017, table 7 (page 26)")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getAllSchedules")
     <X> void DsaReq_operating(ScheduleDefinitions<X> scheduleConstants)
             throws ServiceError, IOException, InterruptedException {
@@ -419,9 +427,10 @@ public class ScheduleNodeTests extends AllianderBaseTest {
         }
     }
 
-    @Requirements(value = { LN03, S08 },
-            description = "Test that SchdEnaErr holds MISSING_VALID_NUMENTR when writing invalid value to NumEntr.setVal (see IEC 61850-90-10:2017, table 7 (page 26))")
-    @ParameterizedTest(name = "schdEnaErr_HoldsMISSING_VALID_NUMENTRcorrectly running {0}")
+    @DisplayName("schdEnaErr_HoldsMISSING_VALID_NUMENTRcorrectly")
+    @Requirements(value = { LN03, S08 })
+    @Description("Test that SchdEnaErr holds MISSING_VALID_NUMENTR when writing invalid value to NumEntr.setVal (see IEC 61850-90-10:2017, table 7 (page 26))")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getAllSchedules")
     <X> void schdEnaErr_HoldsMISSING_VALID_NUMENTRcorrectly(ScheduleDefinitions<X> scheduleConstants)
             throws ServiceError, IOException, InterruptedException {
@@ -450,9 +459,10 @@ public class ScheduleNodeTests extends AllianderBaseTest {
         }
     }
 
-    @Requirements(value = { LN03, S08 },
-            description = "Test that SchdEnaErr holds MISSING_VALID_SCHDINTV when writing invalid value to SchdIntv.setVal (see IEC 61850-90-10:2017, table 7 (page 26))")
-    @ParameterizedTest(name = "SchdEnaErrHoldsMISSING_VALID_SCHDINTVcorrectly running {0}")
+    @DisplayName("SchdEnaErrHoldsMISSING_VALID_SCHDINTVcorrectly")
+    @Requirements(value = { LN03, S08 })
+    @Description("Test that SchdEnaErr holds MISSING_VALID_SCHDINTV when writing invalid value to SchdIntv.setVal (see IEC 61850-90-10:2017, table 7 (page 26))")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getAllSchedules")
     <X> void SchdEnaErrHoldsMISSING_VALID_SCHDINTVcorrectly(ScheduleDefinitions<X> scheduleConstants)
             throws ServiceError, IOException, InterruptedException {
@@ -485,9 +495,10 @@ public class ScheduleNodeTests extends AllianderBaseTest {
      * This test exists only for float values, there is no possibility to create such a test for boolean schedules (as
      * there are no invalid values for boolean)
      */
-    @Requirements(value = { LN03, S08 },
-            description = "Tests that SchdEnaErr holds the error code MISSING_VALID_SCHEDULE_VALUE when invalid values are written, for (Max)Power Schedules (see IEC 61850-90-10:2017, table 7 (page 26))")
-    @ParameterizedTest(name = "SchdEnaErrHoldsMISSING_VALID_SCHEDULE_VALUEScorrectlyFloatValues running {0}")
+    @DisplayName("SchdEnaErrHoldsMISSING_VALID_SCHEDULE_VALUEScorrectly")
+    @Requirements(value = { LN03, S08 })
+    @Description("Tests that SchdEnaErr holds the error code MISSING_VALID_SCHEDULE_VALUE when invalid values are written, for (Max)Power Schedules (see IEC 61850-90-10:2017, table 7 (page 26))")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getPowerValueSchedules")
     void SchdEnaErrHoldsMISSING_VALID_SCHEDULE_VALUEScorrectly(ScheduleDefinitions<Number> scheduleConstants)
             throws ServiceError, IOException, InterruptedException {
@@ -514,11 +525,12 @@ public class ScheduleNodeTests extends AllianderBaseTest {
         }
     }
 
-    @Requirements(value = LN03,
-            description =
-                    "Test that NumEntr can only be set to values > 0  and values <= the number of  instantiated Val[ASG|ING|SPG|ENG]'s "
-                            + "as stated in IEC 61850-90-10:2017, table 7 (page 26)")
-    @ParameterizedTest(name = "NumEntr_range running {0}")
+    @DisplayName("NumEntr_range")
+    @Requirements(value = LN03)
+    @Description(
+            "Test that NumEntr can only be set to values > 0  and values <= the number of  instantiated Val[ASG|ING|SPG|ENG]'s "
+                    + "as stated in IEC 61850-90-10:2017, table 7 (page 26)")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getAllSchedules")
     <X> void NumEntr_range(ScheduleDefinitions<X> scheduleConstants)
             throws ServiceError, IOException, InterruptedException {
@@ -557,8 +569,9 @@ public class ScheduleNodeTests extends AllianderBaseTest {
 
     }
 
+    @DisplayName("reserveSchedulesCannotBeDeactivated")
     @Requirements(S13)
-    @ParameterizedTest(name = "reserveSchedulesCannotBeDeactivated running {0}")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getAllSchedules")
     public void reserveSchedulesCannotBeDeactivated(ScheduleDefinitions scheduleConstants)
             throws ServiceError, IOException {
@@ -577,7 +590,8 @@ public class ScheduleNodeTests extends AllianderBaseTest {
         Assertions.assertEquals(ScheduleState.RUNNING, dut.getScheduleState(reserveSchedule));
     }
 
-    @ParameterizedTest(name = "reserveSchedulesHaveFixedPriority running {0}")
+    @DisplayName("reserveSchedulesHaveFixedPriority")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getAllSchedules")
     @Requirements(S14)
     public void reserveSchedulesHaveFixedPriority(ScheduleDefinitions scheduleConstants)
@@ -591,7 +605,8 @@ public class ScheduleNodeTests extends AllianderBaseTest {
         Assertions.assertEquals(10, dut.readSchedulePrio(reserveSchedule));
     }
 
-    @ParameterizedTest(name = "reserveSchedulesHaveFixedStart running {0}")
+    @DisplayName("reserveSchedulesHaveFixedStart")
+    @ParameterizedTest(name = " running {0}")
     @MethodSource("getAllSchedules")
     @Requirements(S15)
     public void reserveSchedulesHaveFixedStart(ScheduleDefinitions scheduleConstants) throws ServiceError, IOException {
