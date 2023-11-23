@@ -332,26 +332,21 @@ public class ScheduleNodeTests extends AllianderBaseTest {
     <X> void NxtStrTmIsUpdatedProperly(ScheduleDefinitions<X> scheduleConstants)
             throws ServiceError, IOException, InterruptedException {
         for (String scheduleName : scheduleConstants.getAllScheduleNames()) {
-            PreparedSchedule schedule = scheduleConstants.prepareSchedule(scheduleConstants.getDefaultValues(1),
-                    scheduleConstants.getScheduleNumber(scheduleName), ofSeconds(1), Instant.now().plusMillis(500), 20);
-
-            //initial status
-            dut.writeAndEnableSchedule(schedule);
-            Thread.sleep(2000);
+            // disable the schedule such that there is no planned execution
             dut.disableSchedules(scheduleName);
 
-            Thread.sleep(200);
-
-            //if schedule is disabled, quality of ActStrTm should be invalid
+            // no planned execution -> NxtStrTm quality should be "INVALID"
             Assertions.assertEquals("INVALID", dut.getNodeEntryasString(scheduleName, "NxtStrTm", "q"));
 
-            //if schedule is active, ActStrTm.stVal should have the timestamp the active schedule started
-            Instant timestamp = Instant.now().plusSeconds(2).truncatedTo(ChronoUnit.SECONDS);
+            // create a schedule in future such that we have a planned execution
+            Instant timestamp = Instant.now().plusSeconds(10).truncatedTo(ChronoUnit.SECONDS);
             PreparedSchedule preparedSchedule = scheduleConstants.prepareSchedule(scheduleConstants.getDefaultValues(1),
-                    scheduleConstants.getScheduleNumber(scheduleName), ofSeconds(2), timestamp, 20);
+                    scheduleConstants.getScheduleNumber(scheduleName), ofSeconds(2), timestamp, 200);
             dut.writeAndEnableSchedule(preparedSchedule);
-            Thread.sleep(200);
+
+            //if schedule is active, ActStrTm.stVal should have the timestamp the active schedule started and NxtStrTm quality should be "GOOD"
             Assertions.assertEquals(timestamp.toString(), dut.getNodeEntryasString(scheduleName, "NxtStrTm", "stVal"));
+            Assertions.assertEquals("GOOD", dut.getNodeEntryasString(scheduleName, "NxtStrTm", "q"));
         }
     }
 
