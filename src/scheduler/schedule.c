@@ -1509,6 +1509,8 @@ disableSchedule(Schedule self)
     schedule_updateCurrentValueQuality(self, currentTime, true);
 
     schedule_setActStrTmQualityInvalid(self, currentTime, true);
+
+    schedule_updateNxtStrTm(self, 0);
    
     schedule_udpateState(self, newState);
 }
