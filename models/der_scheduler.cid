@@ -78,7 +78,7 @@
           <LN inst="1" lnClass="FSCC" lnType="DERScheduler_FSCC_APC" prefix="ActPow_">
             <DOI desc="controlled entity" name="CtlEnt">
               <DAI name="setSrcRef">
-                <Val>@Control/ActPow_GGIO1.AnOut1.mxVal.f</Val>
+                <Val>@Control/ActPow_GGIO1.AnOut1</Val>
               </DAI>
             </DOI>
             <DOI name="Schd01">
@@ -140,7 +140,7 @@
           <LN inst="1" lnClass="FSCC" lnType="DERScheduler_FSCC_APC" prefix="MaxPow_">
             <DOI desc="controlled entity" name="CtlEnt">
               <DAI name="setSrcRef">
-                <Val>@Control/MaxPow_GGIO1.AnOut1.mxVal.f</Val>
+                <Val>@Control/MaxPow_GGIO1.AnOut1</Val>
               </DAI>
             </DOI>
             <DOI name="Schd01">
@@ -202,7 +202,7 @@
           <LN inst="1" lnClass="FSCC" lnType="DERScheduler_FSCC_SPC" prefix="OnOff_">
             <DOI desc="controlled entity" name="CtlEnt">
               <DAI name="setSrcRef">
-                <Val>@Control/OnOff_GGIO1.SPCSO1.stVal</Val>
+                <Val>@Control/OnOff_GGIO1.SPCSO1</Val>
               </DAI>
             </DOI>
             <DOI name="Schd01">
@@ -355,7 +355,7 @@
             <DOI name="ValASG001">
               <SDI name="setMag">
                 <DAI name="f">
-                  <Val>0</Val>
+                  <Val>11</Val>
                 </DAI>
               </SDI>
             </DOI>
@@ -366,7 +366,7 @@
             </DOI>
             <DOI name="StrTm01">
               <DAI name="setTm">
-                <Val>2020-01-01T00:00:00Z</Val>
+                <Val>1970-01-01T00:00:01Z</Val>
               </DAI>
               <SDI name="setCal">
                 <DAI name="occType">
@@ -374,6 +374,9 @@
                 </DAI>
                 <DAI name="occPer">
                   <Val>Hour</Val>
+                </DAI>
+                <DAI name="mn">
+                  <Val>0</Val>
                 </DAI>
               </SDI>
             </DOI>
@@ -483,7 +486,7 @@
             </DOI>
             <DOI name="StrTm01">
               <DAI name="setTm">
-                <Val>2020-01-01T00:00:00Z</Val>
+                <Val>1970-01-01T00:00:01Z</Val>
               </DAI>
               <SDI name="setCal">
                 <DAI name="occType">
@@ -597,7 +600,7 @@
             </DOI>
             <DOI name="StrTm01">
               <DAI name="setTm">
-                <Val>2020-01-01T00:00:00Z</Val>
+                <Val>1970-01-01T00:00:01Z</Val>
               </DAI>
               <SDI name="setCal">
                 <DAI name="occType">
@@ -728,21 +731,6 @@
       <DO name="ValSPG099" type="DERScheduler_SPG" />
       <DO name="ValSPG100" type="DERScheduler_SPG" />
       <DO name="StrTm01" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm02" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm03" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm04" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm05" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm06" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm07" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm08" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm09" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm10" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm11" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm12" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm13" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm14" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm15" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm16" type="DERScheduler_TSG_setCal" />
       <DO name="SchdReuse" type="DERScheduler_SPG" />
     </LNodeType>
     <LNodeType id="DERScheduler_FSCH_SPG_100_nonperiodic" lnClass="FSCH">
@@ -1107,21 +1095,6 @@
       <DO name="ValASG099" type="DERScheduler_ASG" />
       <DO name="ValASG100" type="DERScheduler_ASG" />
       <DO name="StrTm01" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm02" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm03" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm04" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm05" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm06" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm07" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm08" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm09" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm10" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm11" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm12" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm13" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm14" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm15" type="DERScheduler_TSG_setCal" />
-      <DO name="StrTm16" type="DERScheduler_TSG_setCal" />
       <DO desc="Schedule may be reused" name="SchdReuse" type="DERScheduler_SPG" />
     </LNodeType>
     <LNodeType id="DERScheduler_FSCH_ASG_100_nonperiodic" lnClass="FSCH">
@@ -1392,7 +1365,7 @@
     <LNodeType id="DERScheduler_FSCC_SPC" lnClass="FSCC">
       <DO name="Beh" type="ENS_Beh_On" />
       <DO name="ActSchdRef" type="DERScheduler_ORS" />
-      <DO name="ValSPS" type="DERScheduler_SPS_ScheduleOnOff" />
+      <DO name="ValSPS" type="DERScheduler_SPC_ScheduleOnOff" />
       <DO name="CtlEnt" type="DERScheduler_ORG" />
       <DO name="Schd01" type="DERScheduler_ORG" />
       <DO name="Schd02" type="DERScheduler_ORG" />
@@ -1430,7 +1403,7 @@
       <DO name="Proxy" type="DERScheduler_SPS" />
     </LNodeType>
     <DOType id="DERScheduler_TCS" cdc="TCS">
-      <DA name="stVal" bType="Timestamp" dchg="true" dupd="true" fc="ST" />
+      <DA name="stVal" bType="Timestamp" dchg="true" fc="ST" />
       <DA name="q" bType="Quality" qchg="true" fc="ST" />
       <DA name="t" bType="Timestamp" fc="ST" />
     </DOType>
@@ -1472,13 +1445,17 @@
       <DA name="units" bType="Struct" type="DERScheduler_Units_kW" dchg="true" fc="CF" />
       <DA name="d" bType="VisString255" fc="DC" />
     </DOType>
-    <DOType id="DERScheduler_SPS_ScheduleOnOff" cdc="SPS">
+    <DOType id="DERScheduler_SPC_ScheduleOnOff" cdc="SPC">
       <DA name="stVal" bType="BOOLEAN" dchg="true" fc="ST" />
       <DA name="q" bType="Quality" qchg="true" fc="ST" />
       <DA name="t" bType="Timestamp" fc="ST" />
+      <DA name="ctlModel" bType="Enum" type="CtlModelKind" dchg="true" fc="CF">
+        <Val>direct-with-normal-security</Val>
+      </DA>
+      <DA name="Oper" bType="Struct" type="DERScheduler_SPC_Oper" fc="CO" />
     </DOType>
     <DOType id="DERScheduler_INS" cdc="INS">
-      <DA name="stVal" bType="INT32" dchg="true" dupd="true" fc="ST" />
+      <DA name="stVal" bType="INT32" dchg="true" fc="ST" />
       <DA name="q" bType="Quality" qchg="true" fc="ST" />
       <DA name="t" bType="Timestamp" fc="ST" />
     </DOType>
@@ -1488,19 +1465,19 @@
       <DA name="t" bType="Timestamp" fc="ST" />
     </DOType>
     <DOType id="ENS_Beh_On" desc="Behaviour" cdc="ENS">
-      <DA name="stVal" bType="Enum" type="BehaviourModeKind" dchg="true" dupd="true" fc="ST">
+      <DA name="stVal" bType="Enum" type="BehaviourModeKind" dchg="true" fc="ST">
         <Val>on</Val>
       </DA>
       <DA name="q" bType="Quality" qchg="true" fc="ST" />
       <DA name="t" bType="Timestamp" fc="ST" />
     </DOType>
     <DOType id="ENS_Health" cdc="ENS" desc="Health">
-      <DA bType="Enum" dchg="true" dupd="true" fc="ST" name="stVal" type="HealthKind" />
+      <DA bType="Enum" dchg="true" fc="ST" name="stVal" type="HealthKind" />
       <DA bType="Quality" fc="ST" name="q" qchg="true" />
       <DA bType="Timestamp" fc="ST" name="t" />
     </DOType>
     <DOType id="DERScheduler_ENS_PhyHealth" cdc="ENS">
-      <DA bType="Enum" dchg="true" dupd="true" fc="ST" name="stVal" type="HealthKind" />
+      <DA bType="Enum" dchg="true" fc="ST" name="stVal" type="HealthKind" />
       <DA bType="Quality" fc="ST" name="q" qchg="true" />
       <DA bType="Timestamp" fc="ST" name="t" />
     </DOType>
@@ -1526,22 +1503,24 @@
       <DA bType="Quality" fc="MX" name="q" qchg="true" />
       <DA bType="Timestamp" fc="MX" name="t" />
       <DA bType="Enum" name="ctlModel" type="CtlModelKind" dchg="true" fc="CF" valKind="RO">
-        <Val>status-only</Val>
+        <Val>direct-with-normal-security</Val>
       </DA>
       <DA bType="Struct" dchg="true" fc="CF" name="units" type="DERScheduler_Units_kW" />
       <DA bType="Struct" dchg="true" fc="CF" name="minVal" type="AnalogueValue" />
       <DA bType="Struct" dchg="true" fc="CF" name="maxVal" type="AnalogueValue" />
       <DA bType="FLOAT32" dchg="true" fc="CF" name="dbRef" />
+      <DA name="Oper" fc="CO" bType="Struct" type="DERScheduler_APC_Oper" />
     </DOType>
     <DOType id="DERScheduler_APC_MaxPow" cdc="APC" desc="Maximum Output Power Setpoint">
       <DA bType="Struct" dchg="true" fc="MX" name="mxVal" type="AnalogueValue" />
       <DA bType="Quality" fc="MX" name="q" qchg="true" />
       <DA bType="Timestamp" fc="MX" name="t" />
       <DA bType="Enum" name="ctlModel" type="CtlModelKind" dchg="true" fc="CF" valKind="RO">
-        <Val>status-only</Val>
+        <Val>direct-with-normal-security</Val>
       </DA>
       <DA bType="Struct" dchg="true" fc="CF" name="units" type="DERScheduler_Units_kW" />
       <DA bType="FLOAT32" dchg="true" fc="CF" name="dbRef" />
+      <DA name="Oper" fc="CO" bType="Struct" type="DERScheduler_APC_Oper" />
     </DOType>
     <DOType id="DERScheduler_LPL" cdc="LPL">
       <DA bType="VisString255" fc="DC" name="vendor" />
@@ -1571,6 +1550,15 @@
     </DOType>
     <DAType id="DERScheduler_SPC_Oper">
       <BDA name="ctlVal" bType="BOOLEAN" />
+      <BDA name="origin" bType="Struct" type="DERScheduler_Originator" />
+      <BDA name="ctlNum" bType="INT8U" />
+      <BDA name="T" bType="Timestamp" />
+      <BDA name="Test" bType="BOOLEAN" />
+      <BDA name="Check" bType="Check" />
+      <ProtNs type="8-MMS">IEC 61850-8-1:2003</ProtNs>
+    </DAType>
+    <DAType id="DERScheduler_APC_Oper">
+      <BDA name="ctlVal" bType="Struct" type="AnalogueValue" />
       <BDA name="origin" bType="Struct" type="DERScheduler_Originator" />
       <BDA name="ctlNum" bType="INT8U" />
       <BDA name="T" bType="Timestamp" />

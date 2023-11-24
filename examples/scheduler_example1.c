@@ -127,11 +127,12 @@ main(int argc, char** argv)
         Scheduler_enableWriteAccessToParameter(sched, "@Control/OnOff_Res_FSCH01", SCHED_PARAM_STR_TM, false);
         Scheduler_enableWriteAccessToParameter(sched, "@Control/OnOff_Res_FSCH01", SCHED_PARAM_SCHD_PRIO, false);
 
-
         /* enable all fallback schedules */
         Scheduler_enableSchedule(sched, "@Control/ActPow_Res_FSCH01", true);
         Scheduler_enableSchedule(sched, "@Control/MaxPow_Res_FSCH01", true);
         Scheduler_enableSchedule(sched, "@Control/OnOff_Res_FSCH01", true);
+
+        Scheduler_initializeStorage(sched, "scheduler-db.json", 0, NULL);
 
         Thread workerThread = Thread_create(outputWorkerThread, NULL, false);
 

@@ -1,3 +1,16 @@
+/*
+ * Copyright 2023 MZ Automation GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
 #include "der_scheduler_internal.h"
 
 #include <string.h>
@@ -69,7 +82,6 @@ scheduler_parseModel(Scheduler self)
 
                 while (ln) {
                     /* check if LN name contains "FSCC" */
-
                     if (strstr(ln->name, "FSCC")) {
 
                         /* check for other indications DO "ActSchdRef", DO "CtlEnt", DO "ValXX", DO "SchdXX" */
@@ -131,11 +143,82 @@ Scheduler_create(IedModel* model, IedServer server)
         self->server = server;
         self->scheduleController = LinkedList_create();
         self->schedules = LinkedList_create();
+        self->storage = NULL;
 
         scheduler_parseModel(self);
     }
 
     return self;
+}
+
+static void
+restoreSchedules(Scheduler self)
+{
+    if (self->storage)
+    {
+        LinkedList schedElem = LinkedList_getNext(self->schedules);
+
+        while (schedElem)
+        {
+            Schedule sched = (Schedule)LinkedList_getData(schedElem);
+
+            SchedulerStorage_restoreSchedule(self->storage, sched);
+
+            schedElem = LinkedList_getNext(schedElem);
+        }
+    }
+}
+
+static void
+restoreScheduleControllers(Scheduler self)
+{
+    if (self->storage)
+    {
+        LinkedList controllerElem = LinkedList_getNext(self->scheduleController);
+
+        while (controllerElem) {
+            ScheduleController controller = (ScheduleController)LinkedList_getData(controllerElem);
+
+            SchedulerStorage_restoreScheduleController(self->storage, controller);
+
+            controllerElem = LinkedList_getNext(controllerElem);
+        }
+    }
+}
+
+void
+Scheduler_initializeStorage(Scheduler self, const char* databaseUri, int numberOfParameters, const char** parameters)
+{
+    if (self) {
+        if (self->storage) {
+            SchedulerStorage_destroy(self->storage);
+        }
+
+        self->storage = SchedulerStorage_init(databaseUri, numberOfParameters, parameters);
+
+        LinkedList scheduleElem = LinkedList_getNext(self->schedules);
+
+        while (scheduleElem) {
+            Schedule schedule = (Schedule)LinkedList_getData(scheduleElem);
+
+            schedule->storage = self->storage;
+
+            scheduleElem = LinkedList_getNext(scheduleElem);
+        }
+
+        LinkedList controllerElem = LinkedList_getNext(self->scheduleController);
+
+        while (controllerElem) {
+            ScheduleController controller = (ScheduleController)LinkedList_getData(controllerElem);
+
+            controller->storage = self->storage;
+
+            controllerElem = LinkedList_getNext(controllerElem);
+        }
+
+        restoreSchedules(self);
+        restoreScheduleControllers(self);
+    }
 }
 
 void
@@ -217,12 +300,12 @@ Scheduler_setTargetValueHandler(Scheduler self, Scheduler_TargetValueChanged han
 }
 
 void
-scheduler_targetValueChanged(Scheduler self, DataAttribute* targetAttr, MmsValue* value, Quality quality, uint64_t timestampMs)
+scheduler_targetValueChanged(Scheduler self, ModelNode* targetAttr, MmsValue* value, Quality quality, uint64_t timestampMs)
 {
     if (self->targetValueHandler) {
         char targetValueObjRef[130];
 
-        ModelNode_getObjectReferenceEx((ModelNode*)targetAttr, targetValueObjRef, true);
+        ModelNode_getObjectReferenceEx(targetAttr, targetValueObjRef, true);
 
         self->targetValueHandler(self->targetValueHandlerParameter, targetValueObjRef, value, quality, timestampMs);
     }

@@ -1,3 +1,16 @@
+/*
+ * Copyright 2023 MZ Automation GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
 #include "der_scheduler_internal.h"
 
 #include <stdio.h>
@@ -64,6 +77,11 @@ scheduleController_getActiveSchedule(ScheduleController self)
                 if (Schedule_getPrio(schedule) > Schedule_getPrio(activeSchedule)) {
                     activeSchedule = schedule;
                 }
+                else if (Schedule_getPrio(schedule) == Schedule_getPrio(activeSchedule)) {
+                    if (schedule->startTime > activeSchedule->startTime) {
+                        activeSchedule = schedule;
+                    }
+                }
             }
         }
 
@@ -77,7 +95,6 @@ static void
 scheduleController_updateTargetValue(ScheduleController self, ScheduleTargetType targetType, MmsValue* val, uint64_t currentTime)
 {
     if (self->controlEntity) {
-
         DataAttribute* valueAttr = NULL;
         DataAttribute* qAttr = NULL;
         DataAttribute* tAttr = NULL;
@@ -142,7 +159,10 @@ scheduleController_updateTargetValue(ScheduleController self, ScheduleTargetType
         }
 
         if (valueAttr) {
-            scheduler_targetValueChanged(self->scheduler, valueAttr, val, q, currentTime);
+            scheduler_targetValueChanged(self->scheduler, (ModelNode*)valueAttr, val, q, currentTime);
+        }
+        else {
+            scheduler_targetValueChanged(self->scheduler, self->controlEntity, val, q, currentTime);
         }
         
     }
@@ -284,9 +304,15 @@ scheduleController_scheduleStateUpdated(ScheduleController self, Schedule sched,
             // change active schedule
             self->activeSchedule = activeSchedule;
 
-            //TODO get current value from new running schedule
+            // get current value from new running schedule
 
             MmsValue* outputValue = Schedule_getCurrentValue(activeSchedule);
+
+            char valueBuf[100];
+
+            MmsValue_printToBuffer(outputValue, valueBuf, 100);
+
+            printf("INFO: New value %s\n", valueBuf);
 
             scheduleController_updateActSchdRef(self, self->activeSchedule);
             scheduleController_updateCurrentValue(self, activeSchedule->targetType, outputValue, Hal_getTimeInMs());
@@ -301,6 +327,7 @@ scheduleController_scheduleStateUpdated(ScheduleController self, Schedule sched,
         self->activeSchedule = NULL;
     }
 }
+
 /**
  * @brief Schedule informs the controller that its scheduled value was updated
  * 
@@ -387,6 +414,111 @@ scheduleController_lookUpTargetObject(ScheduleController self, const char* targe
     return NULL;
 }
 
+static int
+scheduleController_getNumberOfScheduleReferences(ScheduleController self)
+{
+    int scheduleRefCount = 0;
+
+    LinkedList dataObjects = ModelNode_getChildren((ModelNode*)self->controllerLn);
+
+    LinkedList doElem = LinkedList_getNext(dataObjects);
+
+    while (doElem) {
+        DataObject* dObj = (DataObject*)LinkedList_getData(doElem);
+
+        if (scheduler_checkIfMultiObjInst(dObj->name, "Schd")) {
+            scheduleRefCount++;
+        }
+
+        doElem = LinkedList_getNext(doElem);
+    }
+
+    LinkedList_destroyStatic(dataObjects);
+
+    printf("INFO: ScheduleController has %i Schd references\n", scheduleRefCount);
+
+    return scheduleRefCount;
+}
+
+DataAttribute*
+ScheduleController_getScheduleReferenceWithIdx(ScheduleController self, int idx)
+{
+    idx++;
+
+    DataAttribute* valueAttr = NULL;
+
+    char attrNameBuf[100];
+
+    char* multiObjStr = "Schd";
+
+    sprintf(attrNameBuf, "%s%i.setSrcRef", multiObjStr, idx);
+    valueAttr = (DataAttribute*)ModelNode_getChild((ModelNode*)self->controllerLn, attrNameBuf);
+
+    if (valueAttr == NULL) {
+        sprintf(attrNameBuf, "%s%02i.setSrcRef", multiObjStr, idx);
+        valueAttr = (DataAttribute*)ModelNode_getChild((ModelNode*)self->controllerLn, attrNameBuf);
+    }
+
+    if (valueAttr == NULL) {
+        sprintf(attrNameBuf, "%s%03i.setSrcRef", multiObjStr, idx);
+        valueAttr = (DataAttribute*)ModelNode_getChild((ModelNode*)self->controllerLn, attrNameBuf);
+    }
+
+    if (valueAttr == NULL) {
+        sprintf(attrNameBuf, "%s%04i.setSrcRef", multiObjStr, idx);
+        valueAttr = (DataAttribute*)ModelNode_getChild((ModelNode*)self->controllerLn, attrNameBuf);
+    };
+
+    return valueAttr;
+}
+
+void
+ScheduleController_setCtlEnt(ScheduleController self, const char* ctlEntValue)
+{
+    DataAttribute* ctlEnt_setSrcRef = (DataAttribute*)ModelNode_getChild((ModelNode*)self->controllerLn, "CtlEnt.setSrcRef");
+
+    if (ctlEnt_setSrcRef) {
+        ModelNode* targetObject = scheduleController_lookUpTargetObject(self, ctlEntValue);
+
+        if (targetObject) {
+            MmsValue_setVisibleString(ctlEnt_setSrcRef->mmsValue, ctlEntValue);
+        }
+        else {
+            printf("ERROR: ScheduleController_setCtlEnt - target object %s not found!\n", ctlEntValue);
+        }
+    }
+    else {
+        printf("ERROR: ScheduleController_setCtlEnt - CtlEnt.setSrcRef not found!\n");
+    }
+
+}
+
+bool
+ScheduleController_setSchdRef(ScheduleController self, const char* id, const char* ref)
+{
+    DataAttribute* schd = (DataAttribute*)ModelNode_getChild((ModelNode*)self->controllerLn, id);
+
+    if (schd) {
+        DataAttribute* schd_setSrcRef = (DataAttribute*)ModelNode_getChild((ModelNode*)schd, "setSrcRef");
+
+        if (schd_setSrcRef) {
+            MmsValue_setVisibleString(schd_setSrcRef->mmsValue, ref);
+        }
+        else {
+            printf("ERROR: schedule reference %s not found in schedule controller\n", ref);
+
+            return false;
+        }
+    }
+    else {
+        printf("ERROR: schedule reference %s not found in schedule controller\n", ref);
+
+        return false;
+    }
+
+    return true;
+}
+
 static MmsDataAccessError
 ctlEnt_setSrcRef_writeAccessHandler(DataAttribute* dataAttribute, MmsValue* value, ClientConnection connection, void* parameter)
 {
@@ -398,7 +530,6 @@ ctlEnt_setSrcRef_writeAccessHandler(DataAttribute* dataAttribute, MmsValue* valu
     ModelNode* targetObject = scheduleController_lookUpTargetObject(self, targetRef);
 
     if (targetObject) {
-        //TODO set targetObject
         self->controlEntity = targetObject;
         printf("INFO: control entity set: %s\n", targetRef);
     }
@@ -408,7 +539,13 @@ ctlEnt_setSrcRef_writeAccessHandler(DataAttribute* dataAttribute, MmsValue* valu
         return DATA_ACCESS_ERROR_OBJECT_VALUE_INVALID;
     }
 
-    return DATA_ACCESS_ERROR_SUCCESS;
+    IedServer_updateAttributeValue(self->server, dataAttribute, value);
+
+    if (self->storage) {
+        SchedulerStorage_saveScheduleController(self->storage, self);
+    }
+
+    return DATA_ACCESS_ERROR_SUCCESS_NO_UPDATE;
 }
 
 static MmsDataAccessError
@@ -455,8 +592,20 @@ schd_setSrcRef_writeAccessHandler(DataAttribute* dataAttribute, MmsValue* value,
     LinkedList_add(self->schedules, sched);
 
     Schedule_setListeningController(sched, self);
+
+    IedServer_updateAttributeValue(self->server, dataAttribute, value);
+
+    if (self->storage) {
+        SchedulerStorage_saveScheduleController(self->storage, self);
+    }
     
-    return DATA_ACCESS_ERROR_SUCCESS;
+    return DATA_ACCESS_ERROR_SUCCESS_NO_UPDATE;
+}
+
+int
+ScheduleController_getRefCount(ScheduleController self)
+{
+    return scheduleController_getNumberOfScheduleReferences(self);
 }
 
 void
@@ -540,4 +689,3 @@ ScheduleController_initialize(ScheduleController self)
     Schedule activeSchedule = scheduleController_getActiveSchedule(self);
     scheduleController_updateActSchdRef(self, activeSchedule);
 }
-

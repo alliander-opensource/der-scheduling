@@ -1,0 +1,27 @@
+{
+    "format": "der-scheduler-db",
+    "version": 1,
+    "schedules" : [
+        {
+            "objRef": "Control/ActPow_FSCH01",
+            "state": "running",
+            "reuse": true,
+            "prio": 99,
+            "numEntr": 5,
+            "schdIntv": 100,
+            "values":[
+                12.5,
+                32.4,
+                12.4,
+                12.1,
+                23.2
+            ],
+            "startTimes": [
+                {
+                    "id": "StrTm01",
+                    "t": 166606000600
+                }
+            ]
+        }
+    ]
+}

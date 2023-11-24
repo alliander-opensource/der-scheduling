@@ -1,4 +1,24 @@
+/*
+ * Copyright 2023 MZ Automation GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
+ */
+
+#ifndef _DER_SCHEDULER_H
+#define _DER_SCHEDULER_H
+
 #include <libiec61850/iec61850_server.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct sScheduler* Scheduler;
 
@@ -11,6 +31,17 @@ typedef struct sScheduler* Scheduler;
  */
 Scheduler
 Scheduler_create(IedModel* model, IedServer server);
+
+/**
+ * @brief Set a storage instance to use to persist schedule data
+ * 
+ * @param self the scheduler instance
+ * @param databaseUri data base URI that are passed to the persistency layer
+ * @param numberOfParameter number of parameters that are passed to the persitency layer
+ * @param parameters parameters that are passed to the persistency layer
+*/
+void
+Scheduler_initializeStorage(Scheduler self, const char* databaseUri, int numberOfParameters, const char** parameters);
 
 /**
  * @brief Callback to receive notifications on target value changes
@@ -96,3 +127,9 @@ Scheduler_enableWriteAccessToParameter(Scheduler self, const char* scheduleRef, 
  */
 void
 Scheduler_destroy(Scheduler self);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* _DER_SCHEDULER_H */
