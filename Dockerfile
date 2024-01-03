@@ -7,6 +7,7 @@ RUN apt-get update && \
 RUN git clone https://github.com/mz-automation/libiec61850.git /var/lib/libiec61850 && \
     mkdir /var/lib/libiec61850/build && \
     cd /var/lib/libiec61850/build && \
+    git checkout v1.5 && \
     cmake .. && \
     make && \
     make install && \
