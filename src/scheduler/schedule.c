@@ -422,22 +422,32 @@ schedule_updateNxtStrTm(Schedule self, uint64_t nextStartTime)
 }
 
 static uint64_t
-updateNextStartTime(DataObject* dObj, uint64_t nextStartTime, uint64_t currentTime)
+getStartTimeValue(DataObject* dObj)
 {
+    uint64_t strTmValue = 0;
+
     DataAttribute* setTm = (DataAttribute*)ModelNode_getChild((ModelNode*)dObj, "setTm");
 
     if (setTm && setTm->mmsValue) {
-        uint64_t strTmVal = MmsValue_getUtcTimeInMs(setTm->mmsValue);
+        strTmValue = MmsValue_getUtcTimeInMs(setTm->mmsValue);
+    }
 
-        if (strTmVal > currentTime) {
+    return strTmValue;
+}
 
-            if (nextStartTime == 0) {
+static uint64_t
+updateNextStartTime(DataObject* dObj, uint64_t nextStartTime, uint64_t currentTime)
+{
+    uint64_t strTmVal = getStartTimeValue(dObj);
+
+    if (strTmVal > currentTime) {
+
+        if (nextStartTime == 0) {
+            nextStartTime = strTmVal;
+        }
+        else {
+            if (strTmVal <= nextStartTime) {
                 nextStartTime = strTmVal;
-            }
-            else {
-                if (strTmVal <= nextStartTime) {
-                    nextStartTime = strTmVal;
-                }
             }
         }
     }
@@ -551,11 +561,157 @@ updateNextPeriodicStartTime(Schedule self, DataObject* dObj, uint64_t nextStartT
 }
 
 static uint64_t
-schedule_getNextStartTime(Schedule self)
+getClosestPeriodicStartTime(Schedule self, DataObject* dObj, uint64_t timestamp, SetCalValues setCalValues)
 {
     uint64_t nextStartTime = 0;
 
-    uint64_t currentTime = Hal_getTimeInMs();
+    /* check if setCal values are supported */
+
+    if (setCalValues->occTypeVal != 0) {
+        printf("ERROR: Only occType = Time(0) is supported (is %i)\n", setCalValues->occTypeVal);
+
+        return 0;
+    }
+
+    if (setCalValues->occPerVal != 0 && setCalValues->occPerVal != 1) {
+        printf("ERROR: Only occPer = Hour(0) or Day(1) is supported\n");
+
+        return 0;        
+    }
+ 
+    /* convert current time to broken down time */
+
+    uint64_t msPart = timestamp % 1000;
+
+    time_t curTm = timestamp / 1000;
+
+    struct tm btTimeBuf;
+
+    struct tm* brokenDownTime = localtime_r(&curTm, &btTimeBuf);
+
+    if (brokenDownTime == NULL) {
+        printf("ERROR: Failed to convert timestamp to local time\n");
+
+        return 0;
+    }
+
+    if (setCalValues->occPerVal == 1 /* Day */) 
+    {
+        brokenDownTime->tm_hour = setCalValues->hrVal;
+
+        /* convert to unix time and check if is in the future or past */
+        uint64_t startTime = (timelocal(brokenDownTime) * 1000) + msPart;
+
+        /* if this time is in the future then check if it is the new nextStartTime */
+        if (startTime <= timestamp)
+        {
+            /* check if the periodic schedule is currently running */
+            uint64_t lastExecutionEnd = startTime + (Schedule_getSchdIntvInMs(self) * Schedule_getNumEntr(self));
+
+            if (timestamp < lastExecutionEnd) {
+                nextStartTime = startTime;
+            }
+        }
+
+        return nextStartTime;
+    }
+    else /* (setCalValues->occPerVal == 0 (Hour)) */ 
+    {
+        brokenDownTime->tm_min = setCalValues->mnVal;
+
+        /* convert to unix time and check if is in the future or past */
+        uint64_t startTime = (timelocal(brokenDownTime) * 1000) + msPart;
+
+        /* if this time is in the future then check if it is the new nextStartTime */
+        if (startTime <= timestamp)
+        {
+            /* check if the periodic schedule is currently running */
+            uint64_t lastExecutionEnd = startTime + (Schedule_getSchdIntvInMs(self) * Schedule_getNumEntr(self));
+
+            if (timestamp < lastExecutionEnd) {
+                nextStartTime = startTime;
+            }
+        }
+
+        return nextStartTime;
+    }
+}
+
+static uint64_t
+schedule_getClosestStartTime(Schedule self, uint64_t timestamp)
+{
+    uint64_t nextStartTime = 0;
+
+    //TODO move to object variable to avoid calling this function again and again?
+    LinkedList dataObjects = ModelNode_getChildren((ModelNode*)self->scheduleLn);
+
+    LinkedList doElem = LinkedList_getNext(dataObjects);
+
+    while (doElem)
+    {
+        DataObject* dObj = (DataObject*)LinkedList_getData(doElem);
+
+        // check that data object name is "StrTmXXX"
+        if (checkIfStrTm(dObj->name))
+        {
+            if (isPeriodic(self))
+            {
+                struct sSetCalValues setCalValues;
+
+                if (handleSetCal(self, dObj, &setCalValues))
+                {
+                    uint64_t strTmVal = getClosestPeriodicStartTime(self, dObj, timestamp, &setCalValues);
+
+                    if ((strTmVal <= timestamp) && (strTmVal > nextStartTime)) {
+                        nextStartTime = strTmVal;
+                    }
+                }
+                else {
+                    printf("ERROR: Invalid setCal attribute\n");
+                }
+            }
+            else
+            {
+                uint64_t strTmVal = getStartTimeValue(dObj);
+
+                if (nextStartTime == 0) {
+                    nextStartTime = strTmVal;
+                }
+
+                if ((strTmVal <= timestamp) && (strTmVal > nextStartTime)) {
+                    nextStartTime = strTmVal;
+                }
+            }
+        }
+
+        doElem = LinkedList_getNext(doElem);
+    }
+
+    uint64_t strTmVal = self->startTime;
+
+    if (nextStartTime == 0) {
+        nextStartTime = strTmVal;
+    }
+
+    if ((strTmVal <= timestamp) && (strTmVal > nextStartTime)) {
+        nextStartTime = strTmVal;
+    }
+
+    LinkedList_destroyStatic(dataObjects);
+
+    return nextStartTime;    
+}
+
+static uint64_t
+schedule_getCurrentStartTime(Schedule self)
+{
+    return self->startTime;
+}
+
+static uint64_t
+schedule_getNextStartTime(Schedule self, uint64_t currentTime)
+{
+    uint64_t nextStartTime = 0;
 
     LinkedList dataObjects = ModelNode_getChildren((ModelNode*)self->scheduleLn);
 
@@ -567,8 +723,8 @@ schedule_getNextStartTime(Schedule self)
         // check that data object name is "StrTmXXX"
         if (checkIfStrTm(dObj->name)) {
 
-            if (isPeriodic(self)) {
-                //TODO get the next periodic start time
+            if (isPeriodic(self))
+            {
                 struct sSetCalValues setCalValues;
 
                 if (handleSetCal(self, dObj, &setCalValues)) {
@@ -590,18 +746,6 @@ schedule_getNextStartTime(Schedule self)
     LinkedList_destroyStatic(dataObjects);
 
     return nextStartTime;
-}
-
-LinkedList
-Schedule_getStartTimes(Schedule self)
-{
-    LogicalNode* schedLn = self->scheduleLn;
-
-    DataObject* dobj = (DataObject*)(schedLn->firstChild);
-
-    while (dobj) {
-
-    }
 }
 
 /**
@@ -1229,17 +1373,17 @@ getSchdIntvValueInMs(Schedule self)
 static int
 schedule_getNumEntrValue(Schedule self)
 {
-    int numEntrVal = -1;
+    int numEntry = 0;
 
-    DataAttribute* numEntr = (DataAttribute*)ModelNode_getChild((ModelNode*)self->scheduleLn, "NumEntr.setVal");
+    DataAttribute* numEntry_setVal = (DataAttribute*)ModelNode_getChild((ModelNode*)(self->scheduleLn), "NumEntr.setVal");
 
-    if (numEntr) {
-        if ((numEntr->mmsValue) && (MmsValue_getType(numEntr->mmsValue) == MMS_INTEGER)) {
-            numEntrVal = MmsValue_toInt32(numEntr->mmsValue);
+    if (numEntry_setVal) {
+        if (numEntry_setVal->mmsValue && MmsValue_getType(numEntry_setVal->mmsValue) == MMS_INTEGER) {
+            numEntry = MmsValue_toInt32(numEntry_setVal->mmsValue);
         }
     }
-    
-    return numEntrVal;
+
+    return numEntry;
 }
 
 static bool
@@ -1428,7 +1572,7 @@ enabledSchedule(Schedule self)
     schedule_udpateState(self, newState);
 
     if (newState == SCHD_STATE_READY) {
-        uint64_t nextStartTime = schedule_getNextStartTime(self);
+        uint64_t nextStartTime = schedule_getNextStartTime(self, Hal_getTimeInMs());
 
         schedule_updateNxtStrTm(self, nextStartTime);
 
@@ -1731,7 +1875,7 @@ schedule_thread(void* parameter)
             bool startSchedule = false;
 
             if (self->nextStartTime == 0) {
-                self->nextStartTime = schedule_getNextStartTime(self);
+                self->nextStartTime = schedule_getNextStartTime(self, Hal_getTimeInMs());
             }
 
             if ((self->nextStartTime != 0) && (currentTime > self->nextStartTime)) {
@@ -1753,7 +1897,7 @@ schedule_thread(void* parameter)
 
                 eraseStartTime(self, self->startTime);
 
-                self->nextStartTime = schedule_getNextStartTime(self);
+                self->nextStartTime = schedule_getNextStartTime(self, Hal_getTimeInMs());
 
                 schedule_updateNxtStrTm(self, self->nextStartTime);
 
@@ -1804,7 +1948,7 @@ schedule_thread(void* parameter)
                     schedule_setActStrTmQualityInvalid(self, currentTime, true);
 
                     /* check for next state */
-                    self->nextStartTime = schedule_getNextStartTime(self);
+                    self->nextStartTime = schedule_getNextStartTime(self, Hal_getTimeInMs());
                    
                     if (self->nextStartTime) {
                         schedule_updateNxtStrTm(self, self->nextStartTime);
@@ -1835,6 +1979,167 @@ schedule_thread(void* parameter)
 
         Thread_sleep(100);
     }
+}
+
+ScheduleEvent
+ScheduleEvent_create(uint64_t timestamp, MmsValue* value, int priority, uint64_t startTime)
+{
+    ScheduleEvent self = (ScheduleEvent)calloc(1, sizeof(struct sScheduleEvent));
+
+    if (self) {
+        self->timestamp = timestamp;
+        self->lastStartTime = startTime;
+        self->value = value;
+        self->priority = priority;
+    }
+
+    return self;
+}
+
+MmsValue*
+ScheduleEvent_getValue(ScheduleEvent self)
+{
+    return self->value;
+}
+
+uint64_t
+ScheduleEvent_getTime(ScheduleEvent self)
+{
+    return self->timestamp;
+}
+
+void
+ScheduleEvent_destroy(ScheduleEvent self)
+{
+    if (self)
+    {
+        MmsValue_delete(self->value);
+        free(self);
+    }
+}
+
+ScheduleEvent
+Schedule_getValueAt(Schedule self, uint64_t timestamp)
+{
+    ScheduleEvent event = NULL;
+
+    if ((Schedule_getState(self) == SCHD_STATE_RUNNING) || (Schedule_getState(self) == SCHD_STATE_READY))
+    {
+        // 1. Get the latest start time before timestamp
+        uint64_t strTmVal = schedule_getClosestStartTime(self, timestamp);
+
+        if (strTmVal > 0)
+        {
+            /* check if timestamp is inside the schedule execution */
+            int noOfEntryValues = schedule_getNumEntrValue(self);
+            int intvInMs = Schedule_getSchdIntvInMs(self);
+
+            uint64_t scheduleDuration = noOfEntryValues * intvInMs;
+
+            if ((timestamp >= strTmVal) && (timestamp <= strTmVal + scheduleDuration)) {
+                uint64_t relTime = timestamp - strTmVal;
+
+                int idx = relTime / intvInMs;
+
+                //TODO printf("idx: %i relTime: %lu intvInMs: %i\n", idx, relTime, intvInMs);
+
+                MmsValue* val = Schedule_getValueWithIdx(self, idx);
+
+                event = ScheduleEvent_create(timestamp, MmsValue_clone(val), Schedule_getPrio(self), strTmVal);
+            }
+        }
+    }
+
+    if (event == NULL) {
+        event = ScheduleEvent_create(timestamp, NULL, Schedule_getPrio(self), 0);
+    }
+
+    return event;
+}
+
+LinkedList
+Schedule_runSchedule(Schedule self, uint64_t startTime, uint64_t endTime)
+{
+    LinkedList scheduleEvents = NULL;
+
+    MmsValue* scheduleValueAtStartTime = NULL;
+
+    int priority = Schedule_getPrio(self);
+
+    if (schedule_getState(self) == SCHD_STATE_RUNNING)
+    {
+        uint64_t currentTime = Hal_getTimeInMs();
+
+        DataAttribute* curValue = schedule_getCurrentValueAttribute(self);
+
+        scheduleValueAtStartTime = curValue->mmsValue;
+
+        scheduleEvents = LinkedList_create();
+
+        ScheduleEvent event = ScheduleEvent_create(currentTime, MmsValue_clone(curValue->mmsValue), priority, self->startTime);
+   
+        LinkedList_add(scheduleEvents, event);
+
+        int noOfEntryValues = schedule_getNumEntrValue(self);
+        int intvInMs = Schedule_getSchdIntvInMs(self);
+
+        int idx = schedule_getCurrentIdx(self, currentTime);
+
+        uint64_t currentStrTm = schedule_getCurrentStartTime(self);
+
+        for (int i = idx + 1; i < noOfEntryValues; i++)
+        {
+            uint64_t eventTime = currentStrTm + (i * intvInMs);
+
+            MmsValue* eventValue = Schedule_getValueWithIdx(self, i);
+
+            event = ScheduleEvent_create(eventTime, MmsValue_clone(eventValue), priority, currentStrTm);
+
+            LinkedList_add(scheduleEvents, event);
+        }
+    }
+    else 
+    {
+        if (schedule_getState(self) != SCHD_STATE_READY) {
+            /* no schedule available */
+            return scheduleEvents; 
+        }
+
+        //get next start time
+        uint64_t nextStrTm = schedule_getNextStartTime(self, Hal_getTimeInMs());
+
+        if (nextStrTm == 0) {
+            /* no schedule available */
+            printf("WARNING: No valid next StrTm found\n");
+
+            return scheduleEvents;
+        }
+        else {
+            scheduleEvents = LinkedList_create();
+
+            MmsValue* val = Schedule_getValueWithIdx(self, 0);
+
+            ScheduleEvent event = ScheduleEvent_create(nextStrTm, MmsValue_clone(val), priority, nextStrTm);
+
+            int noOfEntryValues = schedule_getNumEntrValue(self);
+            int intvInMs = Schedule_getSchdIntvInMs(self);
+
+            LinkedList_add(scheduleEvents, event);
+
+            for (int i = 1; i < noOfEntryValues; i++)
+            {
+                uint64_t eventTime = nextStrTm + (i * intvInMs);
+
+                MmsValue* eventValue = Schedule_getValueWithIdx(self, i);
+
+                event = ScheduleEvent_create(eventTime, MmsValue_clone(eventValue), priority, nextStrTm);
+
+                LinkedList_add(scheduleEvents, event);
+            }
+        }
+    }
+
+    return scheduleEvents;
 }
 
 Schedule
@@ -1922,7 +2227,8 @@ Schedule_create(LogicalNode* schedLn, IedServer server, IedModel* model)
 
         self = (Schedule)calloc(1, sizeof(struct sSchedule));
 
-        if (self && knownScheduleControllers) {
+        if (self && knownScheduleControllers)
+        {
             self->storage = NULL;
             self->scheduleLn = schedLn;
             self->server = server;
@@ -2010,6 +2316,9 @@ Schedule_destroy(Schedule self)
         self->alive = false;
         Thread_destroy(self->thread);
 
+        if (self->knownScheduleControllers)
+            LinkedList_destroyStatic(self->knownScheduleControllers);
+
         free(self);
     }
 }
@@ -2072,17 +2381,7 @@ Schedule_setSchdReuse(Schedule self, bool reuse)
 int
 Schedule_getNumEntr(Schedule self)
 {
-    int numEntry = 0;
-
-    DataAttribute* numEntry_setVal = (DataAttribute*)ModelNode_getChild((ModelNode*)(self->scheduleLn), "NumEntr.setVal");
-
-    if (numEntry_setVal) {
-        if (numEntry_setVal->mmsValue && MmsValue_getType(numEntry_setVal->mmsValue) == MMS_INTEGER) {
-            numEntry = MmsValue_toInt32(numEntry_setVal->mmsValue);
-        }
-    }
-
-    return numEntry;
+    return schedule_getNumEntrValue(self);
 }
 
 void

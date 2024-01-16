@@ -689,3 +689,226 @@ ScheduleController_initialize(ScheduleController self)
     Schedule activeSchedule = scheduleController_getActiveSchedule(self);
     scheduleController_updateActSchdRef(self, activeSchedule);
 }
+
+static int
+compareUint64(const void* a, const void* b)
+{
+    uint64_t aVal = *((uint64_t*)a);
+    uint64_t bVal = *((uint64_t*)b);
+
+    if (aVal == bVal)
+        return 0;
+    else if (aVal < bVal)
+        return -1;
+    else
+        return 1;
+}
+
+LinkedList
+ScheduleController_createForecast(ScheduleController self, uint64_t startTime, uint64_t endTime)
+{
+    LinkedList listOfSchedules = LinkedList_create();
+
+    /* 1. Calculate the forecasts for the individual schedules */
+
+    LinkedList schedulesElem = LinkedList_getNext(self->schedules);
+
+    int numberOfSchedules = 0;
+
+    while (schedulesElem)
+    {
+        Schedule sched = (Schedule)LinkedList_getData(schedulesElem);
+
+        LinkedList scheduleForecast = Schedule_runSchedule(sched, startTime, endTime);
+
+        if (scheduleForecast) {
+            LinkedList_add(listOfSchedules, scheduleForecast);
+            numberOfSchedules++;
+        }
+
+        schedulesElem = LinkedList_getNext(schedulesElem);
+    }
+
+    /* 2. get the relevant times */
+
+    uint64_t currentTime = 0;
+
+    LinkedList timestamps = LinkedList_create();
+
+    LinkedList lastTimestamp = timestamps;
+
+    schedulesElem = LinkedList_getNext(listOfSchedules);
+
+    while (schedulesElem)
+    {
+        LinkedList scheduleForecast = LinkedList_getData(schedulesElem);
+
+        LinkedList scheduleForecastElem = LinkedList_getNext(scheduleForecast);
+
+        while (scheduleForecastElem)
+        {
+            ScheduleEvent event = (ScheduleEvent)LinkedList_getData(scheduleForecastElem);
+
+            uint64_t* timestamp = (uint64_t*)calloc(1, sizeof(uint64_t));
+
+            if (timestamp)
+            {
+                *timestamp = event->timestamp;
+
+                lastTimestamp = LinkedList_insertAfter(lastTimestamp, timestamp);
+            }
+            else {
+                printf("ERROR: Failed to allocate memory for timestamp\n");
+            }
+
+            scheduleForecastElem = LinkedList_getNext(scheduleForecastElem);
+        }
+
+        LinkedList_destroyDeep(scheduleForecast, (LinkedListValueDeleteFunction)ScheduleEvent_destroy);
+
+        schedulesElem = LinkedList_getNext(schedulesElem);
+    }
+
+    LinkedList_destroyStatic(listOfSchedules);
+
+    /* remove multiple occurences of timestamps from the list */
+
+    LinkedList timestampsElem = LinkedList_getNext(timestamps);
+
+    uint64_t previousTimestamp = 0;
+    int numberOfDifferentTimestamps = 0;
+
+    while (timestampsElem)
+    {
+        uint64_t* ts = (uint64_t*)LinkedList_getData(timestampsElem);
+
+        if (*ts != previousTimestamp) {
+            numberOfDifferentTimestamps++;
+            previousTimestamp = *ts;
+        }
+
+        timestampsElem = LinkedList_getNext(timestampsElem);
+    }
+
+    LinkedList resultSchedule = NULL;
+
+    uint64_t* tsList = (uint64_t*)calloc(numberOfDifferentTimestamps, sizeof(uint64_t));
+
+    if (tsList)
+    {
+        int idx = 0;
+        previousTimestamp = 0;
+        numberOfDifferentTimestamps = 0;
+
+        timestampsElem = LinkedList_getNext(timestamps);
+
+        while (timestampsElem)
+        {
+            uint64_t* ts = (uint64_t*)LinkedList_getData(timestampsElem);
+
+            bool addToList = true;
+
+            if (idx > 0)
+            {
+                for (int j = 0; j < idx; j++) {
+                    if (tsList[j] == *ts) {
+                        addToList = false;
+                        break;
+                    }
+                }
+            }
+
+            if (addToList) {
+                tsList[idx++] = *ts;
+                numberOfDifferentTimestamps++;
+            }
+
+            timestampsElem = LinkedList_getNext(timestampsElem);
+        }
+
+        /* sort the list */
+        qsort(tsList, idx, sizeof(uint64_t), compareUint64);
+
+        /* create the result schedule */
+        resultSchedule = LinkedList_create();
+
+        ScheduleEvent lastValue = NULL;
+
+        for (int i = 0; i < numberOfDifferentTimestamps; i++)
+        {
+            schedulesElem = LinkedList_getNext(self->schedules);
+
+            ScheduleEvent currentEvent = NULL;
+
+            while (schedulesElem)
+            {
+                Schedule sched = (Schedule)LinkedList_getData(schedulesElem);
+
+                ScheduleEvent event = Schedule_getValueAt(sched, tsList[i]);
+
+                if (event)
+                {
+                    if (event->value)
+                    {
+                        if (currentEvent == NULL) {
+                            currentEvent = event;
+                        }
+                        else
+                        {
+                            if (event->priority > currentEvent->priority) {
+                                ScheduleEvent_destroy(currentEvent);
+                                currentEvent = event;
+                            }
+                            else if (event->priority == currentEvent->priority) {
+                                if (event->lastStartTime > currentEvent->lastStartTime) {
+                                    ScheduleEvent_destroy(currentEvent);
+                                    currentEvent = event;
+                                }
+                                else {
+                                    ScheduleEvent_destroy(event);
+                                }
+                            }
+                            else {
+                                ScheduleEvent_destroy(event);
+                            }
+                        }
+                    }
+                    else {
+                        ScheduleEvent_destroy(event);
+                    }
+                }
+
+                schedulesElem = LinkedList_getNext(schedulesElem);
+            }
+
+            if (currentEvent)
+            {
+                /* check if value is equal to previous value */
+                if ((lastValue != NULL) &&
+                    (MmsValue_equals(currentEvent->value, lastValue->value)))
+                {
+                    ScheduleEvent_destroy(currentEvent);
+                }
+                else {
+                    LinkedList_add(resultSchedule, currentEvent);
+
+                    char valueBuf[50];
+
+                    MmsValue_printToBuffer(currentEvent->value, valueBuf, 50);
+
+                    lastValue = currentEvent;
+                }
+
+                if (lastValue == NULL) {
+                    lastValue = currentEvent;
+                }
+            }
+        }
+
+        free(tsList);
+    }
+
+    LinkedList_destroy(timestamps);
+
+    return resultSchedule;
+}
