@@ -268,16 +268,32 @@ Scheduler_createScheduleForecast(Scheduler self, const char* scheduleRef, uint64
 }
 
 LinkedList
-Scheduler_createForecast(Scheduler self, const char* schedCtrRef, uint64_t startTime, uint64_t endTime)
+Scheduler_createForecast(Scheduler self, const char* schedCtrlRef, uint64_t startTime, uint64_t endTime)
 {
-    ScheduleController scc = Scheduler_getScheduleControllerByObjRef(self, schedCtrRef);
+    ScheduleController scc = Scheduler_getScheduleControllerByObjRef(self, schedCtrlRef);
 
     if (scc)
     {
         return ScheduleController_createForecast(scc, startTime, endTime);
     }
     else {
-        printf("WARN: Schedule controller %s not found\n", schedCtrRef);
+        printf("WARN: Schedule controller %s not found\n", schedCtrlRef);
+
+        return NULL;
+    }
+}
+
+const char*
+Scheduler_getCtlEntityRef(Scheduler self, const char* schedCtrlRef)
+{
+    ScheduleController scc = Scheduler_getScheduleControllerByObjRef(self, schedCtrlRef);
+
+    if (scc)
+    {
+        return ScheduleController_getCtlEntRef(scc);
+    }
+    else {
+        printf("WARN: Schedule controller %s not found\n", schedCtrlRef);
 
         return NULL;
     }

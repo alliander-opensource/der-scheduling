@@ -146,6 +146,9 @@ ScheduleController_getScheduleReferenceWithIdx(ScheduleController self, int idx)
 void
 ScheduleController_setCtlEnt(ScheduleController self, const char* ctlEntValue);
 
+const char*
+ScheduleController_getCtlEntRef(ScheduleController self);
+
 bool
 ScheduleController_setSchdRef(ScheduleController self, const char* id, const char* ref);
 

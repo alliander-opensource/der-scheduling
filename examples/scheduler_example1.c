@@ -136,6 +136,8 @@ main(int argc, char** argv)
 
         Thread workerThread = Thread_create(outputWorkerThread, NULL, false);
 
+        printf("Target for @Control/ActPow_FSCC1: %s\n", Scheduler_getCtlEntityRef(sched, "@Control/ActPow_FSCC1"));
+
         IedServer_start(server, 102);
 
         int count = 0;

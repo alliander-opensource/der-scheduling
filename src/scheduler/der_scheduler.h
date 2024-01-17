@@ -105,6 +105,9 @@ Scheduler_createScheduleForecast(Scheduler self, const char* scheduleRef, uint64
 LinkedList /* <ScheduleEvent> */
 Scheduler_createForecast(Scheduler self, const char* schedCtrRef, uint64_t startTime, uint64_t endTime);
 
+const char*
+Scheduler_getCtlEntityRef(Scheduler self, const char* schedCtrlRef);
+
 /**
  * @brief Enable or disable a schedule
  * 

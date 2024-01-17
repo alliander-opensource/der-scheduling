@@ -490,7 +490,20 @@ ScheduleController_setCtlEnt(ScheduleController self, const char* ctlEntValue)
     else {
         printf("ERROR: ScheduleController_setCtlEnt - CtlEnt.setSrcRef not found!\n");
     }
+}
 
+const char*
+ScheduleController_getCtlEntRef(ScheduleController self)
+{
+    const char* result = NULL;
+
+    DataAttribute* ctlEnt_setSrcRef = (DataAttribute*)ModelNode_getChild((ModelNode*)self->controllerLn, "CtlEnt.setSrcRef");
+
+    if (ctlEnt_setSrcRef && ctlEnt_setSrcRef->mmsValue) {
+        result = MmsValue_toString(ctlEnt_setSrcRef->mmsValue);
+    }
+
+    return result;
 }
 
 bool
