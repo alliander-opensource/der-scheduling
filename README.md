@@ -88,3 +88,15 @@ In the build folder:
         $ sudo ./scheduler_example1
 
 The example has to be executed with root permissions in order to bind to TCP port 102.
+
+## Docker build
+As an alternative to building natively, the DER Scheduler can be built in a docker image using [the provided docker file](Dockerfile). Therefore, simply use the docker build command. Tag the container (e.g. as der-scheduler with version 0.1) if you wish:
+
+	$ docker build . --tag der-scheduler:0.1
+
+After the build completes, the container can be started using:
+
+	$ docker run --name der-scheduler der-scheduler:0.1
+
+Naming the container ('--name der-scheduler') makes it easier to connect other containers with it.
+
