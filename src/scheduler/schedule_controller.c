@@ -842,12 +842,21 @@ ScheduleController_createForecast(ScheduleController self, uint64_t startTime, u
         /* sort the list */
         qsort(tsList, idx, sizeof(uint64_t), compareUint64);
 
+        /* remove outdated values (values in the past that are no longer active)*/
+        int curIdx = 0;
+        while (tsList[curIdx] <= currentTime) {
+            curIdx++;
+        }
+
+        if (curIdx > 0)
+            curIdx--;
+
         /* create the result schedule */
         resultSchedule = LinkedList_create();
 
         ScheduleEvent lastValue = NULL;
 
-        for (int i = 0; i < numberOfDifferentTimestamps; i++)
+        for (int i = curIdx; i < numberOfDifferentTimestamps; i++)
         {
             schedulesElem = LinkedList_getNext(self->schedules);
 
