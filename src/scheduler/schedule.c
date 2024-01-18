@@ -2076,6 +2076,13 @@ Schedule_runSchedule(Schedule self, uint64_t startTime, uint64_t endTime)
 
         scheduleEvents = LinkedList_create();
 
+        char valBuf[100];
+        valBuf[0] = 0;
+
+        if (curValue->mmsValue) {
+            MmsValue_printToBuffer(curValue->mmsValue, valBuf, 100);
+        }
+
         ScheduleEvent event = ScheduleEvent_create(currentTime, MmsValue_clone(curValue->mmsValue), priority, self->startTime);
    
         LinkedList_add(scheduleEvents, event);
@@ -2087,16 +2094,32 @@ Schedule_runSchedule(Schedule self, uint64_t startTime, uint64_t endTime)
 
         uint64_t currentStrTm = schedule_getCurrentStartTime(self);
 
-        for (int i = idx + 1; i < noOfEntryValues; i++)
+        int i = 0;
+
+        for (i = idx + 1; i < noOfEntryValues; i++)
         {
             uint64_t eventTime = currentStrTm + (i * intvInMs);
 
             MmsValue* eventValue = Schedule_getValueWithIdx(self, i);
 
+            char valBuf[100];
+            valBuf[0] = 0;
+
+            if (eventValue) {
+                MmsValue_printToBuffer(eventValue, valBuf, 100);
+            }
+
             event = ScheduleEvent_create(eventTime, MmsValue_clone(eventValue), priority, currentStrTm);
 
             LinkedList_add(scheduleEvents, event);
         }
+
+        /* add end event */
+        uint64_t eventTime = currentStrTm + (i * intvInMs);
+
+        event = ScheduleEvent_create(eventTime, NULL, priority, currentStrTm);
+
+        LinkedList_add(scheduleEvents, event);
     }
     else 
     {
@@ -2126,16 +2149,32 @@ Schedule_runSchedule(Schedule self, uint64_t startTime, uint64_t endTime)
 
             LinkedList_add(scheduleEvents, event);
 
-            for (int i = 1; i < noOfEntryValues; i++)
+            int i = 0;
+
+            for (i = 1; i < noOfEntryValues; i++)
             {
                 uint64_t eventTime = nextStrTm + (i * intvInMs);
 
                 MmsValue* eventValue = Schedule_getValueWithIdx(self, i);
 
+                char valBuf[100];
+                valBuf[0] = 0;
+
+                if (eventValue) {
+                    MmsValue_printToBuffer(eventValue, valBuf, 100);
+                }
+
                 event = ScheduleEvent_create(eventTime, MmsValue_clone(eventValue), priority, nextStrTm);
 
                 LinkedList_add(scheduleEvents, event);
             }
+
+            /* add end event */
+            uint64_t eventTime = nextStrTm + (i * intvInMs);
+
+            event = ScheduleEvent_create(eventTime, NULL, priority, nextStrTm);
+
+            LinkedList_add(scheduleEvents, event);
         }
     }
 

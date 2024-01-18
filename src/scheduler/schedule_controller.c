@@ -844,12 +844,9 @@ ScheduleController_createForecast(ScheduleController self, uint64_t startTime, u
 
         /* remove outdated values (values in the past that are no longer active)*/
         int curIdx = 0;
-        while (tsList[curIdx] <= currentTime) {
+        while (tsList[curIdx] < startTime) {
             curIdx++;
         }
-
-        if (curIdx > 0)
-            curIdx--;
 
         /* create the result schedule */
         resultSchedule = LinkedList_create();
@@ -862,6 +859,8 @@ ScheduleController_createForecast(ScheduleController self, uint64_t startTime, u
 
             ScheduleEvent currentEvent = NULL;
 
+            //printf("Calculate value for ts %lu\n", tsList[i]);
+
             while (schedulesElem)
             {
                 Schedule sched = (Schedule)LinkedList_getData(schedulesElem);
@@ -872,6 +871,12 @@ ScheduleController_createForecast(ScheduleController self, uint64_t startTime, u
                 {
                     if (event->value)
                     {
+                        char val[200];
+
+                        MmsValue_printToBuffer(event->value, val, 200);
+
+                        //printf("  %s: %s\n", sched->scheduleLn->name, val);
+
                         if (currentEvent == NULL) {
                             currentEvent = event;
                         }
@@ -896,6 +901,8 @@ ScheduleController_createForecast(ScheduleController self, uint64_t startTime, u
                         }
                     }
                     else {
+                       // printf("  %s: no value\n", sched->scheduleLn->name);
+
                         ScheduleEvent_destroy(event);
                     }
                 }
