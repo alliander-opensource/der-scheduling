@@ -247,6 +247,8 @@ handleSetCal(Schedule self, DataObject* dObj, SetCalValues values)
 
     if (values)
         values->mnVal = mnVal;
+
+    return true;
 }
 
 static void
@@ -2043,9 +2045,12 @@ Schedule_getValueAt(Schedule self, uint64_t timestamp)
 
                 //TODO printf("idx: %i relTime: %lu intvInMs: %i\n", idx, relTime, intvInMs);
 
-                MmsValue* val = Schedule_getValueWithIdx(self, idx);
+                if (idx < noOfEntryValues)
+                {
+                    MmsValue* val = Schedule_getValueWithIdx(self, idx);
 
-                event = ScheduleEvent_create(timestamp, MmsValue_clone(val), Schedule_getPrio(self), strTmVal);
+                    event = ScheduleEvent_create(timestamp, MmsValue_clone(val), Schedule_getPrio(self), strTmVal);
+                }
             }
         }
     }

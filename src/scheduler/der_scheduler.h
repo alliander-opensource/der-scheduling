@@ -23,6 +23,36 @@ extern "C" {
 typedef struct sScheduler* Scheduler;
 
 /**
+ * \brief Specify the log level for the library internal logging
+ */
+typedef enum {
+    /**
+     * log level DEBUG - shows the most information (useful for debugging applications)
+     */
+    SCHEDULER_LOG_DEBUG = 1,
+
+    /**
+     * log level INFO - show informational messages (useful to trace communication problems)
+     */
+    SCHEDULER__LOG_INFO = 2,
+
+    /**
+     * log level WARNING - show only errors and warning message that indicate wrong configuration
+     */
+    SCHEDULER__LOG_WARNING = 3,
+
+    /**
+     * log level ERROR - show critical problems and communication errors
+     */
+    SCHEDULER__LOG_ERROR = 4,
+
+    /**
+     * log level NONE - don't show any log messages
+     */
+    SCHEDULER_LOG_NONE = 5
+} Scheduler_LogLevel;
+
+/**
  * @brief Create a new Scheduler instance
  * 
  * @param model the data model containing schedule controller and schedule logical nodes
