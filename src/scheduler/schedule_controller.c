@@ -168,9 +168,11 @@ scheduleController_updateTargetValue(ScheduleController self, ScheduleTargetType
     }
 }
 
-static void
+static bool
 scheduleController_updateCurrentValue(ScheduleController self, ScheduleTargetType targetType, MmsValue* val, uint64_t currentTime)
 {
+    bool updated = false;
+
     DataAttribute* valueAttr = NULL;
     DataAttribute* qAttr = NULL;
     DataAttribute* tAttr = NULL;
@@ -193,7 +195,7 @@ scheduleController_updateCurrentValue(ScheduleController self, ScheduleTargetTyp
             objNameStr = "ValSPS";
         }
         else {
-            return;
+            return updated;
         }
 
         valueObj = (DataObject*)ModelNode_getChild((ModelNode*)self->controllerLn, objNameStr);
@@ -209,8 +211,8 @@ scheduleController_updateCurrentValue(ScheduleController self, ScheduleTargetTyp
             valueObj = (DataObject*)ModelNode_getChild((ModelNode*)self->controllerLn, "ValSPS");
     }
 
-    if (valueObj) {
-
+    if (valueObj)
+    {
         char objRefBuf[130];
 
         ModelNode_getObjectReference((ModelNode*)valueObj, objRefBuf);
@@ -236,12 +238,20 @@ scheduleController_updateCurrentValue(ScheduleController self, ScheduleTargetTyp
 
         IedServer_lockDataModel(self->server);
 
-        if (valueAttr && val) {
-            IedServer_updateAttributeValue(self->server, valueAttr, val);
-             if (qAttr) IedServer_updateQuality(self->server, qAttr, QUALITY_VALIDITY_GOOD);
+        if (valueAttr && val)
+        {
+            if (MmsValue_equals(valueAttr->mmsValue, val) == false) {
+                IedServer_updateAttributeValue(self->server, valueAttr, val);
+
+                if (qAttr) IedServer_updateQuality(self->server, qAttr, QUALITY_VALIDITY_GOOD);
+
+                updated = true;
+            }
         }
         else {
             if (qAttr) IedServer_updateQuality(self->server, qAttr, QUALITY_VALIDITY_INVALID);
+
+            updated = true;
         }
 
         if (tAttr) IedServer_updateUTCTimeAttributeValue(self->server, tAttr, currentTime);
@@ -249,7 +259,7 @@ scheduleController_updateCurrentValue(ScheduleController self, ScheduleTargetTyp
         IedServer_unlockDataModel(self->server);
     }
 
-    return;
+    return updated;
 }
 
 
@@ -295,6 +305,8 @@ scheduleController_scheduleStateUpdated(ScheduleController self, Schedule sched,
 {
     Schedule activeSchedule = scheduleController_getActiveSchedule(self);
 
+    uint64_t currentTime = Hal_getTimeInMs();
+
     if (activeSchedule) {
         if (activeSchedule != self->activeSchedule) {
 
@@ -315,15 +327,21 @@ scheduleController_scheduleStateUpdated(ScheduleController self, Schedule sched,
             printf("INFO: New value %s\n", valueBuf);
 
             scheduleController_updateActSchdRef(self, self->activeSchedule);
-            scheduleController_updateCurrentValue(self, activeSchedule->targetType, outputValue, Hal_getTimeInMs());
-            scheduleController_updateTargetValue(self,  activeSchedule->targetType, outputValue, Hal_getTimeInMs());
+
+            if (scheduleController_updateCurrentValue(self, activeSchedule->targetType, outputValue, currentTime)) {
+                scheduleController_updateTargetValue(self,  activeSchedule->targetType, outputValue, currentTime);
+            }
         }
     }
-    else {
+    else
+    {
         // there is no running schedule
         scheduleController_updateActSchdRef(self, NULL);
-        scheduleController_updateCurrentValue(self, SCHD_TYPE_UNKNOWN, NULL, Hal_getTimeInMs());
-        scheduleController_updateTargetValue(self,  SCHD_TYPE_UNKNOWN, NULL, Hal_getTimeInMs());
+
+        if (scheduleController_updateCurrentValue(self, SCHD_TYPE_UNKNOWN, NULL, currentTime)) {
+            scheduleController_updateTargetValue(self,  SCHD_TYPE_UNKNOWN, NULL, currentTime);
+        }
+
         self->activeSchedule = NULL;
     }
 }
@@ -338,10 +356,11 @@ void
 scheduleController_scheduleValueUpdated(ScheduleController self, Schedule sched, MmsValue* val, uint64_t timestamp)
 {
     // check if the schedule is the actve schedule
-
-    if (sched == self->activeSchedule) {
-        scheduleController_updateCurrentValue(self, sched->targetType, val, timestamp);
-        scheduleController_updateTargetValue(self, sched->targetType, val, timestamp);
+    if (sched == self->activeSchedule)
+    {
+        if (scheduleController_updateCurrentValue(self, sched->targetType, val, timestamp)) {
+            scheduleController_updateTargetValue(self, sched->targetType, val, timestamp);
+        }
     }
     else {
         //ignore new value
