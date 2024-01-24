@@ -824,136 +824,139 @@ ScheduleController_createForecast(ScheduleController self, uint64_t startTime, u
 
     LinkedList resultSchedule = NULL;
 
-    uint64_t* tsList = (uint64_t*)calloc(numberOfDifferentTimestamps, sizeof(uint64_t));
-
-    if (tsList)
+    if (numberOfDifferentTimestamps > 0)
     {
-        int idx = 0;
-        previousTimestamp = 0;
-        numberOfDifferentTimestamps = 0;
+        uint64_t* tsList = (uint64_t*)calloc(numberOfDifferentTimestamps, sizeof(uint64_t));
 
-        timestampsElem = LinkedList_getNext(timestamps);
-
-        while (timestampsElem)
+        if (tsList)
         {
-            uint64_t* ts = (uint64_t*)LinkedList_getData(timestampsElem);
+            int idx = 0;
+            previousTimestamp = 0;
+            numberOfDifferentTimestamps = 0;
 
-            bool addToList = true;
+            timestampsElem = LinkedList_getNext(timestamps);
 
-            if (idx > 0)
+            while (timestampsElem)
             {
-                for (int j = 0; j < idx; j++) {
-                    if (tsList[j] == *ts) {
-                        addToList = false;
-                        break;
+                uint64_t* ts = (uint64_t*)LinkedList_getData(timestampsElem);
+
+                bool addToList = true;
+
+                if (idx > 0)
+                {
+                    for (int j = 0; j < idx; j++) {
+                        if (tsList[j] == *ts) {
+                            addToList = false;
+                            break;
+                        }
                     }
                 }
+
+                if (addToList) {
+                    tsList[idx++] = *ts;
+                    numberOfDifferentTimestamps++;
+                }
+
+                timestampsElem = LinkedList_getNext(timestampsElem);
             }
 
-            if (addToList) {
-                tsList[idx++] = *ts;
-                numberOfDifferentTimestamps++;
+            /* sort the list */
+            qsort(tsList, idx, sizeof(uint64_t), compareUint64);
+
+            /* remove outdated values (values in the past that are no longer active)*/
+            int curIdx = 0;
+            while (tsList[curIdx] < startTime) {
+                curIdx++;
             }
 
-            timestampsElem = LinkedList_getNext(timestampsElem);
-        }
+            /* create the result schedule */
+            resultSchedule = LinkedList_create();
 
-        /* sort the list */
-        qsort(tsList, idx, sizeof(uint64_t), compareUint64);
+            ScheduleEvent lastValue = NULL;
 
-        /* remove outdated values (values in the past that are no longer active)*/
-        int curIdx = 0;
-        while (tsList[curIdx] < startTime) {
-            curIdx++;
-        }
-
-        /* create the result schedule */
-        resultSchedule = LinkedList_create();
-
-        ScheduleEvent lastValue = NULL;
-
-        for (int i = curIdx; i < numberOfDifferentTimestamps; i++)
-        {
-            schedulesElem = LinkedList_getNext(self->schedules);
-
-            ScheduleEvent currentEvent = NULL;
-
-            //printf("Calculate value for ts %lu\n", tsList[i]);
-
-            while (schedulesElem)
+            for (int i = curIdx; i < numberOfDifferentTimestamps; i++)
             {
-                Schedule sched = (Schedule)LinkedList_getData(schedulesElem);
+                schedulesElem = LinkedList_getNext(self->schedules);
 
-                ScheduleEvent event = Schedule_getValueAt(sched, tsList[i]);
+                ScheduleEvent currentEvent = NULL;
 
-                if (event)
+                //printf("Calculate value for ts %lu\n", tsList[i]);
+
+                while (schedulesElem)
                 {
-                    if (event->value)
+                    Schedule sched = (Schedule)LinkedList_getData(schedulesElem);
+
+                    ScheduleEvent event = Schedule_getValueAt(sched, tsList[i]);
+
+                    if (event)
                     {
-                        char val[200];
-
-                        MmsValue_printToBuffer(event->value, val, 200);
-
-                        //printf("  %s: %s\n", sched->scheduleLn->name, val);
-
-                        if (currentEvent == NULL) {
-                            currentEvent = event;
-                        }
-                        else
+                        if (event->value)
                         {
-                            if (event->priority > currentEvent->priority) {
-                                ScheduleEvent_destroy(currentEvent);
+                            char val[200];
+
+                            MmsValue_printToBuffer(event->value, val, 200);
+
+                            //printf("  %s: %s\n", sched->scheduleLn->name, val);
+
+                            if (currentEvent == NULL) {
                                 currentEvent = event;
                             }
-                            else if (event->priority == currentEvent->priority) {
-                                if (event->lastStartTime > currentEvent->lastStartTime) {
+                            else
+                            {
+                                if (event->priority > currentEvent->priority) {
                                     ScheduleEvent_destroy(currentEvent);
                                     currentEvent = event;
+                                }
+                                else if (event->priority == currentEvent->priority) {
+                                    if (event->lastStartTime > currentEvent->lastStartTime) {
+                                        ScheduleEvent_destroy(currentEvent);
+                                        currentEvent = event;
+                                    }
+                                    else {
+                                        ScheduleEvent_destroy(event);
+                                    }
                                 }
                                 else {
                                     ScheduleEvent_destroy(event);
                                 }
                             }
-                            else {
-                                ScheduleEvent_destroy(event);
-                            }
+                        }
+                        else {
+                        // printf("  %s: no value\n", sched->scheduleLn->name);
+
+                            ScheduleEvent_destroy(event);
                         }
                     }
-                    else {
-                       // printf("  %s: no value\n", sched->scheduleLn->name);
 
-                        ScheduleEvent_destroy(event);
+                    schedulesElem = LinkedList_getNext(schedulesElem);
+                }
+
+                if (currentEvent)
+                {
+                    /* check if value is equal to previous value */
+                    if ((lastValue != NULL) &&
+                        (MmsValue_equals(currentEvent->value, lastValue->value)))
+                    {
+                        ScheduleEvent_destroy(currentEvent);
+                    }
+                    else {
+                        LinkedList_add(resultSchedule, currentEvent);
+
+                        char valueBuf[50];
+
+                        MmsValue_printToBuffer(currentEvent->value, valueBuf, 50);
+
+                        lastValue = currentEvent;
+                    }
+
+                    if (lastValue == NULL) {
+                        lastValue = currentEvent;
                     }
                 }
-
-                schedulesElem = LinkedList_getNext(schedulesElem);
             }
 
-            if (currentEvent)
-            {
-                /* check if value is equal to previous value */
-                if ((lastValue != NULL) &&
-                    (MmsValue_equals(currentEvent->value, lastValue->value)))
-                {
-                    ScheduleEvent_destroy(currentEvent);
-                }
-                else {
-                    LinkedList_add(resultSchedule, currentEvent);
-
-                    char valueBuf[50];
-
-                    MmsValue_printToBuffer(currentEvent->value, valueBuf, 50);
-
-                    lastValue = currentEvent;
-                }
-
-                if (lastValue == NULL) {
-                    lastValue = currentEvent;
-                }
-            }
+            free(tsList);
         }
-
-        free(tsList);
     }
 
     LinkedList_destroy(timestamps);
