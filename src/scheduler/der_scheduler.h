@@ -23,6 +23,36 @@ extern "C" {
 typedef struct sScheduler* Scheduler;
 
 /**
+ * \brief Specify the log level for the library internal logging
+ */
+typedef enum {
+    /**
+     * log level DEBUG - shows the most information (useful for debugging applications)
+     */
+    SCHEDULER_LOG_DEBUG = 1,
+
+    /**
+     * log level INFO - show informational messages (useful to trace communication problems)
+     */
+    SCHEDULER__LOG_INFO = 2,
+
+    /**
+     * log level WARNING - show only errors and warning message that indicate wrong configuration
+     */
+    SCHEDULER__LOG_WARNING = 3,
+
+    /**
+     * log level ERROR - show critical problems and communication errors
+     */
+    SCHEDULER__LOG_ERROR = 4,
+
+    /**
+     * log level NONE - don't show any log messages
+     */
+    SCHEDULER_LOG_NONE = 5
+} Scheduler_LogLevel;
+
+/**
  * @brief Create a new Scheduler instance
  * 
  * @param model the data model containing schedule controller and schedule logical nodes
@@ -89,6 +119,25 @@ Scheduler_getTargetValue(Scheduler self, const char* controllerRef, char* target
 void
 Scheduler_enableScheduleControl(Scheduler self, const char* scheduleRef, bool enable);
 
+LinkedList /* <ScheduleEvent> */
+Scheduler_createScheduleForecast(Scheduler self, const char* scheduleRef, uint64_t startTime, uint64_t endTime);
+
+/**
+ * @brief Create a schedule forecast for the specified schedule controller and time period
+ *
+ * @param self the scheduler instance
+ * @param schedCtrRef the object reference of the ScheduleController (@LDInst/LN)
+ * @param startTime the start time of the forecast time period (in ms since Epoch)
+ * @param endTime the end time of the forecast time period (in ms since Epoch)
+ *
+ * @return the list of schedule events (value changes) during the time period
+ */
+LinkedList /* <ScheduleEvent> */
+Scheduler_createForecast(Scheduler self, const char* schedCtrRef, uint64_t startTime, uint64_t endTime);
+
+const char*
+Scheduler_getCtlEntityRef(Scheduler self, const char* schedCtrlRef);
+
 /**
  * @brief Enable or disable a schedule
  * 
@@ -127,6 +176,17 @@ Scheduler_enableWriteAccessToParameter(Scheduler self, const char* scheduleRef, 
  */
 void
 Scheduler_destroy(Scheduler self);
+
+typedef struct sScheduleEvent* ScheduleEvent;
+
+MmsValue*
+ScheduleEvent_getValue(ScheduleEvent self);
+
+uint64_t
+ScheduleEvent_getTime(ScheduleEvent self);
+
+void
+ScheduleEvent_destroy(ScheduleEvent self);
 
 #ifdef __cplusplus
 }

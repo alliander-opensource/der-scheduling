@@ -38,7 +38,7 @@ main(int argc, char** argv)
 
         /* configure schedule */
 
-        IedConnection_writeInt32Value(con, &err, "DER_Scheduler_Control/ActPow_FSCH01.SchdPrio.setVal", IEC61850_FC_SP, 10);
+        IedConnection_writeInt32Value(con, &err, "DER_Scheduler_Control/ActPow_FSCH01.SchdPrio.setVal", IEC61850_FC_SP, 20);
 
         if (err != IED_ERROR_OK) {
             printf("ERROR: failed to set schedule priority\n");

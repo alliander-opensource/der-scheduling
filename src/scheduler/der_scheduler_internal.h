@@ -114,6 +114,20 @@ struct sScheduler
     void* targetValueHandlerParameter;
 };
 
+struct sScheduleEvent
+{
+    uint64_t timestamp;
+    uint64_t lastStartTime;
+    MmsValue* value;
+    int priority;
+};
+
+ScheduleEvent
+ScheduleEvent_create(uint64_t timestamp, MmsValue* value, int priority, uint64_t startTime);
+
+void
+ScheduleEvent_destroy(ScheduleEvent self);
+
 void
 scheduler_targetValueChanged(Scheduler self, ModelNode* targetAttr, MmsValue* value, Quality quality, uint64_t timestampMs);
 
@@ -132,6 +146,9 @@ ScheduleController_getScheduleReferenceWithIdx(ScheduleController self, int idx)
 void
 ScheduleController_setCtlEnt(ScheduleController self, const char* ctlEntValue);
 
+const char*
+ScheduleController_getCtlEntRef(ScheduleController self);
+
 bool
 ScheduleController_setSchdRef(ScheduleController self, const char* id, const char* ref);
 
@@ -146,6 +163,9 @@ scheduleController_scheduleValueUpdated(ScheduleController self, Schedule sched,
 
 void
 ScheduleController_initialize(ScheduleController self);
+
+LinkedList
+ScheduleController_createForecast(ScheduleController self, uint64_t startTime, uint64_t endTime);
 
 Schedule
 Schedule_create(LogicalNode* schedLn, IedServer server, IedModel* model);
@@ -204,6 +224,9 @@ scheduler_checkIfMultiObjInst(const char* name, const char* multiName);
 Schedule
 Scheduler_getScheduleByObjRef(Scheduler self, const char* objRef);
 
+ScheduleController
+Scheduler_getScheduleControllerByObjRef(Scheduler self, const char* objRef);
+
 void
 Schedule_setListeningController(Schedule self, ScheduleController controller);
 
@@ -221,6 +244,12 @@ Schedule_enableWriteAccessToStrTm(Schedule self, bool enable);
 
 void
 Schedule_enableWriteAccessToSchdReuse(Schedule self, bool enable);
+
+ScheduleEvent
+Schedule_getValueAt(Schedule self, uint64_t timestamp);
+
+LinkedList
+Schedule_runSchedule(Schedule self, uint64_t startTime, uint64_t endTime);
 
 SchedulerStorage
 SchedulerStorage_init(const char* databaseUri, int numberOfParameters, const char** parameters);

@@ -230,6 +230,10 @@ Scheduler_destroy(Scheduler self)
 
         LinkedList_destroyDeep(self->schedules, (LinkedListValueDeleteFunction)Schedule_destroy);
 
+        if (self->storage) {
+            SchedulerStorage_destroy(self->storage);
+        }
+
         free(self);
     }
 }
@@ -244,6 +248,54 @@ Scheduler_enableScheduleControl(Scheduler self, const char* scheduleRef, bool en
     }
     else {
         printf("WARN: Schedule %s not found\n", scheduleRef);
+    }
+}
+
+LinkedList
+Scheduler_createScheduleForecast(Scheduler self, const char* scheduleRef, uint64_t startTime, uint64_t endTime)
+{
+    Schedule schedule = Scheduler_getScheduleByObjRef(self, scheduleRef);
+
+    if (schedule)
+    {
+        return Schedule_runSchedule(schedule, startTime, endTime);
+    }
+    else {
+        printf("WARN: Schedule %s not found\n", scheduleRef);
+
+        return NULL;
+    }
+}
+
+LinkedList
+Scheduler_createForecast(Scheduler self, const char* schedCtrlRef, uint64_t startTime, uint64_t endTime)
+{
+    ScheduleController scc = Scheduler_getScheduleControllerByObjRef(self, schedCtrlRef);
+
+    if (scc)
+    {
+        return ScheduleController_createForecast(scc, startTime, endTime);
+    }
+    else {
+        printf("WARN: Schedule controller %s not found\n", schedCtrlRef);
+
+        return NULL;
+    }
+}
+
+const char*
+Scheduler_getCtlEntityRef(Scheduler self, const char* schedCtrlRef)
+{
+    ScheduleController scc = Scheduler_getScheduleControllerByObjRef(self, schedCtrlRef);
+
+    if (scc)
+    {
+        return ScheduleController_getCtlEntRef(scc);
+    }
+    else {
+        printf("WARN: Schedule controller %s not found\n", schedCtrlRef);
+
+        return NULL;
     }
 }
 
@@ -316,8 +368,8 @@ Scheduler_getScheduleByObjRef(Scheduler self, const char* objRef)
 {
     Schedule matchingSchedule = NULL;
 
-    if (objRef && objRef[0] != 0) {
-
+    if (objRef && objRef[0] != 0)
+    {
         bool withoutIedName = false;
 
         if (objRef[0] == '@') {
@@ -344,4 +396,40 @@ Scheduler_getScheduleByObjRef(Scheduler self, const char* objRef)
     }
 
     return matchingSchedule;
+}
+
+ScheduleController
+Scheduler_getScheduleControllerByObjRef(Scheduler self, const char* objRef)
+{
+    ScheduleController matchingController = NULL;
+
+    if (objRef && objRef[0] != 0)
+    {
+        bool withoutIedName = false;
+
+        if (objRef[0] == '@') {
+            withoutIedName = true;
+            objRef = objRef + 1;
+        }
+
+        LinkedList controllerElem = LinkedList_getNext(self->scheduleController);
+
+        while (controllerElem)
+        {
+            ScheduleController controller = (ScheduleController)LinkedList_getData(controllerElem);
+
+            char controllerObjRefBuf[130];
+
+            ModelNode_getObjectReferenceEx((ModelNode*)controller->controllerLn, controllerObjRefBuf, withoutIedName);
+
+            if (!strcmp(objRef, controllerObjRefBuf)) {
+                matchingController = controller;
+                break;
+            }
+
+            controllerElem = LinkedList_getNext(controllerElem);
+        }
+    }
+
+    return matchingController;
 }

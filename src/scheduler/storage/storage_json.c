@@ -404,8 +404,6 @@ createSchedule(Schedule schedule)
     }
 
     cJSON_AddItemToObject(scheduleJson, "startTimes", startTimes);
-    
-    char* jsonStr = cJSON_PrintUnformatted(scheduleJson);
 
 exit:
     return scheduleJson;
@@ -578,6 +576,8 @@ getScheduleControllerData(SchedulerStorage self, ScheduleController controller, 
             }
         }
     }
+
+    cJSON_Delete(json);
 
     return true;
 }
@@ -923,6 +923,8 @@ SchedulerStorage_restoreSchedule(SchedulerStorage self, Schedule schedule)
 
         getScheduleData(self, schedule, jsonStr);
 
+        free(jsonStr);
+
         cJSON_Delete(scheduleJson);
     }
 
@@ -962,6 +964,8 @@ SchedulerStorage_restoreScheduleController(SchedulerStorage self, ScheduleContro
         char* jsonStr = cJSON_Print(scheduleJson);
 
         getScheduleControllerData(self, controller, jsonStr);
+
+        free(jsonStr);
 
         cJSON_Delete(scheduleJson);
     }

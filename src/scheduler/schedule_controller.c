@@ -168,9 +168,11 @@ scheduleController_updateTargetValue(ScheduleController self, ScheduleTargetType
     }
 }
 
-static void
+static bool
 scheduleController_updateCurrentValue(ScheduleController self, ScheduleTargetType targetType, MmsValue* val, uint64_t currentTime)
 {
+    bool updated = false;
+
     DataAttribute* valueAttr = NULL;
     DataAttribute* qAttr = NULL;
     DataAttribute* tAttr = NULL;
@@ -193,7 +195,7 @@ scheduleController_updateCurrentValue(ScheduleController self, ScheduleTargetTyp
             objNameStr = "ValSPS";
         }
         else {
-            return;
+            return updated;
         }
 
         valueObj = (DataObject*)ModelNode_getChild((ModelNode*)self->controllerLn, objNameStr);
@@ -209,8 +211,8 @@ scheduleController_updateCurrentValue(ScheduleController self, ScheduleTargetTyp
             valueObj = (DataObject*)ModelNode_getChild((ModelNode*)self->controllerLn, "ValSPS");
     }
 
-    if (valueObj) {
-
+    if (valueObj)
+    {
         char objRefBuf[130];
 
         ModelNode_getObjectReference((ModelNode*)valueObj, objRefBuf);
@@ -236,12 +238,20 @@ scheduleController_updateCurrentValue(ScheduleController self, ScheduleTargetTyp
 
         IedServer_lockDataModel(self->server);
 
-        if (valueAttr && val) {
-            IedServer_updateAttributeValue(self->server, valueAttr, val);
-             if (qAttr) IedServer_updateQuality(self->server, qAttr, QUALITY_VALIDITY_GOOD);
+        if (valueAttr && val)
+        {
+            if (MmsValue_equals(valueAttr->mmsValue, val) == false) {
+                IedServer_updateAttributeValue(self->server, valueAttr, val);
+
+                if (qAttr) IedServer_updateQuality(self->server, qAttr, QUALITY_VALIDITY_GOOD);
+
+                updated = true;
+            }
         }
         else {
             if (qAttr) IedServer_updateQuality(self->server, qAttr, QUALITY_VALIDITY_INVALID);
+
+            updated = true;
         }
 
         if (tAttr) IedServer_updateUTCTimeAttributeValue(self->server, tAttr, currentTime);
@@ -249,7 +259,7 @@ scheduleController_updateCurrentValue(ScheduleController self, ScheduleTargetTyp
         IedServer_unlockDataModel(self->server);
     }
 
-    return;
+    return updated;
 }
 
 
@@ -295,6 +305,8 @@ scheduleController_scheduleStateUpdated(ScheduleController self, Schedule sched,
 {
     Schedule activeSchedule = scheduleController_getActiveSchedule(self);
 
+    uint64_t currentTime = Hal_getTimeInMs();
+
     if (activeSchedule) {
         if (activeSchedule != self->activeSchedule) {
 
@@ -315,15 +327,21 @@ scheduleController_scheduleStateUpdated(ScheduleController self, Schedule sched,
             printf("INFO: New value %s\n", valueBuf);
 
             scheduleController_updateActSchdRef(self, self->activeSchedule);
-            scheduleController_updateCurrentValue(self, activeSchedule->targetType, outputValue, Hal_getTimeInMs());
-            scheduleController_updateTargetValue(self,  activeSchedule->targetType, outputValue, Hal_getTimeInMs());
+
+            if (scheduleController_updateCurrentValue(self, activeSchedule->targetType, outputValue, currentTime)) {
+                scheduleController_updateTargetValue(self,  activeSchedule->targetType, outputValue, currentTime);
+            }
         }
     }
-    else {
+    else
+    {
         // there is no running schedule
         scheduleController_updateActSchdRef(self, NULL);
-        scheduleController_updateCurrentValue(self, SCHD_TYPE_UNKNOWN, NULL, Hal_getTimeInMs());
-        scheduleController_updateTargetValue(self,  SCHD_TYPE_UNKNOWN, NULL, Hal_getTimeInMs());
+
+        if (scheduleController_updateCurrentValue(self, SCHD_TYPE_UNKNOWN, NULL, currentTime)) {
+            scheduleController_updateTargetValue(self,  SCHD_TYPE_UNKNOWN, NULL, currentTime);
+        }
+
         self->activeSchedule = NULL;
     }
 }
@@ -338,10 +356,11 @@ void
 scheduleController_scheduleValueUpdated(ScheduleController self, Schedule sched, MmsValue* val, uint64_t timestamp)
 {
     // check if the schedule is the actve schedule
-
-    if (sched == self->activeSchedule) {
-        scheduleController_updateCurrentValue(self, sched->targetType, val, timestamp);
-        scheduleController_updateTargetValue(self, sched->targetType, val, timestamp);
+    if (sched == self->activeSchedule)
+    {
+        if (scheduleController_updateCurrentValue(self, sched->targetType, val, timestamp)) {
+            scheduleController_updateTargetValue(self, sched->targetType, val, timestamp);
+        }
     }
     else {
         //ignore new value
@@ -490,7 +509,20 @@ ScheduleController_setCtlEnt(ScheduleController self, const char* ctlEntValue)
     else {
         printf("ERROR: ScheduleController_setCtlEnt - CtlEnt.setSrcRef not found!\n");
     }
+}
 
+const char*
+ScheduleController_getCtlEntRef(ScheduleController self)
+{
+    const char* result = NULL;
+
+    DataAttribute* ctlEnt_setSrcRef = (DataAttribute*)ModelNode_getChild((ModelNode*)self->controllerLn, "CtlEnt.setSrcRef");
+
+    if (ctlEnt_setSrcRef && ctlEnt_setSrcRef->mmsValue) {
+        result = MmsValue_toString(ctlEnt_setSrcRef->mmsValue);
+    }
+
+    return result;
 }
 
 bool
@@ -688,4 +720,246 @@ ScheduleController_initialize(ScheduleController self)
 
     Schedule activeSchedule = scheduleController_getActiveSchedule(self);
     scheduleController_updateActSchdRef(self, activeSchedule);
+}
+
+static int
+compareUint64(const void* a, const void* b)
+{
+    uint64_t aVal = *((uint64_t*)a);
+    uint64_t bVal = *((uint64_t*)b);
+
+    if (aVal == bVal)
+        return 0;
+    else if (aVal < bVal)
+        return -1;
+    else
+        return 1;
+}
+
+LinkedList
+ScheduleController_createForecast(ScheduleController self, uint64_t startTime, uint64_t endTime)
+{
+    LinkedList listOfSchedules = LinkedList_create();
+
+    /* 1. Calculate the forecasts for the individual schedules */
+
+    LinkedList schedulesElem = LinkedList_getNext(self->schedules);
+
+    int numberOfSchedules = 0;
+
+    while (schedulesElem)
+    {
+        Schedule sched = (Schedule)LinkedList_getData(schedulesElem);
+
+        LinkedList scheduleForecast = Schedule_runSchedule(sched, startTime, endTime);
+
+        if (scheduleForecast) {
+            LinkedList_add(listOfSchedules, scheduleForecast);
+            numberOfSchedules++;
+        }
+
+        schedulesElem = LinkedList_getNext(schedulesElem);
+    }
+
+    /* 2. get the relevant times */
+
+    uint64_t currentTime = 0;
+
+    LinkedList timestamps = LinkedList_create();
+
+    LinkedList lastTimestamp = timestamps;
+
+    schedulesElem = LinkedList_getNext(listOfSchedules);
+
+    while (schedulesElem)
+    {
+        LinkedList scheduleForecast = LinkedList_getData(schedulesElem);
+
+        LinkedList scheduleForecastElem = LinkedList_getNext(scheduleForecast);
+
+        while (scheduleForecastElem)
+        {
+            ScheduleEvent event = (ScheduleEvent)LinkedList_getData(scheduleForecastElem);
+
+            uint64_t* timestamp = (uint64_t*)calloc(1, sizeof(uint64_t));
+
+            if (timestamp)
+            {
+                *timestamp = event->timestamp;
+
+                lastTimestamp = LinkedList_insertAfter(lastTimestamp, timestamp);
+            }
+            else {
+                printf("ERROR: Failed to allocate memory for timestamp\n");
+            }
+
+            scheduleForecastElem = LinkedList_getNext(scheduleForecastElem);
+        }
+
+        LinkedList_destroyDeep(scheduleForecast, (LinkedListValueDeleteFunction)ScheduleEvent_destroy);
+
+        schedulesElem = LinkedList_getNext(schedulesElem);
+    }
+
+    LinkedList_destroyStatic(listOfSchedules);
+
+    /* remove multiple occurences of timestamps from the list */
+
+    LinkedList timestampsElem = LinkedList_getNext(timestamps);
+
+    uint64_t previousTimestamp = 0;
+    int numberOfDifferentTimestamps = 0;
+
+    while (timestampsElem)
+    {
+        uint64_t* ts = (uint64_t*)LinkedList_getData(timestampsElem);
+
+        if (*ts != previousTimestamp) {
+            numberOfDifferentTimestamps++;
+            previousTimestamp = *ts;
+        }
+
+        timestampsElem = LinkedList_getNext(timestampsElem);
+    }
+
+    LinkedList resultSchedule = NULL;
+
+    if (numberOfDifferentTimestamps > 0)
+    {
+        uint64_t* tsList = (uint64_t*)calloc(numberOfDifferentTimestamps, sizeof(uint64_t));
+
+        if (tsList)
+        {
+            int idx = 0;
+            previousTimestamp = 0;
+            numberOfDifferentTimestamps = 0;
+
+            timestampsElem = LinkedList_getNext(timestamps);
+
+            while (timestampsElem)
+            {
+                uint64_t* ts = (uint64_t*)LinkedList_getData(timestampsElem);
+
+                bool addToList = true;
+
+                if (idx > 0)
+                {
+                    for (int j = 0; j < idx; j++) {
+                        if (tsList[j] == *ts) {
+                            addToList = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (addToList) {
+                    tsList[idx++] = *ts;
+                    numberOfDifferentTimestamps++;
+                }
+
+                timestampsElem = LinkedList_getNext(timestampsElem);
+            }
+
+            /* sort the list */
+            qsort(tsList, idx, sizeof(uint64_t), compareUint64);
+
+            /* remove outdated values (values in the past that are no longer active)*/
+            int curIdx = 0;
+            while (tsList[curIdx] < startTime) {
+                curIdx++;
+            }
+
+            /* create the result schedule */
+            resultSchedule = LinkedList_create();
+
+            ScheduleEvent lastValue = NULL;
+
+            for (int i = curIdx; i < numberOfDifferentTimestamps; i++)
+            {
+                schedulesElem = LinkedList_getNext(self->schedules);
+
+                ScheduleEvent currentEvent = NULL;
+
+                //printf("Calculate value for ts %lu\n", tsList[i]);
+
+                while (schedulesElem)
+                {
+                    Schedule sched = (Schedule)LinkedList_getData(schedulesElem);
+
+                    ScheduleEvent event = Schedule_getValueAt(sched, tsList[i]);
+
+                    if (event)
+                    {
+                        if (event->value)
+                        {
+                            char val[200];
+
+                            MmsValue_printToBuffer(event->value, val, 200);
+
+                            //printf("  %s: %s\n", sched->scheduleLn->name, val);
+
+                            if (currentEvent == NULL) {
+                                currentEvent = event;
+                            }
+                            else
+                            {
+                                if (event->priority > currentEvent->priority) {
+                                    ScheduleEvent_destroy(currentEvent);
+                                    currentEvent = event;
+                                }
+                                else if (event->priority == currentEvent->priority) {
+                                    if (event->lastStartTime > currentEvent->lastStartTime) {
+                                        ScheduleEvent_destroy(currentEvent);
+                                        currentEvent = event;
+                                    }
+                                    else {
+                                        ScheduleEvent_destroy(event);
+                                    }
+                                }
+                                else {
+                                    ScheduleEvent_destroy(event);
+                                }
+                            }
+                        }
+                        else {
+                        // printf("  %s: no value\n", sched->scheduleLn->name);
+
+                            ScheduleEvent_destroy(event);
+                        }
+                    }
+
+                    schedulesElem = LinkedList_getNext(schedulesElem);
+                }
+
+                if (currentEvent)
+                {
+                    /* check if value is equal to previous value */
+                    if ((lastValue != NULL) &&
+                        (MmsValue_equals(currentEvent->value, lastValue->value)))
+                    {
+                        ScheduleEvent_destroy(currentEvent);
+                    }
+                    else {
+                        LinkedList_add(resultSchedule, currentEvent);
+
+                        char valueBuf[50];
+
+                        MmsValue_printToBuffer(currentEvent->value, valueBuf, 50);
+
+                        lastValue = currentEvent;
+                    }
+
+                    if (lastValue == NULL) {
+                        lastValue = currentEvent;
+                    }
+                }
+            }
+
+            free(tsList);
+        }
+    }
+
+    LinkedList_destroy(timestamps);
+
+    return resultSchedule;
 }

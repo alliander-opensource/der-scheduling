@@ -136,16 +136,52 @@ main(int argc, char** argv)
 
         Thread workerThread = Thread_create(outputWorkerThread, NULL, false);
 
+        printf("Target for @Control/ActPow_FSCC1: %s\n", Scheduler_getCtlEntityRef(sched, "@Control/ActPow_FSCC1"));
+
         IedServer_start(server, 102);
 
-        if (IedServer_isRunning(server)) {
+        int count = 0;
 
+        if (IedServer_isRunning(server))
+        {
             running = true;
 
             Thread_start(workerThread);
 
-            while (running) {
+            while (running)
+            {
+                if (count % 50 == 0) {
+                    printf("Create forecast 24 h...\n");
+
+                    uint64_t currentTime = Hal_getTimeInMs();
+
+                    LinkedList forecast = Scheduler_createForecast(sched, "@Control/ActPow_FSCC1", currentTime, currentTime + 86400000);
+
+                    if (forecast)
+                    {
+                        LinkedList forecastElem = LinkedList_getNext(forecast);
+
+                        while (forecastElem)
+                        {
+                            ScheduleEvent event = (ScheduleEvent)LinkedList_getData(forecastElem);
+
+                            char valueBuf[50];
+                            if (ScheduleEvent_getValue(event))
+                                MmsValue_printToBuffer(ScheduleEvent_getValue(event), valueBuf, 50);
+                            else
+                                valueBuf[0] = 0;
+
+                            printf("time: %lu value: %s\n", ScheduleEvent_getTime(event), valueBuf);
+
+                            forecastElem = LinkedList_getNext(forecastElem);
+                        }
+
+                        LinkedList_destroyDeep(forecast, (LinkedListValueDeleteFunction)ScheduleEvent_destroy);
+                    }
+                }
+
                 Thread_sleep(100);
+                count++;
             }            
         }
         else {
