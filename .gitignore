@@ -5,3 +5,4 @@ conformance-tests/target/allure-results
 
 # do not include test build files
 conformance-tests/build
+models/genconfig.jar

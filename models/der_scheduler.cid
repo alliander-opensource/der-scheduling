@@ -78,7 +78,7 @@
           <LN inst="1" lnClass="FSCC" lnType="DERScheduler_FSCC_APC" prefix="ActPow_">
             <DOI desc="controlled entity" name="CtlEnt">
               <DAI name="setSrcRef">
-                <Val>@Control/ActPow_GGIO1.AnOut1</Val>
+                <Val>@Control/ActPow_GGIO1.AnOut1.mxVal.f</Val>
               </DAI>
             </DOI>
             <DOI name="Schd01">
@@ -140,7 +140,7 @@
           <LN inst="1" lnClass="FSCC" lnType="DERScheduler_FSCC_APC" prefix="MaxPow_">
             <DOI desc="controlled entity" name="CtlEnt">
               <DAI name="setSrcRef">
-                <Val>@Control/MaxPow_GGIO1.AnOut1</Val>
+                <Val>@Control/MaxPow_GGIO1.AnOut1.mxVal.f</Val>
               </DAI>
             </DOI>
             <DOI name="Schd01">
