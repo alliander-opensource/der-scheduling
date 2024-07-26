@@ -71,7 +71,7 @@ You can skip this step when libiec61850 is already installed on your PC
         $ cmake ..
         $ make
         $ sudo make install
-        $ sudo ldconfig
+        $ sudo ldconfig	
 
 Building the scheduler code
 
@@ -99,4 +99,7 @@ After the build completes, the container can be started using:
 	$ docker run --name der-scheduler der-scheduler:0.1
 
 Naming the container ('--name der-scheduler') makes it easier to connect other containers with it.
+
+## System tests
+System tests and IEC 61850 conformance tests have been run on this code. The tests can be found in the [conformance test subfolder](conformance-tests), there is also a [README](conformance-tests/README.md) and a [PDF file summarizing the result](conformance-tests/DER_Scheduling_IEC_61850_Conformance_Test_v1.1.pdf).
 

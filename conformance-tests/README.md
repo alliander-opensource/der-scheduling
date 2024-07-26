@@ -30,18 +30,10 @@ calling `./gradlew test` for linux systems or `gradlew.bat test` in Windows.
 Tested runtime environment is openjdk 11. The test assumes the test device is running on localhost (127.0.0.1) and
 accessible on port 102. [This is currently hard coded.](test/tests/src/main/java/org/openmuc/fnn/steuerbox/models/AllianderDER.java#L17)
 
-## Test results
-
-[Allure](https://github.com/allure-framework) will be used to create readable test reports with more information.
-
-Also, the testResults folder contains the logs of all tests, these might be useful for debugging.
-
 ## Getting started
 
-For a first impression, it probably makes sense to have a look in the very
-incomplete [requirements](src/main/java/org/openmuc/fnn/steuerbox/models/Requirement.java)
-and the
-general [IEC 61850 scheduling execution tests](tests/src/test/java/org/openmuc/fnn/steuerbox/ScheduleExecutionTest.java)
+For a first impression, it probably makes sense to have a look into the  [requirements](src/main/java/org/openmuc/fnn/steuerbox/models/Requirement.java)
+and the general [IEC 61850 scheduling execution tests](tests/src/test/java/org/openmuc/fnn/steuerbox/ScheduleExecutionTest.java)
 , tests on existing IEC 61850
 nodes [of schedule controller](src/test/java/org/openmuc/fnn/steuerbox/ScheduleControllerNodeTests.java)
 and [schedule](src/test/java/org/openmuc/fnn/steuerbox/ScheduleNodeTests.java) and more
